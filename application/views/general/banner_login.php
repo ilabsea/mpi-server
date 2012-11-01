@@ -1,0 +1,1 @@
+<div id="bar_login">&nbsp;</div>
