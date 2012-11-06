@@ -33,16 +33,25 @@ class Main extends MpiController {
         endif;
     }
     
+    /**
+     * Default method of this controller
+     */
     function index() {
     	$data = array();
         $this->load->template("templates/general", "main/homepage", Iconstant::MPI_APP_NAME, $data);
     }
     
+    /**
+     * Logout function
+     */
     function logout() {
         Isession::destroy();
         redirect(site_url());
     }
     
+    /**
+     * Change Password function 
+     */
     function changepwd() {
     	$data = array();
     	$data["error"] = Isession::getFlash("error");
@@ -51,6 +60,9 @@ class Main extends MpiController {
         $this->load->template("templates/general", "main/changepwd", Iconstant::MPI_APP_NAME, $data);
     }
     
+    /**
+     * Change Password
+     */
     function changepwdsave() {
         $cur_user = Isession::getUser();
         $this->load->model("usermodel");

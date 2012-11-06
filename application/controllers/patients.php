@@ -18,6 +18,10 @@ class Patients extends MpiController {
         $this->load->template("templates/general", "patients/patient_list", Iconstant::MPI_APP_NAME, $data);
     }
     
+    /**
+     * Patient Detail
+     * @param int $pat_id
+     */
     function patientdetail($pat_id) {
         $this->load->model("patient");
         $patient = $this->patient->getPatientById($pat_id);

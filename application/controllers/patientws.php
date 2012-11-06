@@ -1,14 +1,32 @@
 <?php
+/**
+ * Patient Web Service
+ * @author Sokha RUM
+ */
 class Patientws extends  MpiController {
+	/**
+	 * Construction of Patientws
+	 */
 	function __construct() {
 	    parent::__construct(true, false);
 	}
+	
+	/**
+	 * Reload the SDK
+	 */
+	function loadsdk() {
+	    $grFingerprint = new GrFingerService();
+	    $grFingerprint->initialize(true);
+	}
+	
+	/**
+	 * search patient
+	 */
     function search() {
     	$result = array("patients" => array(),
     	                "error" => "");
     	try{
 	    	$grFingerprint = new GrFingerService();
-	    	
 	        if (!$grFingerprint->initialize()) :
 	            $result["error"] = "Could not initialize finger print SDK";
 	            echo json_encode($result);
@@ -62,6 +80,9 @@ class Patientws extends  MpiController {
     	}
     }
     
+    /**
+     * Enroll patient
+     */
     function enroll() {
     	$result = array("patientid" => "",
     	                "error" => "");
@@ -93,6 +114,9 @@ class Patientws extends  MpiController {
         return;
     }
     
+    /**
+     * Create service
+     */
     function createservice() {
     	$return = array("patientid" => "", "error" => "");
     	if (!isset($_POST["patientid"])) :
