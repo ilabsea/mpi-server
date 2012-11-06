@@ -15,8 +15,8 @@ class Patientws extends  MpiController {
 	 * Reload the SDK
 	 */
 	function loadsdk() {
-	    $grFingerprint = new GrFingerService();
-	    $grFingerprint->initialize(true);
+		$grFingerprint = new GrFingerService();
+		$grFingerprint->initialize(true);
 	}
 	
 	/**
@@ -25,7 +25,7 @@ class Patientws extends  MpiController {
     function search() {
     	$result = array("patients" => array(),
     	                "error" => "");
-    	try{
+    	try {
 	    	$grFingerprint = new GrFingerService();
 	        if (!$grFingerprint->initialize()) :
 	            $result["error"] = "Could not initialize finger print SDK";
@@ -74,7 +74,7 @@ class Patientws extends  MpiController {
 	            $result["error"] = "Could not find fingerprint";
 	        endif;
         	echo json_encode($result);
-    	} catch (Exception $e) {
+		} catch (Exception $e) {
     		$result["error"] = $e->getMessage();
     		echo json_encode($result);
     	}
@@ -86,6 +86,7 @@ class Patientws extends  MpiController {
     function enroll() {
     	$result = array("patientid" => "",
     	                "error" => "");
+    	var_dump($_POST);
     	$grFingerprint = new GrFingerService();
         if (!$grFingerprint->initialize()) :
             $result["error"] = "Could not initialize finger print SDK";
@@ -105,10 +106,27 @@ class Patientws extends  MpiController {
             echo json_encode($result);
             return;
         endif;
+        $data = array();
+        $data["fingerprint"] = $_POST["fingerprint"];
+        if (isset($_POST["gender"])) :
+            $data["gender"] = $_POST["gender"]; 
+        endif;
+        
+        if (isset($_POST["fingerprint2"])) :
+            $ret = $grFingerprint->GrFingerX->IdentifyPrepareBase64($_POST["fingerprint2"], $grFingerprint->GR_DEFAULT_CONTEXT);
+            if($ret!=$grFingerprint->GR_OK) :
+                 $result["error"] = "Fingerprint template2 is not correct";
+                 echo json_encode($result);
+                 return;
+            endif;
+            $data["fingerprint2"] = $_POST["fingerprint2"];
+        else:
+            echo "KK LL MM NN";
+        endif;
         
         
         $this->load->model("patient");
-        $pat_id = $this->patient->newPatient(array("fingerprint" => $_POST["fingerprint"]));
+        $pat_id = $this->patient->newPatient($data);
         $result["patientid"] = $pat_id;
         echo json_encode($result);
         return;

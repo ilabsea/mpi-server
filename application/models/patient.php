@@ -18,6 +18,7 @@ class Patient extends CI_Model {
     }
     
     function patient_list($data) {
+    	
         $sql = "SELECT p.pat_id, 
                        p.pat_gender, 
                        p.pat_dob,
@@ -26,15 +27,20 @@ class Patient extends CI_Model {
         return $this->db->query($sql);
     }
     
-    function newPatient($var) {
-    	
+    function newPatient($data) {
+    	$gender = isset($data["gender"]) ? $data["gender"] : "NULL";
+    	$fingerprint2 =  isset($data["fingerprint2"]) ? "'".mysql_real_escape_string($data["fingerprint2"])."'" : "NULL";
     	//for ($i=1; $i<=50000;$i++) :
        $pat_id = uniqid(); 
        $sql = "INSERT INTO mpi_patient(pat_id, 
                                        pat_fingerprint,
+                                       pat_fingerprint2,
+                                       pat_gender,
                                        date_create) 
                                 VALUES('".$pat_id."',
-                                       '".mysql_real_escape_string($var["fingerprint"])."',
+                                       '".mysql_real_escape_string($data["fingerprint"])."',
+                                       ".$fingerprint2.",
+                                       ".$gender.",
                                        CURRENT_TIMESTAMP())";
        $this->db->query($sql) or die(mysql_error());
        //endfor;
