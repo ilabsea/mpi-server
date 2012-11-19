@@ -2,7 +2,8 @@
 class Patient extends CI_Model {
     function search ($gender="", $dob="") {
     	$sql = "SELECT pat_id,
-    	               pat_fingerprint, 
+    	               pat_fingerprint,
+    	               pat_fingerprint2,
     	               pat_gender,
     	               pat_dob
     	        FROM mpi_patient";
@@ -12,7 +13,7 @@ class Patient extends CI_Model {
     	endif;
     	
     	if ($where != "") :
-    	    $sql.= "WHERE pat_gender = ".$gender;
+    	    $sql.= " WHERE pat_gender = ".$gender;
     	endif;
     	return $this->db->query($sql);
     }
@@ -28,6 +29,7 @@ class Patient extends CI_Model {
     }
     
     function newPatient($data) {
+    	$create_date = isset($var["date_create"]) ? "'".$var["date_create"]."'" : "CURRENT_TIMESTAMP()";
     	$gender = isset($data["gender"]) ? $data["gender"] : "NULL";
     	$fingerprint2 =  isset($data["fingerprint2"]) ? "'".mysql_real_escape_string($data["fingerprint2"])."'" : "NULL";
     	//for ($i=1; $i<=50000;$i++) :
@@ -41,7 +43,7 @@ class Patient extends CI_Model {
                                        '".mysql_real_escape_string($data["fingerprint"])."',
                                        ".$fingerprint2.",
                                        ".$gender.",
-                                       CURRENT_TIMESTAMP())";
+                                       ".$create_date;
        $this->db->query($sql) or die(mysql_error());
        //endfor;
        return $pat_id;
@@ -94,7 +96,8 @@ class Patient extends CI_Model {
                       ps.site_code, 
                       ps.ext_code, 
                       ps.visit_date,
-                      ps.info
+                      ps.info,
+                      ps.date_create
                   FROM patient_service ps
                   LEFT JOIN mpi_service s ON (s.serv_id = ps.serv_id)
                   WHERE pat_id = '".mysql_real_escape_string($pid)."'
@@ -103,6 +106,7 @@ class Patient extends CI_Model {
     }
     
     function newVisit($var) {
+    	$create_date = isset($var["date_create"]) ? "'".$var["date_create"]."'" : "CURRENT_TIMESTAMP()";
         $sql = "INSERT INTO patient_service(pat_id,
                                             serv_id,
                                             site_code,
@@ -116,13 +120,10 @@ class Patient extends CI_Model {
                                              '".mysql_real_escape_string($var["ext_code"])."',
                                              '".mysql_real_escape_string($var["info"])."',
                                              '".$var["visit_date"]."',
-                                             CURRENT_TIMESTAMP()
+                                             ".$create_date."
                                            )";
         $this->db->query($sql);
-        
-        $sql = "update mpi_patient SET pat_gender = ".$var["gender"].",
-                                       pat_dob = '".$var["birthdate"]."'
-                                 WHERE pat_id = '".mysql_real_escape_string($var["pat_id"])."'";
-        $this->db->query($sql);
+        $visit_id = $this->db->insert_id();
+        return $visit_id;
     }
 }

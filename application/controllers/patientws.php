@@ -20,7 +20,7 @@ class Patientws extends  MpiController {
 	}
 	
 	/**
-	 * search patient
+	 * patient identify
 	 */
     function search() {
     	$result = array("patients" => array(),
@@ -32,22 +32,39 @@ class Patientws extends  MpiController {
 	            echo json_encode($result);
 	            return;
 	        endif;
-
+	        
 	        if (isset($_POST["fingerprint"])) :
 	            $ret = $grFingerprint->GrFingerX->IdentifyPrepareBase64($_POST["fingerprint"], $grFingerprint->GR_DEFAULT_CONTEXT);
 	            if($ret!=$grFingerprint->GR_OK) :
-	                 $result["error"] = "Fingerprint template is not correct";
+	                 $result["error"] = "Fingerprint template1 is not correct";
 	                 echo json_encode($result);
 	                 return;
 	            endif;
 	            
-	            $file = fopen(FCPATH."log.txt", "w");
+	           /*
+	            if (isset($_POST["fingerprint2"])) :
+		            $ret = $grFingerprint->GrFingerX->IdentifyPrepareBase64($_POST["fingerprint2"], $grFingerprint->GR_DEFAULT_CONTEXT);
+		            if($ret!=$grFingerprint->GR_OK) :
+		                 $result["error"] = "Fingerprint template2 is not correct";
+		                 echo json_encode($result);
+		                 return;
+		            endif;
+		            //$data["fingerprint2"] = $_POST["fingerprint2"];
+		        else:
+		            //Do Nothing
+		        endif;
+		        */
+		        
+	            $gender = "";
+	            if (isset($_POST["gender"]) && ($_POST["gender"] == 1 || $_POST["gender"] == 2)) :
+	                $gender = $_POST["gender"];
+	            endif;
+	            
 	            $this->load->model("patient");
-	            $patients = $this->patient->search();
+	            $patients = $this->patient->search($gender);
 	            $arr_patient = array();
 	            foreach ($patients->result_array() as $row) :
 	                $score = 0;
-	                
 	                $ret = $grFingerprint->GrFingerX->IdentifyBase64($row["pat_fingerprint"],$score,$grFingerprint->GR_DEFAULT_CONTEXT);
 	                if( $ret == $grFingerprint->GR_MATCH) : 
 	                    $patient = array();
@@ -86,7 +103,7 @@ class Patientws extends  MpiController {
     function enroll() {
     	$result = array("patientid" => "",
     	                "error" => "");
-    	var_dump($_POST);
+    	//var_dump($_POST);
     	$grFingerprint = new GrFingerService();
         if (!$grFingerprint->initialize()) :
             $result["error"] = "Could not initialize finger print SDK";
@@ -121,7 +138,7 @@ class Patientws extends  MpiController {
             endif;
             $data["fingerprint2"] = $_POST["fingerprint2"];
         else:
-            echo "KK LL MM NN";
+            //Do Nothing
         endif;
         
         
@@ -176,21 +193,120 @@ class Patientws extends  MpiController {
         
         $data = array();
         $data["pat_id"] = $_POST["patientid"];
-        $data["gender"] = $_POST["gender"];
-        $data["birthdate"] = $_POST["birthdate"];
+        /*$data["gender"] = $_POST["gender"];
+        $data["birthdate"] = $_POST["birthdate"];*/
         $data["serv_id"] = $_POST["serviceid"];
         $data["visit_date"] = $_POST["visitdate"];
         $data["site_code"] = $_POST["sitecode"];
         $data["ext_code"] = $_POST["externalcode"];
         $data["info"] = $_POST["info"];
         
-        $this->patient->newVisit($data);
+        $visitid = $this->patient->newVisit($data);
+        $return["visitid"] = $visitid;
+        
         echo json_encode($return);
     	return;
     }
     
     function synchronize() {
-    
+    	$patient_str = $_POST["patient"];
+    	$patient = json_decode($patient_str, true);
+    	
+    	$hander = fopen("c:/works/dane/log.txt", "w");
+    	$val = print_r($patient, true);
+    	fwrite($hander, $val."\n");
+        fclose($hander);
+        
+        
+    	$data = array();
+    	
+    	$pat_fingerprint_1 = $patient["fingerprint"];
+    	$pat_fingerprint_2 = $patient["fingerprint2"];
+    	$gender = $patient["gender"];
+    	if ($gender == "0") :
+    		$gender = "";
+    	endif;
+    	$this->load->model("patient");
+    	$patient_list = $this->patient->search($gender);
+    	if (isset($patient["fingerprint"])) :
+            $ret = $grFingerprint->GrFingerX->IdentifyPrepareBase64($pat_fingerprint_1, $grFingerprint->GR_DEFAULT_CONTEXT);
+            if($ret!=$grFingerprint->GR_OK) :
+                 $result["error"] = "Fingerprint template1 is not correct";
+                 echo json_encode($result);
+                 return;
+            endif;
+            
+            $array_found = array();
+            foreach ($patient_list->result_array() as $row) :
+                $score = 0;
+                $ret = $grFingerprint->GrFingerX->IdentifyBase64($row["pat_fingerprint"],$score,$grFingerprint->GR_DEFAULT_CONTEXT);
+                if( $ret == $grFingerprint->GR_MATCH) :
+                     array_push($array_found, $row);
+	            endif;
+            endforeach;
+            
+            $array_found2 = array();
+            if (count($array_found) > 1) :
+                $ret = $grFingerprint->GrFingerX->IdentifyPrepareBase64($pat_fingerprint_2, $grFingerprint->GR_DEFAULT_CONTEXT);
+            	if($ret!=$grFingerprint->GR_OK) :
+                	$result["error"] = "Fingerprint template2 is not correct";
+                	echo json_encode($result);
+                	return;
+            	endif;
+            	foreach ($array_found as $row) :
+	                $score = 0;
+	                $ret = $grFingerprint->GrFingerX->IdentifyBase64($row["pat_fingerprint2"],$score,$grFingerprint->GR_DEFAULT_CONTEXT);
+	                if( $ret == $grFingerprint->GR_MATCH) :
+	                     array_push($array_found2, $row);
+		            endif;
+	            endforeach;
+	            $array_found = $array_found2;
+	        endif;
+	        
+	        if (count($array_found) == 0 || count($array_found) == 1): 
+		        if (count($array_found) == 0) :
+		            $patient_data["pat_gender"] = $patient["gender"];
+		            $patient_data["pat_fingerprint"] = $patient["fingerprint"];
+		            $patient_data["pat_fingerprint2"] = $patient["fingerprint2"];
+		            $patient_data["pat_dob"] = $patient["datebirth"];
+		            $patient_data["date_create"] = $patient["createdate"];
+		            $pat_id = $this->patient->newPatient($patient_data);
+		            $patient["patientid"] = $pat_id;
+		        elseif (ount($array_found) == 1) :
+		            $patient["patientid"] = $array_found[0]["pat_id"];
+		        endif;
+		        
+		        foreach($patient["visits"] as $visit) :
+		            $data_visit = array();
+		            $data_visit["pat_id"] = $visit["patientid"];
+		            $data_visit["serv_id"] = $visit["serviceid"];
+		            $data_visit["site_code"] = $visit["sitecode"];
+		            $data_visit["ext_code"] = $visit["externalcode"];
+		            $data_visit["info"] = $visit["info"];
+		            $data_visit["info"] = $visit["info"];
+		            $data_visit["date_create"] = $visit["create_date"];
+		            $data_visit["visit_date"] = $visit["visitdate"];
+		            $this->patient->newVisit($data_visit);
+		        endforeach;
+		        
+		        $visits = $this->patient->getVisitsByPID($patient["patientid"]);
+	            foreach($visits->result_array() as $row) :
+		            $visit = array();
+		            $visit["sitecode"] = $row["site_code"];
+		            $visit["externalcode"] = $row["ext_code"];
+		            $visit["serviceid"] = $row["serv_id"];
+		            $visit["info"] = $row["info"];
+		            $visit["visitdate"] = $row["visit_date"];
+		            $visit["createdate"] = $row["date_create"];
+		            array_push($patient["visits"], $visit);
+		        endforeach;
+		        echo json_encode($patient);
+		        return;
+	        endif;
+	        
+	        if (count($array_found) > 1) :
+	        
+            endif;
+	    endif;
     }
-    
 }
