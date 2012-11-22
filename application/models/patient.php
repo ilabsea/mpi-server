@@ -43,7 +43,7 @@ class Patient extends CI_Model {
                                        '".mysql_real_escape_string($data["fingerprint"])."',
                                        ".$fingerprint2.",
                                        ".$gender.",
-                                       ".$create_date;
+                                       ".$create_date.")";
        $this->db->query($sql) or die(mysql_error());
        //endfor;
        return $pat_id;
