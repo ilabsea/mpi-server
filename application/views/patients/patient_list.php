@@ -19,6 +19,7 @@
    <tr valign="middle">
       <th>Id</th>
       <th>Gender</th>
+      <th>Age</th>
       <th>Birth date</th>
       <th>Number Visits</th>
    </tr>	
@@ -30,6 +31,7 @@
    <tr <?=(($row_nb % 2)?"":"class=\"even_row\"")?>>
       <td align="center"><a href="<?=site_url("patients/patientdetail/".$row["pat_id"])?>"><?=htmlspecialchars($row["pat_id"])?></a></td>
       <td align="center"><?=($row["pat_gender"] == 2 ? "Female" : "Male")?></td>
+      <td align="center"><?=$row["pat_age"]?></td>
       <td align="center"><?=htmlspecialchars(date_mysql_to_html($row["pat_dob"]))?></td>
       <td align="center"><?=$row["nb_visit"]?></td>
    </tr>

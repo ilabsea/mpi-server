@@ -19,8 +19,9 @@
       <th>Site</th>
       <th>Date</th>
       <th>External Code</th>
+      <th>External Code 2</th>
       <th>Information</th>
-   </tr>	
+   </tr>
    <?php
       $row_nb = 0; 
       foreach($visit_list->result_array() as $row) :
@@ -31,6 +32,7 @@
       <td align="center"><?=htmlspecialchars($row["site_code"])?></td>
       <td align="center"><?=htmlspecialchars(date_mysql_to_html($row["visit_date"]))?></td>
       <td align="center"><?=$row["ext_code"]?></td>
+      <td align="center"><?=$row["ext_code_2"]?></td>
       <td><?=htmlspecialchars($row["info"])?></td>
    </tr>
    <?php endforeach;?>
