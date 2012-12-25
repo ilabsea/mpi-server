@@ -106,13 +106,15 @@ class Patient extends CI_Model {
        $sql = "SELECT ps.pat_id, 
                       ps.serv_id, 
                       s.serv_code,
-                      ps.site_code, 
+                      ps.site_code,
+                      site.site_name,
                       ps.ext_code, 
                       ps.ext_code_2,
                       ps.visit_date,
                       ps.info
                   FROM mpi_visit ps
                   LEFT JOIN mpi_service s ON (s.serv_id = ps.serv_id)
+                  LEFT JOIN mpi_site site ON (site.site_code = ps.site_code)
                   WHERE pat_id IN (".$patient_ids.")";
        return $this->db->query($sql);
     }
@@ -125,7 +127,8 @@ class Patient extends CI_Model {
        $sql = "SELECT ps.pat_id, 
                       ps.serv_id,
                       s.serv_code, 
-                      ps.site_code, 
+                      ps.site_code,
+                      site.site_name,
                       ps.ext_code, 
                       ps.ext_code_2,
                       ps.visit_date,
@@ -133,6 +136,7 @@ class Patient extends CI_Model {
                       ps.date_create
                   FROM mpi_visit ps
                   LEFT JOIN mpi_service s ON (s.serv_id = ps.serv_id)
+                  LEFT JOIN mpi_site site ON (site.site_code = ps.site_code)
                   WHERE pat_id = '".mysql_real_escape_string($pid)."'
                   ORDER BY visit_date DESC";
        return $this->db->query($sql);
