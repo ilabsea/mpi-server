@@ -1,4 +1,8 @@
 <?php
+/**
+ * The encryption class
+ * @author Sokha RUM
+ */
 class Iencryption {
     const ENCRYPTION_TIME = 1;
     

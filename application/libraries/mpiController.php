@@ -1,5 +1,17 @@
 <?php
+/**
+ * 
+ * The MPI main controller
+ * @author Sokha RUM
+ *
+ */
 class MpiController extends CI_Controller {
+	
+	/**
+	 * The construction of this controller
+	 * @param boolean $load_fingerprint: if we need to reload the fingerprint SDK
+	 * @param boolean $init_session: if we need to create session
+	 */
     function __construct($load_fingerprint=false, $init_session=true) {
         parent::__construct();
         if ($load_fingerprint) :
@@ -8,11 +20,17 @@ class MpiController extends CI_Controller {
         $this->initController($init_session);
     }  
 
+    /**
+     * Initialize the session
+     * @param boolean $init_session: if we need to create session
+     */
     private function initController($init_session) {
         $CI =& get_instance();
 		define("CHAR_SET", $CI->config->item("charset"));
 		$this->load->helper("html");
         $this->load->helper('url');
+        
+        /**  load the library */
         require_once BASEPATH.'core/model.php';
         require_once APPPATH.'libraries/Imodel.php';
         require_once APPPATH.'libraries/Isession.php';
@@ -26,6 +44,9 @@ class MpiController extends CI_Controller {
         endif;
     }
     
+    /**
+     * @param integer $session_status : the status of the session
+     */
     private function controlUser($session_status) {
     	$uri = trim(uri_string(), "/");
     	$user = Isession::getUser();

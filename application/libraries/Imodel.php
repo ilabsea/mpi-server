@@ -1,5 +1,12 @@
 <?php
+/**
+ * The custom model
+ * @author Sokha
+ */
 class Imodel extends CI_Model {
+	/**
+	 * The constructor of this class
+	 */
 	function __construct() {
         parent::__construct();
     }

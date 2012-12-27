@@ -1,4 +1,8 @@
 <?php
+/**
+ * The patient model class
+ * @author Sokha RUM
+ */
 class Patient extends CI_Model {
     function search ($gender="", $dob="") {
     	$sql = "SELECT p.pat_id,
@@ -18,16 +22,20 @@ class Patient extends CI_Model {
     	        FROM mpi_patient p
     	        LEFT JOIN mpi_fingerprint f ON (f.pat_id = p.pat_id)";
     	$where = "";
-    	if ($gender != "") :
-    	    $where = "p.pat_gender=".$gender;
-    	endif;
+    	/*if ($gender != "") :
+    	    $where = "(p.pat_gender=".$gender." OR p.pat_gender IS NULL)";
+    	endif;*/
     	
     	if ($where != "") :
-    	    $sql.= " WHERE p.pat_gender = ".$gender;
+    	    $sql.= " WHERE (p.pat_gender = ".$gender." OR p.pat_gender IS NULL)";
     	endif;
     	return $this->db->query($sql);
     }
     
+    /**
+     * getting the list of patients list
+     * @param unknown_type $data
+     */
     function patient_list($data) {
     	
         $sql = "SELECT p.pat_id, 
@@ -39,10 +47,15 @@ class Patient extends CI_Model {
         return $this->db->query($sql);
     }
     
+    /**
+     * Creating new 
+     * @param unknown_type $data
+     */
     function newPatientFingerprint($data) {
        $create_date = isset($var["date_create"]) ? "'".$var["date_create"]."'" : "CURRENT_TIMESTAMP()";
        $gender = isset($data["gender"]) ? $data["gender"] : "NULL";
        $age = isset($data["age"]) ? $data["age"] : "NULL";
+       $dob = isset($data["birthdate"]) ? "'".$data["birthdate"]."'" : "NULL";
 
     	//for ($i=1; $i<=50000;$i++) :
        $pat_id = uniqid(); 
@@ -51,10 +64,12 @@ class Patient extends CI_Model {
 	       $sql = "INSERT INTO mpi_patient(pat_id, 
 	                                       pat_gender,
 	                                       pat_age,
+	                                       pat_dob,
 	                                       date_create) 
 	                                VALUES('".$pat_id."',
 	                                       ".$gender.",
 	                                       ".$age.",
+	                                       ".$dob.",
 	                                       ".$create_date.")";
 	       $this->db->query($sql) or die(mysql_error());
 	       
@@ -79,6 +94,10 @@ class Patient extends CI_Model {
        return $pat_id;
     }
     
+    /**
+     * Get patiemt with the specific
+     * @param String $pat_id
+     */
     function getPatientById($pat_id) {
         $sql = "SELECT pat_id,
                        pat_gender,
@@ -142,6 +161,10 @@ class Patient extends CI_Model {
        return $this->db->query($sql);
     }
     
+    /**
+     * Creating new visit with the specific variables
+     * @param array $var: the array of the variables
+     */
     function newVisit($var) {
     	$create_date = isset($var["date_create"]) ? "'".$var["date_create"]."'" : "CURRENT_TIMESTAMP()";
         $sql = "INSERT INTO mpi_visit(pat_id,

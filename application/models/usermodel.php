@@ -148,6 +148,10 @@ class Usermodel extends Imodel {
         $this->db->query($sql);
     }
     
+    /**
+     * Update user
+     * @param array $data
+     */
     function user_update($data) {
         $sql = "UPDATE users SET user_login = '".mysql_real_escape_string($data["user_login"])."',
                                  user_lname = '".mysql_real_escape_string($data["user_lname"])."',

@@ -1,4 +1,8 @@
 <?php
+/**
+ * The ISession class
+ * @author Sokha RUM
+ */
 class Isession {
 	const SESSION_KEY = "I_MPI_SERVER"; 
 	const SESSION_USER_KEY = "I_USER_KEY";
@@ -129,16 +133,26 @@ class Isession {
     	unset($_SESSION[Isession::SESSION_KEY]);
     }
 
-    
+    /**
+     * Getting the last page url
+     */
     static function getLastPageUrl() {
     	return $_SESSION[Isession::SESSION_KEY]["PRE_URL"];
     }
 
+    /**
+     * Set the criteria to session
+     * @param String $key
+     * @param object $criteria
+     */
     static function setCriteria($key, $criteria) {
     	 $_SESSION[Isession::SESSION_KEY][Isession::SESSION_CRITERIA_KEY][$key] = $criteria;
     }
     
-
+   /**
+    * Getting object from the session with specific key
+    * @param String $key
+    */ 
    static function getCriteria($key) {
    	 if (!isset($_SESSION[Isession::SESSION_KEY][Isession::SESSION_CRITERIA_KEY][$key])) {
     	 	return null;
@@ -146,6 +160,10 @@ class Isession {
      return $_SESSION[Isession::SESSION_KEY][Isession::SESSION_CRITERIA_KEY][$key];
    }
     
+   /**
+    * remove the criteria from session
+    * @param String $key
+    */
     static function removeCriteria($key) {
        if (isset($_SESSION[Isession::SESSION_KEY][Isession::SESSION_CRITERIA_KEY][$key])) {
        	   unset($_SESSION[Isession::SESSION_KEY][Isession::SESSION_CRITERIA_KEY][$key]);
