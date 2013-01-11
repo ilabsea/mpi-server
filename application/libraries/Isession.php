@@ -169,4 +169,9 @@ class Isession {
        	   unset($_SESSION[Isession::SESSION_KEY][Isession::SESSION_CRITERIA_KEY][$key]);
        }
     }
+    
+    static function removeAllCriteria() {
+    	unset($_SESSION[Isession::SESSION_KEY][Isession::SESSION_CRITERIA_KEY]);
+    	$_SESSION[Isession::SESSION_KEY][Isession::SESSION_CRITERIA_KEY] = array();
+    }
 }

@@ -90,3 +90,7 @@
 .table_list_printable tr:HOVER {
     background-color:#9F9FFF;
 }
+
+.headerclickable {
+     cursor: pointer;
+}

@@ -22,6 +22,7 @@ class Main extends MpiController {
      */
     function authentication() {
         $this->load->model("usermodel");
+        //TODO 
         $user = $this->usermodel->authentication($_POST["user_login"], $_POST["user_pwd"]);
         if ($user == null) :
             Isession::setFlash("error", "Login or Password is not correct");
@@ -38,6 +39,7 @@ class Main extends MpiController {
      */
     function index() {
     	$data = array();
+    	Isession::removeAllCriteria();
         $this->load->template("templates/general", "main/homepage", Iconstant::MPI_APP_NAME, $data);
     }
     

@@ -40,4 +40,7 @@ class Iconstant {
      * 		3 --> STD
      */
     public static $MPI_SERVICE = array(1, 2, 3);
+    
+    /** row per page for pagination*/
+    const PAGINATION_ROW_PER_PAGE = 15;
 }

@@ -14,5 +14,6 @@
 	   <div><?php require_once APPPATH."views/general/banner.php";?></div>
 	   <div><?php require_once APPPATH."views/".$k_main_body_view.".php";?></div>
 	</div>
+	<br/>
 </body>
 </html>

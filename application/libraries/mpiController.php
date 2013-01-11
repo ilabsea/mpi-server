@@ -36,7 +36,9 @@ class MpiController extends CI_Controller {
         require_once APPPATH.'libraries/Isession.php';
         require_once APPPATH.'libraries/Iencryption.php';
         require_once APPPATH.'libraries/Iconstant.php';
+        require_once APPPATH.'libraries/ILog.php';
         require_once APPPATH.'helpers/mpi_helper.php';
+        ILog::getInstance();
         
         if ($init_session) :
 	        $session_status = Isession::initializeSession();

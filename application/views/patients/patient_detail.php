@@ -5,19 +5,20 @@
 </ul>
 <h3>Patient Detail</h3>
 <div class="row-fluid">
-   <div class="span1">PID: </div>
+   <div class="span2">Master ID: </div>
    <div class="span2"><?=htmlspecialchars($patient["pat_id"])?></div>
 </div>
 <div class="row-fluid">
-   <div class="span1">Sex: </div>
+   <div class="span2">Gender: </div>
    <div class="span2"><?=($patient["pat_gender"] == 2 ? "Female" : "Male")?></div>
 </div>
 
-<table  class="table_list" cellspacing="0" cellpadding="0" width="80%">
+<table  class="table_list" cellspacing="0" cellpadding="0" width="100%">
    <tr valign="middle">
       <th>Service</th>
       <th>Site</th>
-      <th>Date</th>
+      <th>Site Name</th>
+      <th>Visit Date</th>
       <th>External Code</th>
       <th>External Code 2</th>
       <th>Information</th>
@@ -30,6 +31,7 @@
    <tr <?=(($row_nb % 2)?"":"class=\"even_row\"")?>>
       <td align="center"><?=htmlspecialchars($row["serv_code"])?></td>
       <td align="center"><?=htmlspecialchars($row["site_code"])?></td>
+      <td align="center"><?=htmlspecialchars($row["site_name"])?></td>
       <td align="center"><?=htmlspecialchars(date_mysql_to_html($row["visit_date"]))?></td>
       <td align="center"><?=$row["ext_code"]?></td>
       <td align="center"><?=$row["ext_code_2"]?></td>
