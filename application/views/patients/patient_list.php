@@ -108,7 +108,7 @@ function header_click(orderby, orderdirection) {
   </ul>  
 </div> 
 <?php endif; ?>
-<?php if ($patient_list != null && $patient_list->num_rows() > 0) : ?>
+<?php if ($patient_list != null) : ?>
 <table  class="table_list" cellspacing="0" cellpadding="0" width="100%">
    <tr valign="middle">
       <th onclick="header_click('pat_id')" class="headerclickable">Master ID <?=pagination_direction("pat_id", $orderby, $orderdirection)?></th>
@@ -117,7 +117,12 @@ function header_click(orderby, orderdirection) {
       <th onclick="header_click('pat_age')" class="headerclickable">Age <?=pagination_direction("pat_age", $orderby, $orderdirection)?></th>
       <th onclick="header_click('pat_dob')" class="headerclickable">Birth date <?=pagination_direction("pat_dob", $orderby, $orderdirection)?></th>
       <th onclick="header_click('nb_visit')" class="headerclickable">Number Visits <?=pagination_direction("nb_visit", $orderby, $orderdirection)?></th>
-   </tr>	
+   </tr>
+   <?php if ($patient_list->num_rows() <= 0) :?>
+   <tr>
+      <td align="center" colspan="6"><b class="error" style="color: blue">Record not found</b></td>
+   </tr>
+   <?php endif;?>
    <?php
       $row_nb = 0; 
       foreach($patient_list->result_array() as $row) :

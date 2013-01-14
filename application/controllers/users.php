@@ -180,4 +180,32 @@ class Users extends MpiController {
 	    Isession::setFlash("success", "User was successfully updated");
 	    redirect(site_url("users/useredit/".$data["user_id"]));
     }
+    
+    function userdelete($user_id) {
+    	$user = Isession::getUser();
+        if (!is_nint($user_id)) :
+            redirect("users/userlist");
+            return;
+        endif;
+        
+        $this->load->model("usermodel");
+        $user_found = $this->usermodel->user_by_id($user_id);
+        if ($user_found == null) :
+            Isession::setFlash("error", "User with id ".$user_id." was not found");
+            redirect("users/userlist");
+            return;
+        endif;
+        
+        if ($user_id == $user["user_id"]) :
+            Isession::setFlash("error", "You cannot delete yourself");
+            redirect("users/userlist");
+            return;
+        endif;
+        
+        $this->load->model("usermodel");
+        $this->usermodel->delete_user($user_id);
+        Isession::setFlash("success", "User ".$user_found["user_login"]." have been deleted");
+        redirect(site_url("users/userlist"));
+        
+    }
 }

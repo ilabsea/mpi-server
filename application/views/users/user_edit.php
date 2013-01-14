@@ -47,6 +47,6 @@
    <div class="span2"><input type="text" name="user_email" value="<?=htmlspecialchars($user_email)?>"></div>
 </div>
 <div>
-   <button type="submit" class="btn">Save</button> &nbsp; <button type="reset" class="btn" onclick="window.location='<?=site_url("users/useredit/".$user_id)?>'">Cancel</button>
+   <button type="submit" class="btn">Save</button> &nbsp; <button type="reset" class="btn" onclick="window.location='<?=site_url("users/useredit/".$user_id)?>'">Reset</button>
 </div>
 </form>

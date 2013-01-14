@@ -43,4 +43,9 @@ class Iconstant {
     
     /** row per page for pagination*/
     const PAGINATION_ROW_PER_PAGE = 15;
+    
+    /** User level admin */
+    const USER_ADMIN = 1;
+    /** Normal user level */
+    const USER_NORMAL = 2;
 }

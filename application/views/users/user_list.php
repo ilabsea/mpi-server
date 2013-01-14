@@ -14,7 +14,7 @@
       <?php endif;?>
    </div>
 </div>
-<table  class="table_list" cellspacing="0" cellpadding="0" width="80%">
+<table  class="table_list" cellspacing="0" cellpadding="0" width="100%">
    <tr valign="middle">
       <th>Login</th>
       <th>Name</th>
@@ -32,7 +32,7 @@
       <td><?=htmlspecialchars($row["user_fname"]." ".$row["user_lname"])?></td>
       <td><?=htmlspecialchars($row["grp_name"])?></td>
       <td><?=htmlspecialchars($row["user_email"])?></td>
-      <td align="center"><a href="<?=site_url("users/userdelete/".$row["user_id"])?>"><img src="<?=base_url("img/delete.png")?>"/></a></td>
+      <td align="center"><a href="<?=site_url("users/userdelete/".$row["user_id"])?>" onclick="return confirm('Are you sure to delete this user ?')"><img src="<?=base_url("img/delete.png")?>"/></a></td>
    </tr>
    <?php endforeach;?>
 </table>

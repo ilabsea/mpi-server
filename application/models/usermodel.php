@@ -163,4 +163,13 @@ class Usermodel extends Imodel {
                            WHERE user_id = ".$data["user_id"];
         $this->db->query($sql);
     }
+    
+    /**
+     * remove a user with the specific id from database
+     * @param int $user_id
+     */
+    function delete_user ($user_id) {
+        $sql = "DELETE FROM users WHERE user_id = ".$user_id;
+        $this->db->query($sql);
+    }
 }
