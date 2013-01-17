@@ -99,8 +99,17 @@ class Main extends MpiController {
             return;
         endif;
         
-        $this->usermodel->update_pwd($cur_user["user_id"], $_POST["user_new_pwd"]);
+        $this->usermodel->update_pwd($cur_user["user_id"], $_POST["user_new_pwd"], $cur_user["user_id"]);
         Isession::setFlash("success", "Password changed successfully");
         redirect("main/changepwd");
+    }
+    
+    /**
+     * Display the error page
+     */
+    function errorpage() {
+    	$data = array();
+    	$data["error"] = "You do not have right to access this page";
+        $this->load->template("templates/general", "main/errorpage", Iconstant::MPI_APP_NAME, $data);
     }
 }

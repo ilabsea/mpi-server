@@ -2,13 +2,17 @@
 /**
  * Users controller
  * @author Sokha RUM
- *
  */
 class Users extends MpiController {
     /**
      * User list
      */
 	function userlist() {
+		$user = Isession::getUser();
+		if ($user["grp_id"] != Iconstant::USER_ADMIN) :
+		    redirect(site_url("main/errorpage"));
+		    return;
+		endif;
 		$data = array();
 		$data["error"] = Isession::getFlash("error");
     	$data["error_list"] = Isession::getFlash("error_list");
@@ -17,12 +21,17 @@ class Users extends MpiController {
     	$data["user_list"] = $this->usermodel->user_list();
         $this->load->template("templates/general", "users/user_list", Iconstant::MPI_APP_NAME, $data);
     }
-    
+
     /**
      * Form of user creation
      * Enter description here ...
      */
     function usernew() {
+    	$user = Isession::getUser();
+		if ($user["grp_id"] != Iconstant::USER_ADMIN) :
+		    redirect(site_url("main/errorpage"));
+		    return;
+		endif;
     	$data = array();
     	$data["error"] = Isession::getFlash("error");
     	$data["error_list"] = Isession::getFlash("error_list");
@@ -47,6 +56,11 @@ class Users extends MpiController {
      */
     function usersave() {
     	$cur_user = Isession::getUser();
+    	//$user = Isession::getUser();
+		if ($cur_user["grp_id"] != Iconstant::USER_ADMIN) :
+		    redirect(site_url("main/errorpage"));
+		    return;
+		endif;
         $data = array();
 
     	$data["user_login"] = trim($_POST["user_login"]);
@@ -104,6 +118,12 @@ class Users extends MpiController {
      * @param int $user_id
      */
     function useredit($user_id) {
+    	$user = Isession::getUser();
+		if ($user["grp_id"] != Iconstant::USER_ADMIN) :
+		    redirect(site_url("main/errorpage"));
+		    return;
+		endif;
+		
         if (!is_nint($user_id)) :
             redirect("users/userlist");
             return;
@@ -129,7 +149,6 @@ class Users extends MpiController {
     	endif;
     	$data["group_list"] = $this->usermodel->group_list();
         $this->load->template("templates/general", "users/user_edit", Iconstant::MPI_APP_NAME, $data);
-    	
     }
     
     /**
@@ -137,6 +156,10 @@ class Users extends MpiController {
      */
     function userupdate() {
         $cur_user = Isession::getUser();
+		if ($cur_user["grp_id"] != Iconstant::USER_ADMIN) :
+		    redirect(site_url("main/errorpage"));
+		    return;
+		endif;
         $data = array();
 
         $data["user_id"] = $_POST["user_id"];
@@ -180,9 +203,17 @@ class Users extends MpiController {
 	    Isession::setFlash("success", "User was successfully updated");
 	    redirect(site_url("users/useredit/".$data["user_id"]));
     }
-    
+
+    /**
+     * Delete a user with specific user id
+     * @param int $user_id
+     */
     function userdelete($user_id) {
     	$user = Isession::getUser();
+		if ($user["grp_id"] != Iconstant::USER_ADMIN) :
+		    redirect(site_url("main/errorpage"));
+		    return;
+		endif;
         if (!is_nint($user_id)) :
             redirect("users/userlist");
             return;
@@ -206,6 +237,34 @@ class Users extends MpiController {
         $this->usermodel->delete_user($user_id);
         Isession::setFlash("success", "User ".$user_found["user_login"]." have been deleted");
         redirect(site_url("users/userlist"));
+    }
+
+    /**
+     * Regenerate the password randonly
+     * @param int $user_id
+     */
+    function generagepwd($user_id) {
+    	$user = Isession::getUser();
+		if ($user["grp_id"] != Iconstant::USER_ADMIN) :
+		    redirect(site_url("main/errorpage"));
+		    return;
+		endif;
+        if (!is_nint($user_id)) :
+            redirect("users/userlist");
+            return;
+        endif;
         
+        $this->load->model("usermodel");
+        $user_found = $this->usermodel->user_by_id($user_id);
+        if ($user_found == null) :
+            Isession::setFlash("error", "User with id ".$user_id." was not found");
+            redirect("users/userlist");
+            return;
+        endif;
+        
+        $new_pwd = uniqid();
+        $this->usermodel->update_pwd($user_id, $new_pwd, $user["user_id"]);
+        Isession::setFlash("success", "Password has beed regenerated to: ".$new_pwd);
+        redirect("users/useredit/".$user_id);
     }
 }

@@ -37,9 +37,9 @@ class Usermodel extends Imodel {
      * @param string $user_pwd
      * @author Sokha RUM
      */
-    function update_pwd($user_id, $user_pwd) {
+    function update_pwd($user_id, $user_pwd, $user_update) {
         $sql = "UPDATE users SET user_pwd = SHA1('".mysql_real_escape_string($user_pwd)."'),
-                                 user_update = ".$user_id.",
+                                 user_update = ".$user_update.",
                                  date_update = CURRENT_TIMESTAMP()
                            WHERE user_id = ".$user_id;
         $this->db->query($sql);

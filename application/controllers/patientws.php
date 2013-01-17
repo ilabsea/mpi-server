@@ -66,7 +66,7 @@ class Patientws extends  MpiController {
             $this->load->model("patient");
             
             // get the list of patient with the specific gender
-            $patients = $this->patient->search($gender);
+            $patients = $this->patient->search();
             $arr_patient = array();
             
             // start doing the matching

@@ -4,6 +4,11 @@
  * @author Sokha RUM
  */
 class Patient extends Imodel {
+	/**
+	 * Searching patient filtering $gender
+	 * @param int $gender
+	 * @param string $dob
+	 */
     function search ($gender="", $dob="") {
     	ILog::debug("search patient");
     	$sql = "SELECT p.pat_id,
@@ -30,7 +35,9 @@ class Patient extends Imodel {
     	endif;*/
     	
     	if ($where == "") :
+    	    if ($gender != "") :
     	    $sql.= " WHERE (p.pat_gender = ".$gender." OR p.pat_gender IS NULL)";
+    	    endif;
     	endif;
     	ILog::debug($sql);
     	return $this->db->query($sql);

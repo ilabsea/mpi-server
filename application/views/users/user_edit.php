@@ -1,3 +1,15 @@
+<script type="text/javascript">
+   function confirm_pwd_generate(user_id){
+      if (confirm('Do you really want to regenerate password for this user ?')) {
+    	  window.location='<?=site_url("users/generagepwd/".$user_id)?>';
+    	  return true;
+      } else {
+          return false;    	  
+      }
+      
+   }
+</script>
+
 <ul class="breadcrumb">
 	<li><a href="<?=site_url("main")?>">Home</a> <span class="divider">&gt;</span></li>
 	<li><a href="<?=site_url("users/userlist")?>">User List</a> <span class="divider">&gt;</span></li>
@@ -48,5 +60,6 @@
 </div>
 <div>
    <button type="submit" class="btn">Save</button> &nbsp; <button type="reset" class="btn" onclick="window.location='<?=site_url("users/useredit/".$user_id)?>'">Reset</button>
+   &nbsp; <button type="button" class="btn" onclick="return confirm_pwd_generate('<?=$user_id?>')">Generate Password</button>
 </div>
-</form>
+</form> 
