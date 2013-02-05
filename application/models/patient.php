@@ -140,7 +140,7 @@ class Patient extends Imodel {
        $dob = isset($data["birthdate"]) && $data["birthdate"] != "" ? "'".$data["birthdate"]."'" : "NULL";
        $site = isset($data["sitecode"]) && $data["sitecode"] != "" ? "'".$data["sitecode"]."'" : "NULL";
        $sitecode = $site == "NULL" ?  "0201" : $data["sitecode"];
-    	//for ($i=1; $i<=50000;$i++) :
+       //for ($i=1; $i<=50000;$i++) :
        //$pat_id = uniqid();
 
        $pat_id = $this->getPatientIdBySiteCode($sitecode);

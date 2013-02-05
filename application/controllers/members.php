@@ -1,11 +1,13 @@
 <?php
 /**
- * Site Controller
- * @author Sokha RUM
- *
+ * Member
+ * @author sokha
  */
-class Sites extends MpiController {
-    function sitelist() {
+class Members extends MpiController {
+	/**
+	 * Enter description here ...
+	 */
+    function memberlist() {
         $data = array();
 		$data["error"] = Isession::getFlash("error");
     	$data["error_list"] = Isession::getFlash("error_list");
@@ -14,23 +16,18 @@ class Sites extends MpiController {
     	$this->load->model("service");
     	$data["services"] = $this->service->getServices();
     	
-    	$this->load->model("site");
-    	$data["provinces"] = $this->site->getProvinces();
-    	
     	$criteria = array(
     						"cri_serv_id" => "",
-    						"cri_pro_code" => "",
     						"cri_site_code" => "",
+    						"cri_member_login" => "",
     						"cur_page" => 1,
     						"orderby" => "site_code",
     						"orderdirection" => "ASC"
     					);
-
-        $this->load->model("site");
         
         $start = 0;
     	
-    	$session_data = Isession::getCriteria("site_list");
+    	$session_data = Isession::getCriteria("member_list");
     	$first_access = false;
     	if ($session_data != null) :
     		$criteria = array_merge($criteria, $session_data);
@@ -55,7 +52,7 @@ class Sites extends MpiController {
     	    $data["site_list"] = null;
     	    $data["total_record"] = 0;
     	    $data["nb_of_page"] = 1;
-    	    $this->load->template("templates/general", "sites/site_list", Iconstant::MPI_APP_NAME, $data);
+    	    $this->load->template("templates/general", "members/member_list", Iconstant::MPI_APP_NAME, $data);
     	    return;
     	endif;
     	
@@ -69,7 +66,7 @@ class Sites extends MpiController {
     		$criteria["cur_page"] = $total_pages;
     	endif; 
     	
-    	Isession::setCriteria("site_list", $criteria);
+    	Isession::setCriteria("member_list", $criteria);
     	
     	
     	
@@ -83,7 +80,7 @@ class Sites extends MpiController {
     	$data["total_record"] = $total_sites;
     	$data["nb_of_page"] = $total_pages;
     	$data = array_merge($data, $criteria);
-    	$this->load->template("templates/general", "sites/site_list", Iconstant::MPI_APP_NAME, $data);
+    	$this->load->template("templates/general", "members/member_list", Iconstant::MPI_APP_NAME, $data);
     }
     
     function search() {

@@ -94,9 +94,9 @@ function header_click(orderby, orderdirection) {
     $next_page = $cur_page >= $nb_of_page ? $nb_of_page : $cur_page + 1;
 ?>
  
-<div class="pagination">  
+<div class="pagination pagination-mini">  
   <ul>  
-    <li><a href="<?=site_url("patients/patientlist?cur_page=".$previous_page)?>">Prev</a></li>
+    <li><a href="<?=site_url("patients/patientlist?cur_page=".$previous_page)?>">&laquo;</a></li>
     <?php for ($i=1; $i<=$nb_of_page; $i++) : ?>	
 	    <?php if ($i == $cur_page) :  ?>
 	        <li class="active"><a href="#"><?=$i?></a></li>
@@ -104,7 +104,7 @@ function header_click(orderby, orderdirection) {
 	    	<li><a href="<?=site_url("patients/patientlist?cur_page=".$i)?>"><?=$i?></a></li>
 	    <?php endif;?>
     <?php endfor; ?>  
-    <li><a href="<?=site_url("patients/patientlist?cur_page=".$next_page)?>">Next</a></li>
+    <li><a href="<?=site_url("patients/patientlist?cur_page=".$next_page)?>">&raquo;</a></li>
   </ul>  
 </div> 
 <?php endif; ?>

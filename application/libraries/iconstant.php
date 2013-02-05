@@ -33,6 +33,31 @@ class Iconstant {
     							 "fingerprint_r5",
     							 "fingerprint_l5");
     
+    
+    /** 
+     * 
+     * 		 r --> right hand
+     *       l --> left hand
+     *       1 --> thumb finger
+     *       2 --> grooming finger
+     *       3 --> middle finger
+     *       4 --> ring finger
+     *       5 --> little finger
+     *  Example: user_r1 means the thumb of right hand
+     */
+    public static $MPI_USER_FP = array(
+    							 "member_fp_r1",
+    							 "member_fp_l1",
+    							 "member_fp_r2",
+        						 "member_fp_l2",
+        						 "member_fp_r3",
+    							 "member_fp_l3",
+    							 "member_fp_r4",
+    							 "member_fp_l4",
+    							 "member_fp_r5",
+    							 "member_fp_l5");
+    
+    
     /**
      * Services which are currently available for MPI
      * 		1 --> VCCT
