@@ -84,43 +84,45 @@ function header_click(orderby, orderdirection) {
 
 <div class="pagination pagination-mini">  
   <ul>  
-    <li><a href="<?=site_url("sites/sitelist?cur_page=".$previous_page)?>">&laquo;</a></li>
+    <li><a href="<?=site_url("members/memberlist?cur_page=".$previous_page)?>">&laquo;</a></li>
     <?php for ($i=1; $i<=$nb_of_page; $i++) : ?>	
 	    <?php if ($i == $cur_page) :  ?>
 	        <li class="active"><a href="#"><?=$i?></a></li>
 	    <?php else: ?>
-	    	<li><a href="<?=site_url("sites/sitelist?cur_page=".$i)?>"><?=$i?></a></li>
+	    	<li><a href="<?=site_url("members/memberlist?cur_page=".$i)?>"><?=$i?></a></li>
 	    <?php endif;?>
     <?php endfor; ?>  
-    <li><a href="<?=site_url("sites/sitelist?cur_page=".$next_page)?>">&raquo;</a></li>
+    <li><a href="<?=site_url("members/memberlist?cur_page=".$next_page)?>">&raquo;</a></li>
   </ul>  
 </div> 
 <?php endif; ?>
-<?php if ($site_list != null) : ?>
+<?php if ($member_list != null) : ?>
 <table  class="table_list" cellspacing="0" cellpadding="0" width="100%">
    <tr valign="middle">
-      <th onclick="header_click('site_code')" class="headerclickable">Code <?=pagination_direction("site_code", $orderby, $orderdirection)?></th>
-      <th onclick="header_click('site_name')" class="headerclickable">Name <?=pagination_direction("site_name", $orderby, $orderdirection)?></th>
-      <th onclick="header_click('pro_code')" class="headerclickable">Province <?=pagination_direction("pro_code", $orderby, $orderdirection)?></th>
+      <th onclick="header_click('member_login')" class="headerclickable">Login <?=pagination_direction("member_login", $orderby, $orderdirection)?></th>
+      <th onclick="header_click('site_code')" class="headerclickable">Site Code <?=pagination_direction("site_code", $orderby, $orderdirection)?></th>
+      <th onclick="header_click('site_name')" class="headerclickable">Site Name <?=pagination_direction("site_name", $orderby, $orderdirection)?></th>
       <th onclick="header_click('serv_code')" class="headerclickable">Service <?=pagination_direction("serv_code", $orderby, $orderdirection)?></th>
+      <th onclick="header_click('date_create')" class="headerclickable">Registered Date <?=pagination_direction("date_create", $orderby, $orderdirection)?></th>
    </tr>
-   <?php if ($site_list->num_rows() <= 0) :?>
+   <?php if ($member_list->num_rows() <= 0) :?>
    <tr>
-      <td align="center" colspan="4"><b class="error" style="color: blue">Record not found</b></td>
+      <td align="center" colspan="5"><b class="error" style="color: blue">Record not found</b></td>
    </tr>
    <?php endif;?>
    <?php
       $row_nb = 0; 
-      foreach($site_list->result_array() as $row) :
+      foreach($member_list->result_array() as $row) :
       	$row_nb++;
    ?>
    <tr <?=(($row_nb % 2)?"":"class=\"even_row\"")?>>
+      <td align="center"><?=htmlspecialchars($row["member_login"])?></td>
       <td align="center"><?=htmlspecialchars($row["site_code"])?></td>
       <td><?=htmlspecialchars($row["site_name"])?></td>
-      <td><?=htmlspecialchars($row["pro_name"])?></td>
       <td align="center"><?=htmlspecialchars($row["serv_code"])?></td>
+      <td align="center"><?=htmlspecialchars(date_mysql_to_html($row["date_create"]))?></td>
    </tr>
    <?php endforeach;?>
 </table>
-<div><?=$site_list->num_rows()?> / <?=$total_record?></div>
+<div><?=$member_list->num_rows()?> / <?=$total_record?></div>
 <?php endif;?>

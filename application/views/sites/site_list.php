@@ -111,6 +111,7 @@ function header_click(orderby, orderdirection) {
       <th onclick="header_click('site_code')" class="headerclickable">Code <?=pagination_direction("site_code", $orderby, $orderdirection)?></th>
       <th onclick="header_click('site_name')" class="headerclickable">Name <?=pagination_direction("site_name", $orderby, $orderdirection)?></th>
       <th onclick="header_click('pro_code')" class="headerclickable">Province <?=pagination_direction("pro_code", $orderby, $orderdirection)?></th>
+      <th onclick="header_click('od_name')" class="headerclickable">OD <?=pagination_direction("od_name", $orderby, $orderdirection)?></th>
       <th onclick="header_click('serv_code')" class="headerclickable">Service <?=pagination_direction("serv_code", $orderby, $orderdirection)?></th>
    </tr>
    <?php if ($site_list->num_rows() <= 0) :?>
@@ -127,6 +128,7 @@ function header_click(orderby, orderdirection) {
       <td align="center"><?=htmlspecialchars($row["site_code"])?></td>
       <td><?=htmlspecialchars($row["site_name"])?></td>
       <td><?=htmlspecialchars($row["pro_name"])?></td>
+      <td><?=htmlspecialchars($row["od_name"])?></td>
       <td align="center"><?=htmlspecialchars($row["serv_code"])?></td>
    </tr>
    <?php endforeach;?>

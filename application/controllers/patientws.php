@@ -36,6 +36,12 @@ class Patientws extends  MpiController {
 	            echo json_encode($result);
 	            return;
 	        endif;
+	       
+	        if (!$this->accept_webservice($grFingerprint)) :
+	        	$result["error"] = "The request was rejected. Contact application administrator for more detail";
+	        	echo json_encode($result);
+	            return;
+	        endif;
 	        
 	        // get the valid fingerprint from the request
 	        $fingerprints = $this->valid_fingerprint($grFingerprint, $result);
@@ -132,6 +138,12 @@ class Patientws extends  MpiController {
 	            return;
 	        endif;
 	  
+	        if (!$this->accept_webservice($grFingerprint)) :
+	        	$result["error"] = "The request was rejected. Contact application administrator for more detail";
+	        	echo json_encode($result);
+	            return;
+	        endif;
+	        
 	        // get the valid fingerprint from the request
 	        $fingerprints = $this->valid_fingerprint($grFingerprint, $result);
 		    if($result["error"] != "") :
@@ -291,6 +303,13 @@ class Patientws extends  MpiController {
 	            echo json_encode($patient_array);
 	            return;
 	        endif;
+	        
+	        if (!$this->accept_webservice($grFingerprint)) :
+	        	$result["error"] = "The request was rejected. Contact application administrator for more detail";
+	        	echo json_encode($result);
+	            return;
+	        endif;
+	        
 	    	$patient_str = $_POST["patient"];
 	    	$patient = json_decode($patient_str, true);
 	    	ILog::info($patient);
@@ -307,53 +326,58 @@ class Patientws extends  MpiController {
 	    		$gender = "";
 	    	endif;
 	    	$this->load->model("patient");
-	    	$patient_list = $this->patient->search($gender);
-	    	
+	    	$patient_found = $this->patient->getPatientById($patient["patientid"]);
 	    	$array_found = array();
-	    	foreach ($fingerprints as $fingerprint) :
-	    	    $array_found2 = array();
-	    		$ret = $grFingerprint->GrFingerX->IdentifyPrepareBase64($patient[$fingerprint], $grFingerprint->GR_DEFAULT_CONTEXT);
-	            if($ret!=$grFingerprint->GR_OK) :
-	                 $patient_array["error"] = "Fingerprint ".$fingerprint." is not correct";
-	                 echo json_encode($patient_array);
-	                 return;
-	            endif;
-	            
-	            if (count($array_found) > 1) :
-	               foreach ($array_found as $row) :
-	               		$score = 0;
-		            	if ($row[$fingerprint] == null || $row[$fingerprint] == "") :
-		            	    continue;
-		            	endif;
-		            	
-		                $ret = $grFingerprint->GrFingerX->IdentifyBase64($row[$fingerprint],$score,$grFingerprint->GR_DEFAULT_CONTEXT);
-		                if( $ret == $grFingerprint->GR_MATCH) :
-		                     array_push($array_found2, $row);
-			            endif;
-	               endforeach;
-	            else:
-	               foreach ($patient_list->result_array() as $row) :
-		               $score = 0;
-		            	if ($row[$fingerprint] == null || $row[$fingerprint] == "") :
-		            	    continue;
-		            	endif;
-
-		                $ret = $grFingerprint->GrFingerX->IdentifyBase64($row[$fingerprint],$score,$grFingerprint->GR_DEFAULT_CONTEXT);
-		                if( $ret == $grFingerprint->GR_MATCH) :
-		                     array_push($array_found2, $row);
-			            endif;
-	               endforeach;
-	            endif;
-	            
-	            $array_found = $array_found2;
-	            if (count($array_found) <= 1) :
-	                break;
-	            endif;
+	    	if ($patient_found == null) :
+		    	$patient_list = $this->patient->search($gender);
+		    	
+		    	
+		    	foreach ($fingerprints as $fingerprint) :
+		    	    $array_found2 = array();
+		    		$ret = $grFingerprint->GrFingerX->IdentifyPrepareBase64($patient[$fingerprint], $grFingerprint->GR_DEFAULT_CONTEXT);
+		            if($ret!=$grFingerprint->GR_OK) :
+		                 $patient_array["error"] = "Fingerprint ".$fingerprint." is not correct";
+		                 echo json_encode($patient_array);
+		                 return;
+		            endif;
+		            
+		            if (count($array_found) > 1) :
+		               foreach ($array_found as $row) :
+		               		$score = 0;
+			            	if ($row[$fingerprint] == null || $row[$fingerprint] == "") :
+			            	    continue;
+			            	endif;
+			            	
+			                $ret = $grFingerprint->GrFingerX->IdentifyBase64($row[$fingerprint],$score,$grFingerprint->GR_DEFAULT_CONTEXT);
+			                if( $ret == $grFingerprint->GR_MATCH) :
+			                     array_push($array_found2, $row);
+				            endif;
+		               endforeach;
+		            else:
+		               foreach ($patient_list->result_array() as $row) :
+			               $score = 0;
+			            	if ($row[$fingerprint] == null || $row[$fingerprint] == "") :
+			            	    continue;
+			            	endif;
+	
+			                $ret = $grFingerprint->GrFingerX->IdentifyBase64($row[$fingerprint],$score,$grFingerprint->GR_DEFAULT_CONTEXT);
+			                if( $ret == $grFingerprint->GR_MATCH) :
+			                     array_push($array_found2, $row);
+				            endif;
+		               endforeach;
+		            endif;
+		            
+		            $array_found = $array_found2;
+		            if (count($array_found) <= 1) :
+		                break;
+		            endif;
 	    	endforeach;
-	    	
+	    	endif;
 		    
-	        if (count($array_found) == 0 || count($array_found) == 1): 
-		        if (count($array_found) == 0) :
+	        if ($patient_found != null || count($array_found) == 0 || count($array_found) == 1): 
+	            if ($patient_found != null) :
+	            	// Do nothing
+		        elseif (count($array_found) == 0) :
 		            $patient_data["gender"] = $patient["gender"];
 		            foreach (Iconstant::$MPI_FINGERPRINT as $fingerprint) :
 		                $patient_data[$fingerprint] = isset($patient[$fingerprint]) ? $patient[$fingerprint] : "";
@@ -495,6 +519,13 @@ class Patientws extends  MpiController {
 	            echo json_encode($patient_array);
 	            return;
 	        endif;
+	        
+	        if (!$this->accept_webservice($grFingerprint)) :
+	        	$result["error"] = "The request was rejected. Contact application administrator for more detail";
+	        	echo json_encode($result);
+	            return;
+	        endif;
+	        
 	    	$patient_str = $_POST["patient"];
 
 	    	$patient = json_decode($patient_str, true);
@@ -577,5 +608,45 @@ class Patientws extends  MpiController {
     	//print_r ($this->unit->result());
     	//echo "</pre>";
     	echo $this->unit->report();
+    }
+    
+	/**
+     * Detect if the finger is ok with the site
+     * @param Object $grFingerprint
+     * @param array $reference
+     */
+    private function accept_webservice($grFingerprint, $reference=null) {
+    	if ($reference == null) :
+    	   $reference = $_POST;
+    	endif;
+    	
+    	if (true) :
+    	   return true;
+    	endif;
+    	
+    	$site_code = !isset($_POST["sitecode"]) || $_POST["sitecode"] == "" ? null : $_POST["sitecode"];
+    	$fp_name = !isset($_POST["member_fp_name"]) || $_POST["member_fp_name"] == "" ? null : $_POST["member_fp_name"];
+    	$fp_val = !isset($_POST["member_fp_value"]) || $_POST["member_fp_value"] == "" ? null : $_POST["member_fp_value"];
+    	
+    	if ($site_code == null || $fp_name == null || $fp_val == null) :
+    	    return false;
+    	endif;
+    	$this->load->model("member");
+    	$members = $this->member->getMemberBySiteCode($site_code);
+    	$ret = $grFingerprint->GrFingerX->IdentifyPrepareBase64($fp_val, $grFingerprint->GR_DEFAULT_CONTEXT);
+    	if ($ret != $grFingerprint->GR_OK) :
+	        return FALSE;
+	    endif;
+    	foreach($members->result_array() as $row) :
+    		$score = 0;
+            if ($row[$fp_name] == null || $row[$fp_name] == "") :
+                continue;
+            endif;
+    	    $ret = $grFingerprint->GrFingerX->IdentifyBase64($row[$fp_name],$score,$grFingerprint->GR_DEFAULT_CONTEXT);
+    	    if( $ret == $grFingerprint->GR_MATCH) : 
+    	        return true;
+    	    endif;
+    	endforeach;
+    	return false;
     }
 }

@@ -49,14 +49,15 @@ class Members extends MpiController {
     	
     	if ($first_access) :
     	    $data = array_merge($data, $criteria);
-    	    $data["site_list"] = null;
+    	    $data["member_list"] = null;
     	    $data["total_record"] = 0;
     	    $data["nb_of_page"] = 1;
     	    $this->load->template("templates/general", "members/member_list", Iconstant::MPI_APP_NAME, $data);
     	    return;
     	endif;
     	
-    	$total_sites = $this->site->count_site_list($criteria);
+    	$this->load->model("member");
+    	$total_sites = $this->member->count_member_list($criteria);
     	$total_pages = (int)($total_sites / Iconstant::PAGINATION_ROW_PER_PAGE);
     	if ($total_pages == 0 || $total_pages * Iconstant::PAGINATION_ROW_PER_PAGE < $total_sites) :
     	    $total_pages++;
@@ -75,7 +76,7 @@ class Members extends MpiController {
     	//$criteria["orderby"] = $orderby;
     	//$criteria["orderdirection"] = $orderdirection;
 
-    	$data["site_list"] = $this->site->getSites($criteria, $start, Iconstant::PAGINATION_ROW_PER_PAGE);
+    	$data["member_list"] = $this->member->getMembers($criteria, $start, Iconstant::PAGINATION_ROW_PER_PAGE);
     	//$data["cur_page"] = $cur_page;
     	$data["total_record"] = $total_sites;
     	$data["nb_of_page"] = $total_pages;
@@ -83,17 +84,20 @@ class Members extends MpiController {
     	$this->load->template("templates/general", "members/member_list", Iconstant::MPI_APP_NAME, $data);
     }
     
+    /**
+     * Searching for member
+     */
     function search() {
     	$criteria = $_POST;
     	$criteria["cri_site_code"] = trim($criteria["cri_site_code"]);
 
-    	$session_data = Isession::getCriteria("site_list");
+    	$session_data = Isession::getCriteria("member_list");
     	if ($session_data != null) :
     		$criteria = array_merge($session_data, $criteria);
     	endif;
     	
-    	Isession::setCriteria("site_list", $criteria);
-    	redirect(site_url("sites/sitelist"));
+    	Isession::setCriteria("member_list", $criteria);
+    	redirect(site_url("members/memberlist"));
     
     
     }

@@ -23,37 +23,37 @@ class Memberws extends MpiController {
     		// detect the fingerprint SDK
 	    	$grFingerprint = new GrFingerService();
 	        if (!$grFingerprint->initialize()) :
-	            $result["error"] = "Could not initialize finger print SDK";
-	            echo json_encode($result);
+	            echo "Could not initialize finger print SDK";
 	            return;
 	        endif;
 	        
 	        // get the valid fingerprint from the request
 	        $fingerprints = $this->valid_user_fp($grFingerprint, $result);
 	        if($result["error"] != "") :
-	             echo json_encode($result);
+	             echo $result["error"];
 	             return;
 	        endif;
 	        
 	        if (count($fingerprints) <= 0) :
-	             $result["error"] = "Could not find fingerprint";
-	             echo json_encode($result);
+	             echo "Could not find fingerprint";
 	             return;
 	        endif;
 	        
             if (!isset($_POST["sitecode"]) || $_POST["sitecode"] == "") :
-                 $result["error"] = "Could not find site code";
-	             echo json_encode($result);
+                 //$result["error"] = "Could not find site code";
+	             echo "Could not find site code";
 	             return;
             endif;
             
             $this->load->model("site");
             $site = $this->site->getSiteByCode($_POST["sitecode"]);
             if ($site == null) :
-                 $result["error"] = "Site code is not correct";
-	             echo json_encode($result);
+                 //$result["error"] = "Site code is not correct";
+	             echo "Site code is not correct";
 	             return;
             endif;
+            
+            
             
             $data = array();
 	        foreach ($fingerprints as $fingerprint) :
@@ -69,13 +69,18 @@ class Memberws extends MpiController {
 	        
 	        
 	        $this->load->model("member");
+	        $memberFound = $this->member->getMemberBySiteCodeAndLogin($data["site_code"], $data["member_login"]);
+	        if ($memberFound != null) :
+	        	 echo "Login ".$data["member_login"]." is found on server";
+	             return;
+	        endif;
 	        $this->member->createNew($data);
-	        
+	        echo "success";
     		
     	} catch (Exception $e) {
     		$result["error"] = $e->getMessage();
     		ILog::error("error during patient searching: ".$e->getMessage());
-    		echo json_encode($result);
+    		echo $result["error"];
     	}
 	}
 	
@@ -103,5 +108,4 @@ class Memberws extends MpiController {
     	endforeach;
         return $arr;
     }
-
 }

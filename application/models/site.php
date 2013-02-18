@@ -14,6 +14,7 @@ class Site extends Imodel {
        					site_code, 
        					site_name, 
        					pro_code, 
+       					od_name,
        					serv_id 
        				FROM mpi_site
        			   WHERE site_code = '".mysql_real_escape_string($site_code)."'";
@@ -35,7 +36,8 @@ class Site extends Imodel {
                       s.pro_code,
                       s.serv_id,
                       pr.pro_name,
-                      ser.serv_code
+                      ser.serv_code,
+                      s.od_name
                 FROM mpi_site s
                 LEFT JOIN mpi_province pr ON (pr.pro_code = s.pro_code)
                 LEFT JOIN mpi_service ser ON (ser.serv_id = s.serv_id)";
