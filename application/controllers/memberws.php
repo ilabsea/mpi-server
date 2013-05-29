@@ -41,7 +41,7 @@ class Memberws extends MpiController {
 	        
             if (!isset($_POST["sitecode"]) || $_POST["sitecode"] == "") :
                  //$result["error"] = "Could not find site code";
-	             echo "Could not find site code";
+	             echo "Site code is required";
 	             return;
             endif;
             
@@ -49,7 +49,7 @@ class Memberws extends MpiController {
             $site = $this->site->getSiteByCode($_POST["sitecode"]);
             if ($site == null) :
                  //$result["error"] = "Site code is not correct";
-	             echo "Site code is not correct";
+	             echo "Site code ".$_POST["sitecode"]." is not found";
 	             return;
             endif;
             

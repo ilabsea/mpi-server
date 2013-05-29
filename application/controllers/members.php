@@ -8,6 +8,11 @@ class Members extends MpiController {
 	 * Enter description here ...
 	 */
     function memberlist() {
+    	$user = Isession::getUser();
+		if ($user["grp_id"] != Iconstant::USER_ADMIN) :
+		    redirect(site_url("main/errorpage"));
+		    return;
+		endif;
         $data = array();
 		$data["error"] = Isession::getFlash("error");
     	$data["error_list"] = Isession::getFlash("error_list");
@@ -88,6 +93,11 @@ class Members extends MpiController {
      * Searching for member
      */
     function search() {
+    	$user = Isession::getUser();
+		if ($user["grp_id"] != Iconstant::USER_ADMIN) :
+		    redirect(site_url("main/errorpage"));
+		    return;
+		endif;
     	$criteria = $_POST;
     	$criteria["cri_site_code"] = trim($criteria["cri_site_code"]);
 
@@ -98,7 +108,32 @@ class Members extends MpiController {
     	
     	Isession::setCriteria("member_list", $criteria);
     	redirect(site_url("members/memberlist"));
+    }
     
-    
+    function memberdelete($member_id) {
+    	$user = Isession::getUser();
+		if ($user["grp_id"] != Iconstant::USER_ADMIN) :
+		    redirect(site_url("main/errorpage"));
+		    return;
+		endif;
+		
+		$this->load->model("member");
+		
+		if (!is_nint($member_id)) :
+            redirect(site_url("members/memberlist"));
+            return;
+        endif;
+        
+        $member_found = $this->member->getMemberById($member_id);
+        if ($member_found == null) :
+            Isession::setFlash("error", "Member was not found");
+            redirect(site_url("members/memberlist"));
+            return;
+        endif;
+        
+        $this->member->delete_member($member_id);
+        Isession::setFlash("success", "Member ".$member_found["member_login"]." has been deleted");
+		
+    	redirect(site_url("members/memberlist"));
     }
 }

@@ -24,7 +24,9 @@ class Patients extends MpiController {
     						"cri_external_code2" => "",
     						"cur_page" => 1,
     						"orderby" => "pat_id",
-    						"orderdirection" => "ASC"
+    						"orderdirection" => "ASC",
+    						"date_from" => "",
+    						"date_to" => "",
     					);
     	
     	$this->load->model("patient");
@@ -52,12 +54,14 @@ class Patients extends MpiController {
     		$criteria["cur_page"] = $_REQUEST["cur_page"];
     	endif;
     	
-    	if ($first_access) :
+    	//var_dump($data);
+    	if ($first_access || ($data["error"] != null && $data["error"] != "")) :
     	    $data = array_merge($data, $criteria);
     	    $data["patient_list"] = null;
     	    $data["total_record"] = 0;
     	    $data["nb_of_page"] = 1;
     	    $this->load->template("templates/general", "patients/patient_list", Iconstant::MPI_APP_NAME, $data);
+    	    return;
     	endif;
     	
     	$total_patients = $this->patient->count_patient_list($criteria);
@@ -79,6 +83,46 @@ class Patients extends MpiController {
     	//$criteria["orderby"] = $orderby;
     	//$criteria["orderdirection"] = $orderdirection;
 
+    	$data["show_partial_page"] = 0;
+    	if ($total_pages >11) :
+    		$start_plus = 0;
+    		$end_plus = 0;
+   			if ($criteria["cur_page"] <= 5) :
+   				$start_page = 1;
+   				$start_plus = 1 + 5 - $criteria["cur_page"];
+   			endif;
+   			
+   			if ($criteria["cur_page"] >= $total_pages - 5) :
+    			$end_page = $total_pages;
+    			$end_plus =  $criteria["cur_page"] + 5 - $total_pages ;
+    		endif;
+   			
+    		if ($criteria["cur_page"] > 5) :
+    			$start_page = $criteria["cur_page"] - 5 - $end_plus;
+    		endif;
+    		
+    		if ($criteria["cur_page"] < $total_pages - 5) :
+    			$end_page = $criteria["cur_page"] + 5 + $start_plus;
+    		endif;
+    		
+   			/* 	
+    		if ($criteria["cur_page"] >= 6) :
+    			$start_page = $criteria["cur_page"] - 5;
+    		else :
+    			$start_page = 1;
+    		endif;
+    		
+    		if ($criteria["cur_page"] <= $total_pages - 5) :
+    			$end_page = $criteria["cur_page"] + 5;
+    		else :
+    			$end_page = $total_pages; 
+    		endif;
+    		*/
+    	
+    		$data["show_partial_page"] = 1;
+    		$data["start_page"] = $start_page; 
+    		$data["end_page"] = $end_page;
+    	endif;
     	$data["patient_list"] = $this->patient->patient_list($criteria, $start, Iconstant::PAGINATION_ROW_PER_PAGE);
     	//$data["cur_page"] = $cur_page;
     	$data["total_record"] = $total_patients;
@@ -115,6 +159,20 @@ class Patients extends MpiController {
     	$criteria["cri_site_code"] = trim($criteria["cri_site_code"]);
     	$criteria["cri_external_code"] = trim($criteria["cri_external_code"]);
     	$criteria["cri_external_code2"] = trim($criteria["cri_external_code2"]);
+    	$criteria["date_from"] = trim($criteria["date_from"]);
+    	$criteria["date_to"] = trim($criteria["date_to"]);
+    	
+    	$error = "";
+    	if (is_null($error) && !is_null($criteria["date_from"]) && is_null(date_html_to_php($html_date))) :
+    		$error = "Visit date (from) is not correct format"; 
+    	endif;
+    	
+    	if (is_null($error) && !is_null($criteria["date_from"]) && is_null(date_html_to_php($html_date))) :
+    		$error = "Visit date (to) is not correct format"; 
+    	endif;
+    	
+    	Isession::setFlash("error", $error);
+    	
 
     	$session_data = Isession::getCriteria("patient_list");
     	if ($session_data != null) :

@@ -26,6 +26,31 @@ class Member extends Imodel {
 	}
 	
 	/**
+	 * Getting members by Id
+	 */
+	function getMemberById($memberId) {
+	    $sql = "SELECT member_id,
+	                   member_login,
+	                   member_fp_r1,
+	                   member_fp_r2,
+	                   member_fp_r3,
+	                   member_fp_r4,
+	                   member_fp_r5,
+	                   member_fp_l1,
+	                   member_fp_l2,
+	                   member_fp_l3,
+	                   member_fp_l4,
+	                   member_fp_l5
+	              FROM mpi_member
+	             WHERE member_id = '".mysql_real_escape_string($memberId)."'";
+	    $query =  $this->db->query($sql);
+	    if ($query->num_rows <= 0) :
+	        return null;
+	    endif;
+	    return $query->row_array();
+	}
+	
+	/**
 	 * Getting the member with the specific site code and specific login
 	 * @param String $sitecode
 	 * @param Login $login
@@ -153,5 +178,10 @@ class Member extends Imodel {
            $row = $query->row_array();
            return $row["nb_member"];
        endif;
+   }
+   
+   function delete_member($member_id) {
+   		$sql = "DELETE FROM mpi_member WHERE member_id = '".mysql_real_escape_string($member_id)."'";
+   		$this->db->query($sql);
    }
 }

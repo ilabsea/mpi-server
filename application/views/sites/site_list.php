@@ -116,7 +116,7 @@ function header_click(orderby, orderdirection) {
    </tr>
    <?php if ($site_list->num_rows() <= 0) :?>
    <tr>
-      <td align="center" colspan="4"><b class="error" style="color: blue">Record not found</b></td>
+      <td align="center" colspan="5"><b class="error" style="color: blue">Record not found</b></td>
    </tr>
    <?php endif;?>
    <?php

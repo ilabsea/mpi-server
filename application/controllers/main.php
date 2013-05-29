@@ -36,6 +36,7 @@ class Main extends MpiController {
     
     /**
      * Default method of this controller
+     * @author Sokha RUM
      */
     function index() {
     	$data = array();
@@ -45,6 +46,7 @@ class Main extends MpiController {
     
     /**
      * Logout function
+     * @author Sokha RUM
      */
     function logout() {
         Isession::destroy();
@@ -52,7 +54,8 @@ class Main extends MpiController {
     }
     
     /**
-     * Change Password function 
+     * Change Password function
+     * @author Sokha RUM 
      */
     function changepwd() {
     	$data = array();
@@ -64,6 +67,7 @@ class Main extends MpiController {
     
     /**
      * Change Password
+     * @author Sokha RUM
      */
     function changepwdsave() {
         $cur_user = Isession::getUser();

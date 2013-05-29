@@ -46,4 +46,21 @@ class ILog extends CI_Log {
 	static function error($msg) {
 		ILog::$ILog->write_log('error', $msg);
 	}
+	
+	/**
+	 * Set the path for the log files
+	 * @param string $path
+	 */
+	static function setPath($path) {
+		if ($path == "") :
+			return;
+		endif;
+		$config =& get_config();
+		
+		ILog::$ILog->_log_path = ($config['log_path'] != '') ? $config['log_path']."/".$path."/" : APPPATH.'logs/'.$path."/";
+		if (!is_dir(ILog::$ILog->_log_path)) :
+			mkdir(ILog::$ILog->_log_path, 0777, true);
+		endif;
+		ILog::$ILog->_log_path .= "MPI_";
+	} 
 }

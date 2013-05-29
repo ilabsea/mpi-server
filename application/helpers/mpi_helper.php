@@ -153,7 +153,7 @@ function datetime_html_to_php($str_date, $time, $format=Iconstantt::APP_DATE_FOR
  * @param $html_date
  * @param $format
  */
-function date_html_to_mysql($html_date, $format=Iconstantt::APP_DATE_FORMAT) {
+function date_html_to_mysql($html_date, $format=Iconstant::APP_DATE_FORMAT) {
 	$php_date = gparse_date($html_date, $format);
 	return $php_date==NULL ? NULL :  $php_date->format("Y-m-d");
 }
@@ -165,7 +165,7 @@ function date_html_to_php($html_date, $format=Iconstant::APP_DATE_FORMAT) {
 
 /**
  * Detech if the input is an interger
- * @param $input
+ * @param $input 
  */
 function is_nint($input){
   return preg_match('@^[0-9]+$@',$input) === 1;
@@ -329,8 +329,6 @@ function k_lang($line, $escapehtml=true, $id = '') {
 	return $line;
 }
 
-
-
 function k_decimal_format($number) {
    if ($number == null || $number == "") {
         return null;
@@ -361,6 +359,10 @@ function cur_page_url() {
     return $pageURL;
 }
 
+/**
+ * @param string $a
+ * @param string $b 
+ */
 function addSpecial($a, $b) {
     if (is_null($a)) :
         return $b;

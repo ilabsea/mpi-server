@@ -104,10 +104,11 @@ function header_click(orderby, orderdirection) {
       <th onclick="header_click('site_name')" class="headerclickable">Site Name <?=pagination_direction("site_name", $orderby, $orderdirection)?></th>
       <th onclick="header_click('serv_code')" class="headerclickable">Service <?=pagination_direction("serv_code", $orderby, $orderdirection)?></th>
       <th onclick="header_click('date_create')" class="headerclickable">Registered Date <?=pagination_direction("date_create", $orderby, $orderdirection)?></th>
+      <th>Delete</th>
    </tr>
    <?php if ($member_list->num_rows() <= 0) :?>
    <tr>
-      <td align="center" colspan="5"><b class="error" style="color: blue">Record not found</b></td>
+      <td align="center" colspan="6"><b class="error" style="color: blue">Record not found</b></td>
    </tr>
    <?php endif;?>
    <?php
@@ -121,6 +122,7 @@ function header_click(orderby, orderdirection) {
       <td><?=htmlspecialchars($row["site_name"])?></td>
       <td align="center"><?=htmlspecialchars($row["serv_code"])?></td>
       <td align="center"><?=htmlspecialchars(date_mysql_to_html($row["date_create"]))?></td>
+      <td align="center"><a href="<?=site_url("members/memberdelete/".$row["member_id"])?>" onclick="return confirm('Are you sure to delete this member ?')"><img src="<?=base_url("img/delete.png")?>"/></a></td>
    </tr>
    <?php endforeach;?>
 </table>

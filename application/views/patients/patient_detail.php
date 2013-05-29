@@ -28,7 +28,7 @@
       foreach($visit_list->result_array() as $row) :
       	$row_nb++;
    ?>
-   <tr <?=(($row_nb % 2)?"":"class=\"even_row\"")?>>
+   <tr <?=(($row_nb % 2)?"":"class=\"even_row\"")?> <?=(strtolower($row["info"])=="positive"?"style=\"background: red\"":"")?>>
       <td align="center"><?=htmlspecialchars($row["serv_code"])?></td>
       <td align="center"><?=htmlspecialchars($row["site_code"])?></td>
       <td align="center"><?=htmlspecialchars($row["site_name"])?></td>
