@@ -739,9 +739,9 @@ class Patientws extends  MpiController {
     	   $reference = $_POST;
     	endif;
     	
-    	if (true) :
+    	/*if (true) :
     	   return true;
-    	endif;
+    	endif;*/
     	
     	$site_code = !isset($_POST["sitecode"]) || $_POST["sitecode"] == "" ? null : $_POST["sitecode"];
     	$fp_name = !isset($_POST["member_fp_name"]) || $_POST["member_fp_name"] == "" ? null : $_POST["member_fp_name"];
