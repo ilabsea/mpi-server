@@ -13,6 +13,19 @@
    <div class="span2"><?=($patient["pat_gender"] == 2 ? "Female" : "Male")?></div>
 </div>
 
+<div class="row-fluid">
+   <div class="span3">Registered at: </div>
+   <div class="span3"><?=$patient["pat_register_site"]?></div>
+</div>
+<div class="row-fluid">
+   <div class="span3">Registered on: </div>
+   <div class="span3"><?=datetime_mysql_to_html($patient["date_create"])?></div>
+</div>
+<div class="row-fluid">
+   <div class="span3">Age: </div>
+   <div class="span3"><?=$patient["pat_age"]?></div>
+</div>
+
 <table  class="table_list" cellspacing="0" cellpadding="0" width="100%">
    <tr valign="middle">
       <th>Service</th>

@@ -10,19 +10,32 @@
        <h4><a href="<?=site_url("sites/sitelist")?>">Sites</a></h4>
    </div>
    
-   <?php if ($mpi_user["grp_id"] == Iconstant::USER_ADMIN) : ?>
    <div class="span2 offset2" align="center">
-       <a href="<?=site_url("users/userlist")?>"><img style="width: 128px" src="<?=base_url("img/users.png")?>" alt="Users"/></a>
-       <h4><a href="<?=site_url("users/userlist")?>">Users</a></h4>
+       <a href="<?=site_url("reports/reportmenu")?>"><img style="width: 128px" src="<?=base_url("img/reports_icon.png")?>" alt="Reports"/></a>
+       <h4><a href="<?=site_url("reports/reportmenu")?>">Reports</a></h4>
    </div>
-   <?php endif;?>
+   
 </div>
 <br/>
 <div class="row-fluid">
    <?php if ($mpi_user["grp_id"] == Iconstant::USER_ADMIN) : ?>
    <div class="span2 offset1" align="center">
+       <a href="<?=site_url("users/userlist")?>"><img style="width: 128px" src="<?=base_url("img/users.png")?>" alt="Users"/></a>
+       <h4><a href="<?=site_url("users/userlist")?>">Users</a></h4>
+   </div>
+   <?php endif;?>
+
+   <?php if ($mpi_user["grp_id"] == Iconstant::USER_ADMIN) : ?>
+   <div class="span2 offset2" align="center">
        <a href="<?=site_url("members/memberlist")?>"><img style="width: 128px" src="<?=base_url("img/doctor.png")?>" alt="Members"/></a>
        <h4><a href="<?=site_url("members/memberlist")?>">Members</a></h4>
+   </div>
+   <?php endif;?>
+   
+   <?php if ($mpi_user["grp_id"] == Iconstant::USER_ADMIN) : ?>
+   <div class="span2 offset2" align="center">
+       <a href="<?=site_url("datas/csvexport")?>"><img style="width: 128px" src="<?=base_url("img/csv.png")?>" alt="CSV Export"/></a>
+       <h4><a href="<?=site_url("datas/csvexport")?>">CSV Export</a></h4>
    </div>
    <?php endif;?>
 </div>

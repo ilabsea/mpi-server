@@ -1,0 +1,1 @@
+<?php require_once APPPATH."views/".$k_main_body_view.".php";?>

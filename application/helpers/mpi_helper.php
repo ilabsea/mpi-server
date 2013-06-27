@@ -14,6 +14,27 @@ function mysql_to_date($postgres_date) {
 	return $result;
 }
 
+
+function mysql_datetime_to_date($postgres_datetime = "") {
+    if ($postgres_datetime == NULL || $postgres_datetime == "") {
+		return NULL;
+	}
+	$arr = explode(" ", $postgres_datetime);
+	$postgres_date = $arr[0];
+	$datetime = "00:00:00";
+	if (count($arr) > 1) :
+		$datetime_arr = explode(".", $arr[1]);
+		$datetime = $datetime_arr[0];
+	endif; 
+	$arr = explode("-", $postgres_date);
+	$arr2 = explode(":", $datetime);
+	$result =  new DateTime();
+	$result->setDate($arr[0], $arr[1], $arr[2]);
+	$result->setTime($arr2[0], $arr2[1], $arr2[2]);
+	return $result;
+	
+}
+
 /**
  * Convert PHP date to string with a specific format
  * @param $php_date
@@ -93,7 +114,7 @@ function datetime_mysql_to_html($postgres_datetime, $format=Iconstant::APP_DATE_
  * @param unknown_type $str_date
  * @param unknown_type $format
  */
-function gparse_date($str_date, $format) {
+function gparse_date($str_date, $format=Iconstant::APP_DATE_FORMAT) {
 	$formats = array("Y-M-D", 
 	                 "M/D/Y",
 	                 "D/M/Y"

@@ -18,6 +18,7 @@ class Patients extends MpiController {
     	
     	$criteria = array(
     						"cri_serv_id" => "",
+    						"cri_master_id" => "",
     						"cri_pat_gender" => "",
     						"cri_site_code" => "",
     						"cri_external_code" => "",
@@ -163,12 +164,13 @@ class Patients extends MpiController {
     	$criteria["date_to"] = trim($criteria["date_to"]);
     	
     	$error = "";
-    	if (is_null($error) && !is_null($criteria["date_from"]) && is_null(date_html_to_php($html_date))) :
-    		$error = "Visit date (from) is not correct format"; 
+    	
+    	if ($error=="" && $criteria["date_from"] != null && date_html_to_php($criteria["date_from"]) == null) :
+    		$error = "Visit date (from) format is not correct"; 
     	endif;
     	
-    	if (is_null($error) && !is_null($criteria["date_from"]) && is_null(date_html_to_php($html_date))) :
-    		$error = "Visit date (to) is not correct format"; 
+    	if ($error=="" && $criteria["date_to"] != null && date_html_to_php($criteria["date_to"]) == null) :
+    		$error = "Visit date (to) format is not correct"; 
     	endif;
     	
     	Isession::setFlash("error", $error);

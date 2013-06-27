@@ -73,6 +73,7 @@ class Patient extends Imodel {
         
         $sql .= " ORDER BY ".$criteria["orderby"]." ".$criteria["orderdirection"]."
                   LIMIT ".$start.", ".$rows;
+
         return $this->db->query($sql);
     }
 
@@ -86,9 +87,13 @@ class Patient extends Imodel {
         	$where .= " AND p.pat_gender =".$criteria["cri_pat_gender"];
         endif;
         
+        if ($criteria["cri_master_id"] != "") :
+        	$where .= " AND p.pat_id LIKE '%".mysql_real_escape_string($criteria["cri_master_id"])."%'";
+        endif;
+        
         $sub_where = "";
         
-        if ($criteria["date_from"] != "" || $criteria["date_to"]) :
+        if ($criteria["date_from"] != "" || $criteria["date_to"] || $criteria["cri_site_code"] != "") :
         	if ($criteria["date_from"] != "") :
 				$sub_where .= " AND p.date_create >= '".date_html_to_mysql($criteria["date_from"])." 00:00:00'";
         	endif;
@@ -96,6 +101,11 @@ class Patient extends Imodel {
         	if ($criteria["date_to"] != "") :
 				$sub_where .= " AND p.date_create <= '".date_html_to_mysql($criteria["date_to"])." 23:59:59'";
         	endif;
+        	
+        	if ($criteria["cri_site_code"] != "") :
+        		$sub_where .= " AND p.pat_register_site ='".mysql_real_escape_string($criteria["cri_site_code"])."'";
+        	endif;
+        	
         endif;
         
         $sub_where = trim($sub_where, " AND");
@@ -105,13 +115,18 @@ class Patient extends Imodel {
         $sub_sql2 = "";
         $sub_sql0 = "";
         
-        if ($criteria["date_from"] != "" || $criteria["date_to"]) :
+        
+        if ($criteria["date_from"] != "" || $criteria["date_to"] || $criteria["cri_site_code"] != "") :
         	if ($criteria["date_from"] != "") :
             	$sub_sql2 .= " AND v.visit_date >= '".date_html_to_mysql($criteria["date_from"])."'";
             endif;
             
             if ($criteria["date_to"] != "") :
             	$sub_sql2 .= " AND v.visit_date <= '".date_html_to_mysql($criteria["date_to"])."'";
+            endif;
+            
+            if ($criteria["cri_site_code"] != "") :
+            	$sub_sql2 .= " AND v.site_code = '".mysql_real_escape_string($criteria["cri_site_code"])."'";
             endif;
         endif;
         
@@ -120,7 +135,7 @@ class Patient extends Imodel {
 	        $sub_sql2 = trim($sub_sql2);
         endif;
         
-        if ($criteria["cri_serv_id"] != "" || $criteria["cri_site_code"] != "" || 
+        if ($criteria["cri_serv_id"] != "" || 
             $criteria["cri_external_code"] != "" || $criteria["cri_external_code2"] != "" ) :
             
             $sub_sql = " EXISTS (SELECT v.visit_id FROM mpi_visit v WHERE v.pat_id = p.pat_id";
@@ -129,9 +144,6 @@ class Patient extends Imodel {
             	$sub_sql .= " AND v.serv_id = ".$criteria["cri_serv_id"];
             endif;
             
-            if ($criteria["cri_site_code"] != "") :
-            	$sub_sql .= " AND v.site_code = '".mysql_real_escape_string($criteria["cri_site_code"])."'";
-            endif;
             
             if ($criteria["cri_external_code"] != "") :
             	$sub_sql .= " AND v.ext_code = '".mysql_real_escape_string($criteria["cri_external_code"])."'";
@@ -206,7 +218,7 @@ class Patient extends Imodel {
        $dob = isset($data["birthdate"]) && $data["birthdate"] != "" ? "'".$data["birthdate"]."'" : "NULL";
        $site = isset($data["sitecode"]) && $data["sitecode"] != "" ? "'".$data["sitecode"]."'" : "NULL";
        $sitecode = $site == "NULL" ?  "0201" : $data["sitecode"];
-       for ($i = 1; $i <= 3000; $i++) :
+       //for ($i = 1; $i <= 3000; $i++) :
        //$pat_id = uniqid();
 
 
@@ -257,7 +269,7 @@ class Patient extends Imodel {
        if ($this->db->trans_status() === FALSE) {
         	throw new Exception("There is error during calling method newPatientFingerprint of patient model. ".$this->db->_error_message());
        }*/
-       endfor;
+       //endfor;
        return $pat_id;
     }
 

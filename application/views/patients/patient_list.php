@@ -85,6 +85,10 @@ function header_click(orderby, orderdirection) {
        </td>
    </tr>
    <tr>
+   	 <td>Master Id</td>
+   	 <td><input type="text" name="cri_master_id" value="<?=htmlspecialchars($cri_master_id)?>"></td>
+   </tr>
+   <tr>
        <td>Sex</td>
        <td valign="middle">
            <input type="radio" name="cri_pat_gender" value="" style="vertical-align: middle; margin: 0px;" <?=($cri_pat_gender==""?"checked":"")?>> All &nbsp; &nbsp; &nbsp; &nbsp;
