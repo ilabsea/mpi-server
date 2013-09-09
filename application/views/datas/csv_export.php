@@ -52,7 +52,7 @@ function verify_option() {
 <form method="post" action="<?=site_url("datas/downloadcsv")?>">
 Please select the following tables to export: <br/>
 &nbsp; &nbsp; <input id="mpi_patient" type="checkbox" name="mpi_patient" value="1" <?=(isset($mpi_patient) ? "checked" : "")?>> mpi_patient <br/> 
-&nbsp; &nbsp; <input id="mpi_visit" type="checkbox" name="mpi_visit" value="1" <?=(isset($mpi_visit) ? "checked" : "")?>> Table mpi_visit <br/>
+&nbsp; &nbsp; <input id="mpi_visit" type="checkbox" name="mpi_visit" value="1" <?=(isset($mpi_visit) ? "checked" : "")?>> mpi_visit <br/>
 
 <br/>
 <input type="submit" value="Export to CSV" class="btn" onclick="return verify_option();"/>

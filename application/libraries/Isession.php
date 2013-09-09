@@ -9,7 +9,7 @@ class Isession {
 	const SESSION_DATA_KEY = "I_DATA_KEY";
 	const SESSION_FLASH_KEY = "I_FLASH_KEY";
 	const SESSION_CRITERIA_KEY = "I_CRITERIA_KEY";
-	const TIMEOUT = 3600;
+	const TIMEOUT = 43200;
 
 	/**
      * Initialize session

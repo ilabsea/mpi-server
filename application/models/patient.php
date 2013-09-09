@@ -337,7 +337,7 @@ class Patient extends Imodel {
      * Getting list of visits with the specific several patient id
      * @param Array $var: the arry of patient id
      */
-    function getVisits($var) {
+    function getVisits($var, $orderby="visit_date", $orderdirection="DESC") {
        if (count($var) <= 0 ) :
            return null;
        endif;
@@ -357,7 +357,7 @@ class Patient extends Imodel {
                   FROM mpi_visit ps
                   LEFT JOIN mpi_service s ON (s.serv_id = ps.serv_id)
                   LEFT JOIN mpi_site site ON (site.site_code = ps.site_code)
-                  WHERE pat_id IN (".$patient_ids.")";
+                  WHERE pat_id IN (".$patient_ids.") ORDER BY ".$orderby." ".$orderdirection;
        return $this->db->query($sql);
     }
 
@@ -377,7 +377,10 @@ class Patient extends Imodel {
                       ps.visit_date,
                       ps.info,
                       ps.date_create,
-                      ps.pat_age
+                      ps.pat_age,
+                      ps.refer_to_vcct,
+                      ps.refer_to_oiart,
+                      ps.refer_to_std
                   FROM mpi_visit ps
                   LEFT JOIN mpi_service s ON (s.serv_id = ps.serv_id)
                   LEFT JOIN mpi_site site ON (site.site_code = ps.site_code)
@@ -417,6 +420,9 @@ class Patient extends Imodel {
                                             info,
                                             visit_date,
                                             pat_age,
+                                            refer_to_vcct,
+                                            refer_to_oiart,
+                                            refer_to_std,
                                             date_create)
                                       VALUES('".mysql_real_escape_string($var["pat_id"])."',
                                              ".$var["serv_id"].",
@@ -426,6 +432,9 @@ class Patient extends Imodel {
                                              '".mysql_real_escape_string($var["info"])."',
                                              '".$var["visit_date"]."',
                                              ".$age.",
+                                             ".$var["refer_to_vcct"].",
+                                             ".$var["refer_to_oiart"].",
+                                             ".$var["refer_to_std"].",
                                              ".$create_date."
                                            )";
         
@@ -526,6 +535,10 @@ class Patient extends Imodel {
     						WHERE pat_id = '".mysql_real_escape_string($old_masterid)."'";
     	$query = $this->db->query($sql);
     	
+    	$sql = "UPDATE mpi_vcct_from_oiart SET oiart_pat_id = '".mysql_real_escape_string($new_patientid)."'
+    						WHERE oiart_pat_id = '".mysql_real_escape_string($old_masterid)."'";
+    	$query = $this->db->query($sql);
+    	
     	$sql = "UPDATE mpi_patient SET new_pat_id = '".mysql_real_escape_string($new_patientid)."' 
     						WHERE pat_id = '".mysql_real_escape_string($old_masterid)."'";
     	$query = $this->db->query($sql);
@@ -535,4 +548,73 @@ class Patient extends Imodel {
         	throw new Exception("There is error during calling method updateReplacePatientId of patient model. ".$this->db->_error_message());
        	}
     }
+    
+    
+    /**
+     * Manage VCCT no Fingerprint from VCCT site
+     * @param array $data
+     */
+    /*
+    function manageVcctNoFpFromVcct($data) {
+    	$sql = "SELECT 	vcct_no_fp_id, 
+    					vcct_external_code, 
+    					vcct_site, 
+    					vcct_pat_id, 
+    					oiart_pat_id 
+    			FROM mpi_vcct_from_oiart 
+    			WHERE 	vcct_external_code = '".mysql_real_escape_string($data["ext_code"])."' AND
+    					vcct_site = '".mysql_real_escape_string($data["site_code"])."'";
+    	$query = $this->db->query($sql);
+    	$record = null;
+        if ($query->num_rows() > 0) :
+            $record = $query->row_array();
+        endif;
+        
+        if ($record == null) :
+        	$sql = "INSERT INTO mpi_vcct_from_oiart(
+        				vcct_external_code, 
+    					vcct_site, 
+    					vcct_pat_id, )
+    				VALUES('".mysql_real_escape_string($data["ext_code"])."',
+    					'".mysql_real_escape_string($data["site_code"])."',
+    					'".mysql_real_escape_string($data["pat_id"])."')";
+        else:
+        	$sql = "UPDATE mpi_vcct_from_oiart 
+        				SET vcct_pat_id = '".mysql_real_escape_string($data["pat_id"])."'
+        			WHERE vcct_no_fp_id = ".$record["vcct_no_fp_id"];
+        endif;
+        $this->db->query($sql);
+    }*/
+    
+	/**
+     * Manage VCCT no Fingerprint from OI/ART site
+     * @param array $data
+     */
+    function manageVcctNoFpFromOiart($data) {
+    	$sql = "SELECT 	vcct_no_fp_id, 
+    					vcct_external_code, 
+    					vcct_site,  
+    					oiart_pat_id 
+    			FROM mpi_vcct_from_oiart 
+    			WHERE 	vcct_external_code = '".mysql_real_escape_string($data["ext_code"])."' AND
+    					vcct_site = '".mysql_real_escape_string($data["site_code"])."'";
+    	$query = $this->db->query($sql);
+    	$record = null;
+        if ($query->num_rows() > 0) :
+            $record = $query->row_array();
+        endif;
+        if ($record == null) :
+        	$sql = "INSERT INTO mpi_vcct_from_oiart(
+        				vcct_external_code, 
+    					vcct_site, 
+    					oiart_pat_id)
+    				VALUES('".mysql_real_escape_string($data["ext_code"])."',
+    					'".mysql_real_escape_string($data["site_code"])."',
+    					'".mysql_real_escape_string($data["pat_id"])."')";
+        	  $this->db->query($sql);
+
+        endif;
+      
+    }
+    
 }

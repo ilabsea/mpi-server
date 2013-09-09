@@ -21,12 +21,12 @@ class GrFingerService
 			com_load_typelib('{A9995C7C-77BF-4E27-B581-A4B5BBD90E50}');
 		endif;
 		try {
-			$this->GrFingerX = new COM('GrFingerX.GrFingerXCtrl.1') or die ('Could not initialize object. line 24');
+			$this->GrFingerX = new COM('GrFingerX.GrFingerXCtrl.1') or die ('Could not initialise object.');
 			if($this->GrFingerX->Initialize() != $this->GR_OK)
 				return false;
 		} catch (Exception $exception) {
 			com_load_typelib('{A9995C7C-77BF-4E27-B581-A4B5BBD90E50}');
-			$this->GrFingerX = new COM('GrFingerX.GrFingerXCtrl.1') or die ('Could not initialize object. line 29');
+			$this->GrFingerX = new COM('GrFingerX.GrFingerXCtrl.1') or die ('Could not initialise object.');
 			if($this->GrFingerX->Initialize() != $this->GR_OK)
 				return false;
 		}

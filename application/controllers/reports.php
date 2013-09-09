@@ -652,6 +652,9 @@ class Reports extends MpiController {
     		case 3: // STD show at VCCT  
     			$patients = $this->report->std_show_at_vcct($site_code, $criteria);
     			break;
+    		case 4:
+    			$patients = $this->report->oiart_show_at_std($site_code, $criteria);
+    			break;
     	}
     	$data["patients"] = $patients;
     	

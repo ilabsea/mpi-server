@@ -477,6 +477,36 @@ class Report extends Imodel {
 		return $result;
 	}
 	
+	function oiart_show_at_std($site, $criteria) {
+		$sub_sql = "SELECT pat_id FROM mpi_visit v 
+					  			  WHERE v.pat_id = p.pat_id AND
+					  					v.serv_id = 3";
+		if ($criteria["date_from"] != "") :
+			$sub_sql .= " AND v.visit_date >= '".date_html_to_mysql($criteria["date_from"])." 00:00:00'";
+        endif;
+        	
+        if ($criteria["date_to"] != "") :
+			$sub_sql .= " AND v.visit_date <= '".date_html_to_mysql($criteria["date_to"])." 23:59:59'";
+        endif;
+		
+		$sql = "SELECT pat_id, pat_age, pat_gender, pat_register_site, 
+						(SELECT COUNT(visit_id) 
+						 FROM mpi_visit v
+						 WHERE v.pat_id = p.pat_id
+						 ) as nb_visit 
+				FROM mpi_patient p
+				WHERE pat_register_site = '".$site."' AND 
+					  EXISTS (".$sub_sql.")";
+		
+		$query = $this->db->query($sql);
+		
+		$result = array();
+		foreach($query->result_array() as $row) :
+			array_push($result, $row);
+		endforeach;
+		return $result;
+	}
+	
 	function std_show_at_vcct($site, $criteria) {
 		$sub_sql = "SELECT pat_id FROM mpi_visit v 
 					  			  WHERE v.pat_id = p.pat_id AND

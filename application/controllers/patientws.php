@@ -40,7 +40,7 @@ class Patientws extends  MpiController {
 	        endif;
 	       
 	        if (!$this->accept_webservice($grFingerprint)) :
-	        	$result["error"] = "SDK is busy with other service";
+	        	$result["error"] = "The request was rejected. Contact application administrator for more detail";
 	        	ILog::error($result["error"]);
 	        	echo json_encode($result);
 	            return;
@@ -117,6 +117,9 @@ class Patientws extends  MpiController {
 		                $visit["info"] = $row["info"];
 		                $visit["age"] = $row["pat_age"];
 		                $visit["visitdate"] = $row["visit_date"];
+		                $visit["refer_to_vcct"] = $row["refer_to_vcct"];
+		                $visit["refer_to_oiart"] = $row["refer_to_oiart"];
+		                $visit["refer_to_std"] = $row["refer_to_std"];
 		                if ($visit["serviceid"] == 1) :
 		                    if ($last_test_date == "" || strcmp($last_test_date, $visit["visitdate"]) < 0) :
 		                        $last_test_date = $visit["visitdate"];
@@ -388,10 +391,41 @@ class Patientws extends  MpiController {
 	        $data["ext_code"] = $_POST["externalcode"];
 	        $data["ext_code_2"] = isset($_POST["externalcode2"]) ? $_POST["externalcode2"] : "";
 	        $data["age"] = isset($_POST["age"]) && is_nint($_POST["age"]) ? $_POST["age"] : "";
+	        $data["refer_to_vcct"] = isset($_POST["refer_to_vcct"]) && is_nint($_POST["refer_to_vcct"]) ? $_POST["refer_to_vcct"] : 0;
+	        $data["refer_to_oiart"] = isset($_POST["refer_to_oiart"]) && is_nint($_POST["refer_to_oiart"]) ? $_POST["refer_to_oiart"] : 0;
+	        $data["refer_to_std"] = isset($_POST["refer_to_std"]) && is_nint($_POST["refer_to_std"]) ? $_POST["refer_to_std"] : 0;
 	        $data["info"] = $_POST["info"];
 	        
 	        $visitid = $this->patient->newVisit($data);
 	        $return["visitid"] = $visitid;
+	        
+	        /*
+	        if ($data["serv_id"] == 1) :  // VCCT Service
+	        	if (($patient["fingerprint_r1"] == null || $patient["fingerprint_r1"] == "") 
+	        		&& ($patient["fingerprint_r2"] == null || $patient["fingerprint_r2"] == "")
+	        		&& ($patient["fingerprint_r3"] == null || $patient["fingerprint_r3"] == "")
+	        		&& ($patient["fingerprint_r4"] == null || $patient["fingerprint_r4"] == "")
+	        		&& ($patient["fingerprint_r5"] == null || $patient["fingerprint_r5"] == "")
+	        		&& ($patient["fingerprint_l1"] == null || $patient["fingerprint_l1"] == "")
+	        		&& ($patient["fingerprint_l2"] == null || $patient["fingerprint_l2"] == "")
+	        		&& ($patient["fingerprint_l3"] == null || $patient["fingerprint_l3"] == "")
+	        		&& ($patient["fingerprint_l4"] == null || $patient["fingerprint_l4"] == "")
+	        		&& ($patient["fingerprint_l5"] == null || $patient["fingerprint_l5"] == "")
+	        		) :
+	        		
+	        		$this->patient->manageVcctNoFpFromVcct($data);
+	        	endif;
+	        endif;
+	        */
+	        if ($data["serv_id"] == 2) : // OI/ART Service
+	        	if (isset($_POST["vcctsite"]) && $_POST["vcctsite"] != "" && isset($_POST["vcctnumber"]) && $_POST["vcctnumber"] != "") :
+	        		$vcct_info = array();
+	        		$vcct_info["ext_code"] = $_POST["vcctnumber"];
+	        		$vcct_info["site_code"] = $_POST["vcctsite"];
+	        		$vcct_info["pat_id"] = $data["pat_id"];
+	        		$this->patient->manageVcctNoFpFromOiart($vcct_info);
+	        	endif;
+	        endif;
 	        
 	        echo json_encode($return);
 	    	return;
@@ -520,10 +554,25 @@ class Patientws extends  MpiController {
 		            $data_visit["age"] = isset($visit["age"]) ? $visit["age"] : "";
 		            $data_visit["ext_code_2"] = isset($visit["externalcode2"]) ? $visit["externalcode2"] : null;
 		            $data_visit["info"] = $visit["info"];
+		            $data_visit["refer_to_vcct"] = isset($visit["refer_to_vcct"]) ? $visit["refer_to_vcct"] : 0;
+		            $data_visit["refer_to_oiart"] = isset($visit["refer_to_oiart"]) ? $visit["refer_to_oiart"] : 0;
+		            $data_visit["refer_to_std"] = isset($visit["refer_to_std"]) ? $visit["refer_to_std"] : 0;
 
 		            $data_visit["date_create"] = $visit["createdate"];
 		            $data_visit["visit_date"] = $visit["visitdate"];
 		            $this->patient->newVisit($data_visit);
+		            
+		            
+		             if ($data_visit["serv_id"] == 2) : // OI/ART Service
+			        	if (isset($visit["vcctsite"]) && $visit["vcctsite"] != "" && isset($visit["vcctnumber"]) && $visit["vcctnumber"] != "") :
+			        		$vcct_info = array();
+			        		$vcct_info["ext_code"] = $visit["vcctnumber"];
+			        		$vcct_info["site_code"] = $visit["vcctsite"];
+			        		$vcct_info["pat_id"] = $data_visit["pat_id"];
+			        		$this->patient->manageVcctNoFpFromOiart($vcct_info);
+			        	endif;
+			        endif;
+		            
 		        endforeach;
 		        
 		        // prepare to send back to client
@@ -543,6 +592,9 @@ class Patientws extends  MpiController {
 		            $visit["info"] = $row["info"];
 		            $visit["age"] = $row["pat_age"];
 		            $visit["visitdate"] = $row["visit_date"];
+		            $visit["refer_to_vcct"] = $row["refer_to_vcct"];
+		            $visit["refer_to_oiart"] = $row["refer_to_oiart"];
+		            $visit["refer_to_std"] = $row["refer_to_std"];
 		            $visit["createdate"] = $row["date_create"];
 		            array_push($patient["visits"], $visit);
 		        endforeach;
@@ -582,6 +634,9 @@ class Patientws extends  MpiController {
 			            $visit["serviceid"] = $row["serv_id"];
 			            $visit["info"] = $row["info"];
 			            $visit["age"] = $row["pat_age"];
+			            $visit["refer_to_vcct"] = $row["refer_to_vcct"];
+		            	$visit["refer_to_oiart"] = $row["refer_to_oiart"];
+		            	$visit["refer_to_std"] = $row["refer_to_std"];
 			            $visit["visitdate"] = $row["visit_date"];
 			            $visit["createdate"] = $row["date_create"];
 			            array_push($arr_elt["visits"], $visit);
@@ -659,7 +714,7 @@ class Patientws extends  MpiController {
 	    	$this->load->model("patient");
 	    	$patient_found = $this->patient->getPatientById($patient_id);
 	    	if ($patient_found == null) :
-	    		$patient_array["error"] = "Could not patient with master id ".$patient_id;
+	    		$patient_array["error"] = "Could not find patient with master id ".$patient_id;
             	echo json_encode($patient_array);
             	return;
 	    	endif;
@@ -673,9 +728,21 @@ class Patientws extends  MpiController {
 	            $data_visit["ext_code_2"] = isset($visit["externalcode2"]) ? $visit["externalcode2"] : null;
 	            $data_visit["info"] = $visit["info"];
 				$data_visit["age"] = isset($visit["age"]) ? $visit["age"] : "";
+				$data_visit["refer_to_vcct"] = isset($visit["refer_to_vcct"]) ? $visit["refer_to_vcct"] : 0;
+				$data_visit["refer_to_oiart"] = isset($visit["refer_to_oiart"]) ? $visit["refer_to_oiart"] : 0;
+				$data_visit["refer_to_std"] = isset($visit["refer_to_std"]) ? $visit["refer_to_std"] : 0;
 	            $data_visit["date_create"] = $visit["createdate"];
 	            $data_visit["visit_date"] = $visit["visitdate"];
 	            $this->patient->newVisit($data_visit);
+             	if ($data_visit["serv_id"] == 2) : // OI/ART Service
+		        	if (isset($visit["vcctsite"]) && $visit["vcctsite"] != "" && isset($visit["vcctnumber"]) && $visit["vcctnumber"] != "") :
+		        		$vcct_info = array();
+		        		$vcct_info["ext_code"] = $visit["vcctnumber"];
+		        		$vcct_info["site_code"] = $visit["vcctsite"];
+		        		$vcct_info["pat_id"] = $data_visit["pat_id"];
+		        		$this->patient->manageVcctNoFpFromOiart($vcct_info);
+		        	endif;
+		        endif;
 	    	endforeach;
 	    	
 	    	// prepare to send back to client
@@ -692,6 +759,9 @@ class Patientws extends  MpiController {
 	            $visit["serviceid"] = $row["serv_id"];
 	            $visit["info"] = $row["info"];
 	            $visit["age"] = $row["pat_age"];
+	            $visit["refer_to_vcct"] = $row["refer_to_vcct"];
+		        $visit["refer_to_oiart"] = $row["refer_to_oiart"];
+		        $visit["refer_to_std"] = $row["refer_to_std"];
 	            $visit["visitdate"] = $row["visit_date"];
 	            $visit["createdate"] = $row["date_create"];
 	            array_push($patient["visits"], $visit);
@@ -741,7 +811,8 @@ class Patientws extends  MpiController {
     	
     	/*if (true) :
     	   return true;
-    	endif;*/
+    	endif;
+    	*/
     	
     	$site_code = !isset($_POST["sitecode"]) || $_POST["sitecode"] == "" ? null : $_POST["sitecode"];
     	$fp_name = !isset($_POST["member_fp_name"]) || $_POST["member_fp_name"] == "" ? null : $_POST["member_fp_name"];

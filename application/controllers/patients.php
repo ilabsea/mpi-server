@@ -142,13 +142,26 @@ class Patients extends MpiController {
      */
     function patientdetail($pat_id) {
         $this->load->model("patient");
+        $orderby = "visit_date";
+        $orderdirection = "DESC";
+        if (isset($_REQUEST["orderby"])) :
+    		$orderby = $_REQUEST["orderby"];
+    	endif;
+    	
+    	if (isset($_REQUEST["orderdirection"])) :
+    		$orderdirection = $_REQUEST["orderdirection"];
+    	endif;
+        
+        
         $patient = $this->patient->getPatientById($pat_id);
         $var = array();
         array_push($var, $pat_id);
-        $visit = $this->patient->getVisits($var);
+        $visit = $this->patient->getVisits($var, $orderby, $orderdirection);
         $data = array();
         $data["patient"] = $patient;
         $data["visit_list"] = $visit;
+        $data["orderby"] = $orderby;
+        $data["orderdirection"] = $orderdirection;
         $this->load->template("templates/general", "patients/patient_detail", Iconstant::MPI_APP_NAME, $data);
     }
 
