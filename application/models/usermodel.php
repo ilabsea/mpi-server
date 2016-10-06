@@ -11,26 +11,16 @@ class Usermodel extends Imodel {
 	 * @return Array of user information
 	 * @author Sokha RUM
 	 */
-    function authentication ($uesr_login, $user_pwd) {
-        $sql = "SELECT u.user_id,
-                       u.user_login,
-                       u.user_lname,
-                       u.user_fname,
-                       g.grp_id,
-                       g.grp_name,
-                       u.user_email
-                  FROM users u
-                       LEFT JOIN user_group g ON (u.grp_id = g.grp_id)
-                 WHERE u.user_login = '".mysql_real_escape_string($uesr_login)."' AND
-                       u.user_pwd = SHA1('".mysql_real_escape_string($user_pwd)."')";
-        $query = $this->db->query($sql);
-        if ($query->num_rows() <= 0) :
-            return null;
-        else: 
-            return $query->row_array();
-        endif;
+    function authentication ($user_login, $user_pwd) {
+			$this->db->select('users.*, user_group.grp_id, user_group.grp_name');
+			$this->db->from('users');
+			$this->db->join('user_group', 'users.grp_id = user_group.grp_id');
+			$this->db->where('users.user_login', $user_login);
+		  $this->db->where('users.user_pwd', sha1($user_pwd) );
+			$query = $this->db->get();
+      return $query->num_rows() <= 0 ? null : $query->row_array();
     }
-    
+
     /**
      * Change password of a user
      * @param int $user_id
@@ -44,7 +34,7 @@ class Usermodel extends Imodel {
                            WHERE user_id = ".$user_id;
         $this->db->query($sql);
     }
-    
+
     /**
      * user list query
      * @return List of users
@@ -62,7 +52,7 @@ class Usermodel extends Imodel {
 					   LEFT JOIN user_group g ON (u.grp_id = g.grp_id)";
     	return $this->db->query($sql);
     }
-    
+
     /**
      * Getting user group
      * @author Sokha RUM
@@ -74,7 +64,7 @@ class Usermodel extends Imodel {
                   FROM user_group";
         return $this->db->query($sql);
     }
-    
+
     /**
      * get user with the specific id
      * @param int $user_id
@@ -94,11 +84,11 @@ class Usermodel extends Imodel {
     	$query = $this->db->query($sql);
     	if ($query->num_rows() <= 0) :
             return null;
-        else: 
+        else:
             return $query->row_array();
         endif;
     }
-    
+
     /**
      * Get user with the specific login
      * @param string $user_login
@@ -118,11 +108,11 @@ class Usermodel extends Imodel {
     	$query = $this->db->query($sql);
     	if ($query->num_rows() <= 0) :
             return null;
-        else: 
+        else:
             return $query->row_array();
         endif;
     }
-    
+
     /**
      * Create new patient
      * @param array $data the information of patient
@@ -147,7 +137,7 @@ class Usermodel extends Imodel {
                            )";
         $this->db->query($sql);
     }
-    
+
     /**
      * Update user
      * @param array $data
@@ -163,7 +153,7 @@ class Usermodel extends Imodel {
                            WHERE user_id = ".$data["user_id"];
         $this->db->query($sql);
     }
-    
+
     /**
      * remove a user with the specific id from database
      * @param int $user_id
