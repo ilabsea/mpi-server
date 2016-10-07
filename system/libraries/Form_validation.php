@@ -225,6 +225,10 @@ class CI_Form_validation {
 		return $prefix.$this->_field_data[$field]['error'].$suffix;
 	}
 
+  public function errors() {
+    return $this->_error_array;
+  }
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -937,7 +941,7 @@ class CI_Form_validation {
 
 		return ($str !== $field) ? FALSE : TRUE;
 	}
-	
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -952,7 +956,7 @@ class CI_Form_validation {
 	{
 		list($table, $field)=explode('.', $field);
 		$query = $this->CI->db->limit(1)->get_where($table, array($field => $str));
-		
+
 		return $query->num_rows() === 0;
     }
 
