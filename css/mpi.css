@@ -36,22 +36,21 @@
 }
 
 .table_list th, .table_list td{
-    padding-left: 3px;
-    padding-right: 3px;
+    padding: 3px 10px;
     border: solid 1px #DDDDDD;
     margin: 3px;
 }
 
 .table_list td a {
-    color: #0F50A3;	
+    color: #0F50A3;
 }
 
-.table_list td { 
+.table_list td {
    height: 25px;
 }
 
 .table_list td a:hover {
-    color: #000000; 
+    color: #000000;
 }
 
 .table_list th {
@@ -81,6 +80,7 @@
     background-color: #E2F0F3;
     margin: 0px;
     font-size: 14px;
+    width: 100%;
 }
 
 .even_row {

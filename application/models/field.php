@@ -8,6 +8,7 @@ class Field extends Imodel {
   var $code = '';
   var $is_encrypted = 0;
   var $type = "";
+  var $soft_delete = false;
   var $created_at = null;
   var $updated_at = null;
 
@@ -36,6 +37,6 @@ class Field extends Imodel {
   }
 
   static function class_name(){
-    return Field;
+    return 'Field';
   }
 }

@@ -3,6 +3,7 @@
 	<li class="active">Users List</li>
 </ul>
 <h3>Users List</h3>
+
 <div class="row-fluid">
    <div class="span12">
       <?php if (!is_null($error)) : ?>
@@ -14,16 +15,17 @@
       <?php endif;?>
    </div>
 </div>
-<table  class="table_list" cellspacing="0" cellpadding="0" width="100%">
+
+<table class="table_list">
    <tr valign="middle">
       <th>Login</th>
       <th>Name</th>
       <th>Group</th>
       <th>Email</th>
       <th>Delete</th>
-   </tr>	
+   </tr>
    <?php
-      $row_nb = 0; 
+      $row_nb = 0;
       foreach($user_list->result_array() as $row) :
       	$row_nb++;
    ?>

@@ -5,3 +5,12 @@
 .error {
   color: red;
 }
+
+.new-item {
+  margin-top: 14px;
+}
+
+.flash {
+  padding: 10px;
+  margin: 10px 0px;
+}

@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 function pagination_direction($field, $orderby, $direction) {
     if ($field == $orderby) :
@@ -56,7 +56,7 @@ function header_click(orderby, orderdirection) {
        <td>
            <select name="cri_serv_id">
                <option value="">All services</option>
-               <?php foreach($services->result_array() as $row): 
+               <?php foreach($services->result_array() as $row):
                $selected = $cri_serv_id == $row["serv_id"] ? "selected" : "";
                ?>
                <option value="<?=$row["serv_id"]?>" <?=$selected?>><?=htmlspecialchars($row["serv_code"])?></option>
@@ -69,7 +69,7 @@ function header_click(orderby, orderdirection) {
        <td>
            <select name="cri_pro_code">
                <option value="">All provinces</option>
-               <?php foreach($provinces->result_array() as $row): 
+               <?php foreach($provinces->result_array() as $row):
                $selected = $cri_pro_code == $row["pro_code"] ? "selected" : "";
                ?>
                <option value="<?=$row["pro_code"]?>" <?=$selected?>><?=htmlspecialchars($row["pro_name"])?></option>
@@ -84,26 +84,27 @@ function header_click(orderby, orderdirection) {
 </table>
 <input type="submit" value="Search" />
 </form>
- 
+
 <?php if ($nb_of_page > 1) :?>
-<?php 
+<?php
     $previous_page = $cur_page <= 1 ? 1 : $cur_page - 1;
     $next_page = $cur_page >= $nb_of_page ? $nb_of_page : $cur_page + 1;
 ?>
 
 <div class="pagination pagination-mini">  
-  <ul>  
+  <ul>
     <li><a href="<?=site_url("sites/sitelist?cur_page=".$previous_page)?>">&laquo;</a></li>
-    <?php for ($i=1; $i<=$nb_of_page; $i++) : ?>	
+    <?php for ($i=1; $i<=$nb_of_page; $i++) : ?>
 	    <?php if ($i == $cur_page) :  ?>
 	        <li class="active"><a href="#"><?=$i?></a></li>
 	    <?php else: ?>
 	    	<li><a href="<?=site_url("sites/sitelist?cur_page=".$i)?>"><?=$i?></a></li>
 	    <?php endif;?>
-    <?php endfor; ?>  
+    <?php endfor; ?>
     <li><a href="<?=site_url("sites/sitelist?cur_page=".$next_page)?>">&raquo;</a></li>
-  </ul>  
-</div> 
+  </ul>
+</div>
+
 <?php endif; ?>
 <?php if ($site_list != null) : ?>
 <table  class="table_list" cellspacing="0" cellpadding="0" width="100%">
@@ -120,7 +121,7 @@ function header_click(orderby, orderdirection) {
    </tr>
    <?php endif;?>
    <?php
-      $row_nb = 0; 
+      $row_nb = 0;
       foreach($site_list->result_array() as $row) :
       	$row_nb++;
    ?>

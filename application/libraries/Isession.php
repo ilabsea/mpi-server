@@ -4,7 +4,7 @@
  * @author Sokha RUM
  */
 class Isession {
-	const SESSION_KEY = "I_MPI_SERVER"; 
+	const SESSION_KEY = "I_MPI_SERVER";
 	const SESSION_USER_KEY = "I_USER_KEY";
 	const SESSION_DATA_KEY = "I_DATA_KEY";
 	const SESSION_FLASH_KEY = "I_FLASH_KEY";
@@ -62,7 +62,7 @@ class Isession {
 	 * @param unknown_type $user
 	 */
 	static function setUser($user) {
-        $_SESSION[Isession::SESSION_KEY][Isession::SESSION_USER_KEY] =  Iencryption::encrypt(serialize($user)); 
+        $_SESSION[Isession::SESSION_KEY][Isession::SESSION_USER_KEY] =  Iencryption::encrypt(serialize($user));
     }
 
     /**
@@ -70,7 +70,7 @@ class Isession {
      */
 
 	static function getUser() {
-    	if (!isset($_SESSION[Isession::SESSION_KEY][Isession::SESSION_USER_KEY])) { return null;} 
+    	if (!isset($_SESSION[Isession::SESSION_KEY][Isession::SESSION_USER_KEY])) { return null;}
         return unserialize(Iencryption::decrypt($_SESSION[Isession::SESSION_KEY][Isession::SESSION_USER_KEY]));
     }
 
@@ -88,9 +88,19 @@ class Isession {
      * getting data from session
      * @param unknown_type $key
      */
+    static function getFlashes(){
+      if (isset($_SESSION[Isession::SESSION_KEY][Isession::SESSION_FLASH_KEY]))
+        return $_SESSION[Isession::SESSION_KEY][Isession::SESSION_FLASH_KEY];
+      else
+        return array();
+    }
 
-	static function getData($key) {
-        if (!isset($_SESSION[Isession::SESSION_KEY][Isession::SESSION_DATA_KEY][$key])) { return null;} 
+    static function clearFlashes(){
+      $_SESSION[Isession::SESSION_KEY][Isession::SESSION_FLASH_KEY] = null;
+    }
+
+    static function getData($key) {
+        if (!isset($_SESSION[Isession::SESSION_KEY][Isession::SESSION_DATA_KEY][$key])) { return null;}
         return $_SESSION[Isession::SESSION_KEY][Isession::SESSION_DATA_KEY][$key];
     }
 
@@ -118,7 +128,7 @@ class Isession {
      * @param unknown_type $key
      */
 	static function getFlash($key) {
-    	if (!isset($_SESSION[Isession::SESSION_KEY][Isession::SESSION_FLASH_KEY][$key])) { return null;} 
+    	if (!isset($_SESSION[Isession::SESSION_KEY][Isession::SESSION_FLASH_KEY][$key])) { return null;}
         $result = $_SESSION[Isession::SESSION_KEY][Isession::SESSION_FLASH_KEY][$key];
         unset($_SESSION[Isession::SESSION_KEY][Isession::SESSION_FLASH_KEY][$key]);
         return $result;
@@ -148,18 +158,18 @@ class Isession {
     static function setCriteria($key, $criteria) {
     	 $_SESSION[Isession::SESSION_KEY][Isession::SESSION_CRITERIA_KEY][$key] = $criteria;
     }
-    
+
    /**
     * Getting object from the session with specific key
     * @param String $key
-    */ 
+    */
    static function getCriteria($key) {
    	 if (!isset($_SESSION[Isession::SESSION_KEY][Isession::SESSION_CRITERIA_KEY][$key])) {
     	 	return null;
    	 }
      return $_SESSION[Isession::SESSION_KEY][Isession::SESSION_CRITERIA_KEY][$key];
    }
-    
+
    /**
     * remove the criteria from session
     * @param String $key
@@ -169,7 +179,7 @@ class Isession {
        	   unset($_SESSION[Isession::SESSION_KEY][Isession::SESSION_CRITERIA_KEY][$key]);
        }
     }
-    
+
     static function removeAllCriteria() {
     	unset($_SESSION[Isession::SESSION_KEY][Isession::SESSION_CRITERIA_KEY]);
     	$_SESSION[Isession::SESSION_KEY][Isession::SESSION_CRITERIA_KEY] = array();
