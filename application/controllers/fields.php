@@ -56,7 +56,6 @@ class Fields extends MpiController {
   function update($id){
     $field = Field::find($id);
     $filter_params = $this->filter_params(array("name", "code", "type", "is_encrypted"));
-    ILog::debug_message($filter_params);
 
     if($field->update_attributes($filter_params)){
       Isession::setFlash("success", "Field has been successfully updated");
@@ -69,7 +68,6 @@ class Fields extends MpiController {
 
   function delete($id) {
     $field = Field::find($id);
-    ILog::debug_message($field);
 
     if($field && $field->delete())
       Isession::setFlash("success", "Field has been removed");

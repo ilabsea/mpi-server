@@ -6,11 +6,31 @@
 class Imodel extends CI_Model {
   const PER_PAGE = 20;
   protected $_errors = array();
-  private $_changes = array();
+  protected $_changes = array();
+  protected $_not_sql_fields = array('_errors', '_changes', '_not_sql_fields');
+
+  // define your table primary key name here
+  static function primary_key() {
+    return 'id';
+  }
+
+  // define the name of your table
+  static function table_name() {
+    throw new Exception("You must overide this method to return your database table name");
+  }
+
+  //define your class name php older version
+  static function class_name() {
+    throw new Exception("You must overide this method to return your model name");
+  }
+
+  //if you have fields in model that are not part of db table field list them down here
+  static function accessible_fields(){
+    return array();
+  }
 
   function __construct() {
-    // $this->load->library('form_validation');
-    // print_r($this->form_validation);
+    $this->load->library('form_validation');
     parent::__construct();
   }
 
@@ -18,8 +38,8 @@ class Imodel extends CI_Model {
     return $this->_errors;
   }
 
-  static function primary_key() {
-    return 'id';
+  function get_changes() {
+    return $this->_changes();
   }
 
   function new_record() {
@@ -31,44 +51,70 @@ class Imodel extends CI_Model {
     return $this->{$primary_key};
   }
 
-  static function table_name() {
-    return "";
-  }
-  static function class_name() {
-    return "";
-  }
-
   function load_other_model($model_name) {
     $CI =& get_instance();
     $CI->load->model($model_name);
     return $CI->$model_name;
   }
 
-  function build($datas) {
-    return $this->copy_attrs($datas);
+  function current_time() {
+    return date("Y-m-d H:i:s");
   }
 
-  function to_sql_attrs(){
-    $datas = array();
-    foreach($this as $key => $value) {
-      if($key != static::primary_key() && !$this->exclude_field($key) )
-        $data[$key] = $value;
+  //create create uniqueness validation for this shi**y framework
+  function uniqueness_field($field_name) {
+    $table_name = static::table_name();
+    $unique_validator = "is_unique[{$table_name}.{$field_name}]";
+    $escape_unique_validator = "";
+
+    if($this->new_record())
+      return $unique_validator;
+
+    $class_name = static::class_name();
+
+    $record = $class_name::find($this->id());
+    return $this->$field_name == $record->$field_name ? $escape_unique_validator : $unique_validator;
+  }
+
+
+  static function timestampable() {
+    return false;
+  }
+
+  function exclude_field($field_name){
+    $fields = array_merge($this->_not_sql_fields, static::accessible_fields());
+    return in_array($field_name, $fields);
+  }
+
+  function set_attribute($field, $value){
+    if($this->exclude_field($field) || $field == static::primary_key())
+      return;
+
+    $this->_changes[$field] = array($this->$field, $value);
+    $this->$field = $value;
+  }
+
+  function set_attributes($datas) {
+    $this->_changes = array();
+    foreach($datas as $field => $value)
+      $this->set_attribute($field, $value);
+  }
+
+  function get_attributes(){
+    $attributes = array();
+    foreach ($this as $field => $value) {
+      if($this->exclude_field($field) || $field == static::primary_key() )
+        continue;
+      $attributes[$field] = $value;
     }
-    return $data;
+    return $attributes;
   }
 
-  function copy_attrs($datas) {
-    foreach ($datas as $key => $value) {
-      if($key != static::primary_key() && !$this->exclude_field($key))
-        $this->{$key} = $value;
-    }
-    return $this;
-  }
-
-  function copy_raw_attrs($datas){
-    foreach ($datas as $key => $value) {
-      if(!$this->exclude_field($key) )
-        $this->{$key} = $value;
+  function copy_object($record) {
+    foreach($record as $field => $value) {
+      if(!$this->exclude_field($field)){
+        $this->$field = $value;
+      }
     }
     return $this;
   }
@@ -92,11 +138,9 @@ class Imodel extends CI_Model {
     $query = $active_record->db->get();
     $records = array();
 
-    // ILog::debug_message($active_record->db);
-
     foreach( $query->result() as $record){
       $active_record = new $class_name;
-      $active_record->copy_raw_attrs($record);
+      $active_record->copy_object($record);
       $records[] = $active_record;
     }
     return $records;
@@ -115,27 +159,18 @@ class Imodel extends CI_Model {
     else {
       $result = $query->result();
       $record = $result[0];
-      $active_record->copy_raw_attrs($record);
+      $active_record->copy_object($record);
       return $active_record;
     }
   }
 
-  function current_time() {
-    return date("Y-m-d H:i:s");
-  }
-
-  function exclude_field($field_name){
-    return in_array($field_name, array("_errors", "_changes"));
-  }
-
   function insert(){
-    if(!isset($this->created_at))
+    if(static::timestampable()) {
       $this->created_at = $this->current_time();
-
-    if(!isset($this->updated_at))
       $this->updated_at = $this->current_time();
+    }
 
-    $this->db->insert(static::table_name(), $this->to_sql_attrs());
+    $this->db->insert(static::table_name(), $this->get_attributes());
 
     if($this->db->affected_rows() == 0)
       return false;
@@ -148,11 +183,11 @@ class Imodel extends CI_Model {
 
   function update() {
     $class_name = static::class_name();
-    if(property_exists($class_name, 'updated_at'))
-      $datas['updated_at'] = $this->current_time();
+    if(static::timestampable())
+      $this->set_attribute('updated_at', $this->current_time());
 
     $this->db->where('id', $this->id());
-    $this->db->update(static::table_name(), $this->to_sql_attrs());
+    $this->db->update(static::table_name(), $this->get_attributes());
 
     if($this->db->affected_rows() == 0)
       return false;
@@ -169,27 +204,19 @@ class Imodel extends CI_Model {
   }
 
   function update_attributes($datas){
-    $this->copy_attrs($datas);
+
+    $this->set_attributes($datas);
     $class_name = static::class_name();
 
-    if(property_exists($class_name, 'updated_at'))
-      $datas['updated_at'] = $this->current_time();
-
-    $this->_changes = array();
-
-    foreach($datas as $key => $value){
-      $this->_changes[] = array($key => [$this->$key, $value]);
-      $this->$key = $value;
-    }
+    if(static::timestampable())
+      $this->set_attribute('updated_at', $this->current_time());
 
     if(!$this->validate()){
-      ILog::debug_message($this->get_errors());
       return false;
     }
 
     $this->db->where('id', $this->id());
-    $this->db->update(static::table_name(), $datas);
-    ILog::debug_message($this->db);
+    $this->db->update(static::table_name(), $this->get_attributes());
 
     if($this->db->affected_rows() == 0)
       return null;
@@ -200,15 +227,15 @@ class Imodel extends CI_Model {
 
   function validate(){
     $this->validation_rules();
-    if($this->form_validation->run() == false && $this->new_record()){
+    if($this->form_validation->run() == false){
       $this->_errors = $this->form_validation->errors();
       return false;
     }
     return true;
   }
 
-  function save(){
-    if(!$this->validate())
+  function save($validate = true){
+    if($validate && !$this->validate())
       return false;
     return $this->new_record() ? $this->insert() : $this->update();
   }

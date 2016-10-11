@@ -12,7 +12,6 @@ class Field extends Imodel {
   var $created_at = null;
   var $updated_at = null;
 
-
   static function types() {
     return array(
       "Boolean" => "Boolean",
@@ -22,10 +21,8 @@ class Field extends Imodel {
     );
   }
 
-  function validation_rules(){
-    $this->form_validation->set_rules('name', 'Name', 'trim|required');
-    $this->form_validation->set_rules('code', 'Code', 'trim|required|is_unique[field.code]');
-    $this->form_validation->set_rules('type', 'Type', 'required');
+  static function timestampable() {
+    return true;
   }
 
   static function primary_key() {
@@ -38,5 +35,12 @@ class Field extends Imodel {
 
   static function class_name(){
     return 'Field';
+  }
+
+  function validation_rules(){
+    $code_uniqueness = $this->uniqueness_field('code');
+    $this->form_validation->set_rules('name', 'Name', 'trim|required');
+    $this->form_validation->set_rules('code', 'Code', "trim|required|{$code_uniqueness}");
+    $this->form_validation->set_rules('type', 'Type', 'required');
   }
 }
