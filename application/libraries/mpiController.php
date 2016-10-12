@@ -31,7 +31,8 @@ class MpiController extends CI_Controller {
     function filter_params($keys){
       $result = array();
       foreach($keys as $key){
-        $result[$key] = $_REQUEST[$key];
+        if(isset($_REQUEST[$key]))
+          $result[$key] = $_REQUEST[$key];
       }
       return $result;
     }

@@ -14,7 +14,7 @@
       <th>Encrypted</th>
       <th>Type</th>
       <th>Created at</th>
-      <th>Last updated at</th>
+      <th>Updated at</th>
       <th>Action</th>
     </tr>
   </thead>

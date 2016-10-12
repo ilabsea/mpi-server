@@ -47,5 +47,13 @@
              <h4><a href="<?=site_url("fields/index")?>">Dynamic field</a></h4>
        </div>
      <?php endif;?>
+
+     <?php if ($mpi_user["grp_id"] == Iconstant::USER_ADMIN) : ?>
+       <div class="span2 offset2" align="center">
+           <a href="<?=site_url("scopes/index")?>">
+             <img style="width: 128px" src="<?=base_url("img/api-scope.png")?>" alt="API Scope"/></a>
+             <h4><a href="<?=site_url("scopes/index")?>">API Scope</a></h4>
+       </div>
+     <?php endif;?>
   </div>
 </div>

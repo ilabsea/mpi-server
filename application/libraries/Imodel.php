@@ -29,6 +29,10 @@ class Imodel extends CI_Model {
     return array();
   }
 
+  static function serialize_fields(){
+    return array();
+  }
+
   function __construct() {
     $this->load->library('form_validation');
     parent::__construct();
@@ -100,12 +104,12 @@ class Imodel extends CI_Model {
       $this->set_attribute($field, $value);
   }
 
-  function get_attributes(){
+  function sql_attributes(){
     $attributes = array();
     foreach ($this as $field => $value) {
       if($this->exclude_field($field) || $field == static::primary_key() )
         continue;
-      $attributes[$field] = $value;
+      $attributes[$field] = static::is_serialized($field) ? serialize($value) : $value;
     }
     return $attributes;
   }
@@ -113,24 +117,36 @@ class Imodel extends CI_Model {
   function copy_object($record) {
     foreach($record as $field => $value) {
       if(!$this->exclude_field($field)){
-        $this->$field = $value;
+        $this->$field = static::is_serialized($field) ? unserialize($value) : $value;
       }
     }
     return $this;
   }
 
-  static function all($conditions, $page=1, $order_by=null ){
-    $limit = Imodel::PER_PAGE;
-    $offset = $page < 2 ? 0 : ($page-1) * $limit;
+  static function is_serialized($field) {
+    return in_array($field, static::serialize_fields());
+  }
 
+  static function all($conditions=array(), $page=null, $order_by=null ){
+    $limit = Imodel::PER_PAGE;
 
     $class_name = static::class_name();
     $active_record = new $class_name;
 
-    $active_record->db->where($conditions);
+    foreach($conditions as $field => $value){
+      if(is_array($value))
+        $active_record->db->where_in($field, $value);
+      else
+        $active_record->db->where($field, $value);
+    }
+
     $active_record->db->from(static::table_name());
-    $active_record->db->limit($limit);
-    $active_record->db->offset($offset);
+
+    if($page) {
+      $offset = $page < 2 ? 0 : ($page-1) * $limit;
+      $active_record->db->limit($limit);
+      $active_record->db->offset($offset);
+    }
 
     if($order_by)
       $active_record->db->order_by($order_by);
@@ -146,21 +162,62 @@ class Imodel extends CI_Model {
     return $records;
   }
 
-  static function find($id){
+  static function find_by($conditions){
     $class_name = static::class_name();
     $active_record = new $class_name;
+    $active_record->db->from(static::table_name());
 
-    $primary_key = static::primary_key();
-    $conditions = array($primary_key => $id);
-    $query = $active_record->db->get_where(static::table_name(), $conditions);
+    $active_record->db->where($conditions);
+
+    $query = $active_record->db->get();
 
     if($query->num_rows() == 0)
       return null;
+
+    $result = $query->result();
+
+    $find_record = new $class_name;
+    $record = $result[0];
+    $find_record->copy_object($record);
+    return $find_record;
+  }
+
+  static function find($id){
+    $class_name = static::class_name();
+    $active_record = new $class_name;
+    $primary_key = static::primary_key();
+
+    $active_record->db->from(static::table_name());
+
+    if(is_array($id)){
+      if(count($id) == 0)
+        return array();
+      $active_record->db->where_in($primary_key, $id);
+    }
+    else
+      $active_record->db->where(array($primary_key => $id));
+
+    $query = $active_record->db->get();
+
+    if($query->num_rows() == 0)
+      return null;
+
+    $result = $query->result();
+
+    if(is_array($id)){
+      $find_records = array();
+      foreach($result as $record) {
+        $find_record = new $class_name;
+        $find_record->copy_object($record);
+        $find_records[] = $find_record;
+      }
+      return $find_records;
+    }
     else {
-      $result = $query->result();
+      $find_record = new $class_name;
       $record = $result[0];
-      $active_record->copy_object($record);
-      return $active_record;
+      $find_record->copy_object($record);
+      return $find_record;
     }
   }
 
@@ -170,7 +227,7 @@ class Imodel extends CI_Model {
       $this->updated_at = $this->current_time();
     }
 
-    $this->db->insert(static::table_name(), $this->get_attributes());
+    $this->db->insert(static::table_name(), $this->sql_attributes());
 
     if($this->db->affected_rows() == 0)
       return false;
@@ -187,7 +244,7 @@ class Imodel extends CI_Model {
       $this->set_attribute('updated_at', $this->current_time());
 
     $this->db->where('id', $this->id());
-    $this->db->update(static::table_name(), $this->get_attributes());
+    $this->db->update(static::table_name(), $this->sql_attributes());
 
     if($this->db->affected_rows() == 0)
       return false;
@@ -216,7 +273,7 @@ class Imodel extends CI_Model {
     }
 
     $this->db->where('id', $this->id());
-    $this->db->update(static::table_name(), $this->get_attributes());
+    $this->db->update(static::table_name(), $this->sql_attributes());
 
     if($this->db->affected_rows() == 0)
       return null;
@@ -229,12 +286,14 @@ class Imodel extends CI_Model {
     $this->validation_rules();
     if($this->form_validation->run() == false){
       $this->_errors = $this->form_validation->errors();
+      ILog::debug_message($this->_errors);
       return false;
     }
     return true;
   }
 
   function save($validate = true){
+    echo "save called!";
     if($validate && !$this->validate())
       return false;
     return $this->new_record() ? $this->insert() : $this->update();

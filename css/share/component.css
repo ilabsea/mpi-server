@@ -14,3 +14,12 @@
   padding: 10px;
   margin: 10px 0px;
 }
+
+.field-hint {
+  color: #ccc;
+  font-size: 90%;
+}
+
+.input-row {
+  margin: 15px 0px;
+}

@@ -1,0 +1,3 @@
+$(function(){
+  $(".tokenizer").select2();
+});

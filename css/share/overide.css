@@ -1,4 +1,23 @@
 .label, .badge {
-    font-size: 100%;
-    font-weight: normal;;
+  font-size: 100%;
+  font-weight: normal;
+}
+
+.item {
+  overflow: hidden;
+  white-space: nowrap;
+  display: inline-block;
+  text-overflow: ellipsis;
+}
+
+input, select {
+  width: 240px;
+}
+
+select.tokenizer{
+  width: 340px ;
+  height: 40px;
+}
+select.tokenizer-short {
+  width: 250px;
 }

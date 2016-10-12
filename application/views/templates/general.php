@@ -7,6 +7,7 @@
   <link href="<?=base_url("css/mpi.css")?>" rel="stylesheet">
   <link href="<?=base_url("css/share/component.css")?>" rel="stylesheet">
   <link href="<?=base_url("css/share/overide.css")?>" rel="stylesheet">
+  <link href="<?=base_url("css/libs/select2.min.css")?>" rel="stylesheet">
   <link href="<?=base_url("js/jquery/ui/themes/redmond/jquery.ui.all.css")?>" rel="stylesheet">
 
   <script src="<?=base_url("js/jquery-1.9.1.js")?>"></script>
@@ -24,7 +25,10 @@
   <script src="<?=base_url("js/jquery/ui/jquery.ui.effect.js")?>"></script>
   <script src="<?=base_url("js/jquery/ui/jquery.ui.effect-blind.js")?>"></script>
   <script src="<?=base_url("js/jquery/ui/jquery.ui.effect-explode.js")?>"></script>
+
+  <script src="<?=base_url("js/libs/select2.min.js")?>"></script>
   <script src="<?=base_url("js/shared/form-delete.js")?>"></script>
+  <script src="<?=base_url("js/shared/tokenizer.init.js")?>"></script>
 
 </head>
 <body>
