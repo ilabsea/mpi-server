@@ -29,6 +29,7 @@
   <script src="<?=base_url("js/libs/select2.min.js")?>"></script>
   <script src="<?=base_url("js/shared/form-delete.js")?>"></script>
   <script src="<?=base_url("js/shared/tokenizer.init.js")?>"></script>
+  <script src="<?=base_url("js/shared/content-hidden.js")?>"></script>
 
 </head>
 <body>

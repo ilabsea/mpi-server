@@ -28,6 +28,14 @@ class Scope extends Imodel {
     return 'Scope';
   }
 
+  static function mapper() {
+    $scopes = Scope::all();
+    $result = [];
+    foreach($scopes as $scope)
+      $result[$scope->id] = $scope->name;
+    return $result;
+  }
+
   function validation_rules(){
     $code_uniqueness = $this->uniqueness_field('name');
     $this->form_validation->set_rules('name', 'Name', "trim|required|{$code_uniqueness}");

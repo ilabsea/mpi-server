@@ -1,7 +1,4 @@
 <?php
-/**
-* @autoloaded
-*/
 class Field extends Imodel {
   var $id = null;
   var $name = '';
@@ -38,10 +35,6 @@ class Field extends Imodel {
 
   static function class_name(){
     return 'Field';
-  }
-
-  static function static_fields() {
-
   }
 
   static function mapper() {

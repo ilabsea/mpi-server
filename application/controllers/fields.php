@@ -1,7 +1,5 @@
 <?php
 class Fields extends MpiController {
-  public $model = null;
-
   function __construct($load_fingerprint=false, $init_session=true){
     parent::__construct($load_fingerprint=false, $init_session=true);
     $this->before_action();
@@ -10,12 +8,11 @@ class Fields extends MpiController {
   function before_action() {
     $this->require_admin_access();
     $this->load->model("field");
-    $this->model = $this->field;
   }
 
   function index() {
     $page = isset($_GET['page']) ? $_GET['page'] : 1;
-    $fields = Field::all(array(), $page, "name ASC");
+    $fields = Field::all(array(), $page, "dynamic_field DESC, name ASC");
 
     $this->load->template("templates/general", "fields/index", Iconstant::MPI_APP_NAME,
                           array("fields" => $fields,
@@ -42,12 +39,12 @@ class Fields extends MpiController {
   }
 
   function edit($id) {
-    $field = Field::find($id);
+    $field = $this->load_field($id);
     $this->load->template("templates/general", "fields/edit", Iconstant::MPI_APP_NAME, array("field" => $field));
   }
 
   function update($id){
-    $field = Field::find($id);
+    $field = $this->load_field($id);
 
     if($field->update_attributes($this->field_params())){
       Isession::setFlash("success", "Field has been successfully updated");
@@ -93,10 +90,11 @@ class Fields extends MpiController {
 
       if($field)
         $field->update_attributes($field_attrs);
-      else {
+      else
         $field = new Field();
         $field->set_attributes($field_attrs);
-        $field->save(false);
+        if(!$field->save()){
+          ILog::debug_message("errors", $field->get_errors());
       }
     }
   }
@@ -113,5 +111,12 @@ class Fields extends MpiController {
 
   function field_params(){
     return $this->filter_params(array("name", "code", "type", "is_encrypted"));
+  }
+
+  function load_field($id) {
+    $field = Field::find($id);
+    if($field->dynamic_field == 0)
+      throw new Exception("Invalid field", $id);
+    return $field;
   }
 }

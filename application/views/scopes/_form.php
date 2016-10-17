@@ -1,3 +1,7 @@
+<? if(count($scope->get_errors()) > 0): ?>
+  <? require dirname(dirname(__FILE__)). "/shared/validation_error.php" ?>
+<? endif ?>
+
 <?php $class_error = array_key_exists('name', $scope->get_errors()) ? 'error' : '' ?>
 
 <div class="row-fluid input-row <?=$class_error ?>" >

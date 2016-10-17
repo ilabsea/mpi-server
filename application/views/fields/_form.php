@@ -1,3 +1,7 @@
+<? if(count($field->get_errors()) > 0): ?>
+  <? require dirname(dirname(__FILE__)). "/shared/validation_error.php" ?>
+<? endif ?>
+
 <div class="row-fluid input-row <?= array_key_exists('name', $field->get_errors()) ? " error" : '' ?>" >
   <div class="span2">Name*</div>
   <div class="span2">

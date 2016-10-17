@@ -23,3 +23,7 @@
 .input-row {
   margin: 15px 0px;
 }
+
+.content-hidden{
+  cursor: pointer;
+}

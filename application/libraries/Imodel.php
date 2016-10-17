@@ -1,8 +1,4 @@
 <?php
-/**
- * The custom model
- * @author Sokha
- */
 class Imodel extends CI_Model {
   const PER_PAGE = 20;
   protected $_errors = array();
@@ -34,8 +30,8 @@ class Imodel extends CI_Model {
   }
 
   function __construct() {
-    $this->load->library('form_validation');
     parent::__construct();
+    $this->load->library('form_validation');
   }
 
   function get_errors() {
@@ -116,9 +112,10 @@ class Imodel extends CI_Model {
 
   function copy_object($record) {
     foreach($record as $field => $value) {
-      if(!$this->exclude_field($field)){
-        $this->$field = static::is_serialized($field) ? unserialize($value) : $value;
-      }
+      if($this->exclude_field($field))
+         continue;
+      $field_value = static::is_serialized($field) ? unserialize($value) : $value;
+      $this->$field = $field_value;
     }
     return $this;
   }
@@ -178,6 +175,7 @@ class Imodel extends CI_Model {
 
     $find_record = new $class_name;
     $record = $result[0];
+
     $find_record->copy_object($record);
     return $find_record;
   }
@@ -222,6 +220,9 @@ class Imodel extends CI_Model {
   }
 
   function insert(){
+    if(method_exists($this, "before_create"))
+      $this->before_create();
+
     if(static::timestampable()) {
       $this->created_at = $this->current_time();
       $this->updated_at = $this->current_time();
@@ -282,20 +283,37 @@ class Imodel extends CI_Model {
     }
   }
 
+  /* validator requires data from $_POST */
+  function set_data_to_validate(){
+    foreach($this as $field => $value) {
+      if($this->exclude_field($field))
+        continue;
+      $_POST[$field] = $value;
+    }
+  }
+
   function validate(){
+    $this->set_data_to_validate();
     $this->validation_rules();
+
     if($this->form_validation->run() == false){
       $this->_errors = $this->form_validation->errors();
-      ILog::debug_message($this->_errors);
+      // ILog::debug_message($this->form_validation,1,1);
       return false;
     }
     return true;
   }
 
   function save($validate = true){
-    echo "save called!";
+    if(method_exists ($this , 'before_save'))
+      $this->before_save();
+
+    if($this->new_record() && method_exists ($this , 'before_create'))
+      $this->before_create();
+
     if($validate && !$this->validate())
       return false;
+
     return $this->new_record() ? $this->insert() : $this->update();
   }
 }

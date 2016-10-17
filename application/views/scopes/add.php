@@ -5,12 +5,6 @@
 </ul>
 
 <h3>Create Field Permission</h3>
-<? if(count($scope->get_errors()) > 0): ?>
-  <div class="well">
-    <?= validation_errors(); ?>
-  </div>
-<? endif ?>
-
 <?= form_open('scopes/create', '') ?>
   <? require dirname(__FILE__). "/_form.php" ?>
 </form>

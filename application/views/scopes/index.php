@@ -2,7 +2,11 @@
   <li><a href="<?=site_url("main")?>">Home</a> <span class="divider">&gt;</span></li>
   <li class="active">Scope Lists</li>
 </ul>
-<h3>Dynamic Scope Lists</h3>
+<h3>Dynamic Scope Lists
+  <div style="float:right;">
+    <a class='btn' href='<?=site_url("scopes/add")?>'> New Scope</a>
+  </div>
+</h3>
 
 <? require dirname(dirname(__FILE__)). "/shared/flash.php" ?>
 <table class="table_list">
@@ -47,6 +51,6 @@
   </tbody>
 </table>
 
-<div class='new-item'>
+<!-- <div class='new-item'>
    <a class='btn' href='<?=site_url("scopes/add")?>'> New Scope</a>
-</div>
+</div> -->

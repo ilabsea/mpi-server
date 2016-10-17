@@ -8,12 +8,13 @@ class ILog extends CI_Log {
     $this->_log_path .= "MPI_";
   }
 
-  static function debug_message($var,$exit=false, $html_format = true){
+  static function debug_message($message, $var,$exit=false, $html_format = true){
     $html = <<<EOT
      <div style='text-align:left;border-top:1px solid #ccc;background-color:white;color:black;overflow:auto;' >
          <pre>
              <br /> <strong> line : </strong> {line}
              <br /> <strong> file : </strong> {file}
+             <br /> {message}
              <br /> {data}
          </pre>
      </div>
@@ -37,7 +38,8 @@ EOT;
     $str = strtr($format,
        array( "{line}"=>"{$debug_trace['line']}",
                "{file}" => "{$debug_trace['file']}",
-               "{data}"=> print_r($var, true) //debug_trace['args'][0]
+               "{message}" => $message,
+               "{data}"=> print_r($var, true) //debug_trace['args'][1]
             ));
     echo $str ;
     if($exit==true)

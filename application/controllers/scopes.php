@@ -5,7 +5,6 @@
  */
 
 class Scopes extends MpiController {
-  public $model = null;
 
   function __construct($load_fingerprint=false, $init_session=true){
     parent::__construct($load_fingerprint=false, $init_session=true);
@@ -16,7 +15,6 @@ class Scopes extends MpiController {
     $this->require_admin_access();
     $this->load->model("scope");
     $this->load->model("field");
-    $this->model = $this->scope;
   }
 
   function build_params($payload) {
