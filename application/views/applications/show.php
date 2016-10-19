@@ -4,7 +4,7 @@
   <li class="active">Application credential</li>
 </ul>
 
-<h3>Application Detail</h3>
+<h3><?= $application->name ?></h3>
 
 <table class="table_list">
   <tbody>

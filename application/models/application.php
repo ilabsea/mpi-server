@@ -31,12 +31,37 @@ class Application extends Imodel {
     return array("0" => "Disable", "1" => "Enable");
   }
 
+  function ok(){
+    return $this->status == 1;
+  }
+
+  function accessible_by_ip($ip){
+    if(!$this->whitelist)
+      return true;
+    $whitelist_ips = explode(",", $this->whitelist);
+
+    if(in_array($ip, $whitelist_ips))
+      return true;
+
+    return false;
+  }
+
   function before_create() {
-    $api_key_gen = str_replace(".", "", uniqid(null, true)) ;
+    $api_key_gen    = str_replace(".", "", uniqid(null, true)) ;
     $api_secret_gen = base64_encode(uniqid(null, true));
 
-    $this->api_key = "nk{$api_key_gen}";
-    $this->api_secret = "ns{$api_secret_gen}";
+    $this->api_key    = "nk".md5("nk{$api_key_gen}");
+    $this->api_secret = "ns".md5("ns{$api_secret_gen}");
+  }
+
+  static function authenticate($params){
+    $conditions = array("api_key" => $params["client_id"],
+                        "api_secret" => $params["client_secret"],
+                        "status" => 1);
+    $application = Application::find_by($conditions);
+    if($application)
+      return ApplicaitonToken::generate($application);
+    return null;
   }
 
   function validation_rules(){

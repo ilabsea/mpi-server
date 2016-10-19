@@ -227,6 +227,9 @@
  */
 	// Load the base controller class
 	require BASEPATH.'core/Controller.php';
+	require FCPATH.'application/controllers/base_controller.php';
+	require FCPATH.'application/controllers/api_controller.php';
+	require FCPATH.'application/controllers/api_access_controller.php';
 	require FCPATH.'application/libraries/MpiController.php';
 
 	function &get_instance()

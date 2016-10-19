@@ -100,6 +100,20 @@ class Imodel extends CI_Model {
       $this->set_attribute($field, $value);
   }
 
+  function get_attributes($fields = null) {
+    if($fields == nil)
+      return $this->sql_attributes();
+    else {
+      $attributes = array();
+      foreach($fields as $field) {
+        if($this->exclude_field($field) || $field == static::primary_key() )
+          continue;
+        $attributes[$field] = static::is_serialized($field) ? serialize($value) : $value;
+      }
+      return $attributes;
+    }
+  }
+
   function sql_attributes(){
     $attributes = array();
     foreach ($this as $field => $value) {
@@ -165,6 +179,8 @@ class Imodel extends CI_Model {
     $active_record->db->from(static::table_name());
 
     $active_record->db->where($conditions);
+    $active_record->db->limit(1);
+    $active_record->db->order_by("id DESC");
 
     $query = $active_record->db->get();
 
@@ -290,6 +306,11 @@ class Imodel extends CI_Model {
         continue;
       $_POST[$field] = $value;
     }
+  }
+
+  //redefine on child model
+  function validation_rules() {
+
   }
 
   function validate(){

@@ -6,13 +6,8 @@
 
 class Applications extends MpiController {
 
-  function __construct($load_fingerprint=false, $init_session=true){
-    parent::__construct($load_fingerprint=false, $init_session=true);
-    $this->before_action();
-  }
-
   function before_action() {
-    $this->require_admin_access();
+    parent::before_action();
     $this->load->model("application");
     $this->load->model("scope");
   }
@@ -43,7 +38,6 @@ class Applications extends MpiController {
     if($application->save()) {
       Isession::setFlash("success", "Application has been successfully created");
       redirect(site_url("applications/index"));
-      return;
     }
     else{
       $this->load->template("templates/general", "applications/add", Iconstant::MPI_APP_NAME,

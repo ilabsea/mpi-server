@@ -1,12 +1,8 @@
 <?php
 class Fields extends MpiController {
-  function __construct($load_fingerprint=false, $init_session=true){
-    parent::__construct($load_fingerprint=false, $init_session=true);
-    $this->before_action();
-  }
 
   function before_action() {
-    $this->require_admin_access();
+    parent::before_action();
     $this->load->model("field");
   }
 

@@ -39,6 +39,10 @@
 */
 
 $route['default_controller'] = "main/login";
+// $route['api/oauth/token'] = "api_oauth/token";
+// $route['api/(:controller)/(:method)'] = "api_$1/$2";
+$route['api/([a-zA-Z_-]+)/(:any)'] = 'api_$1/$2';
+
 $route['404_override'] = '';
 
 
