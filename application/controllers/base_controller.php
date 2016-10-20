@@ -6,18 +6,36 @@ class BaseController extends CI_Controller {
     parent::__construct();
     $CI =& get_instance();
     define("CHAR_SET", $CI->config->item("charset"));
+
     require_once APPPATH.'libraries/http_status_code.php';
     require_once APPPATH.'libraries/ILog.php';
     session_start();
 
-    $action = $this->router->fetch_method();
-
-    if(!in_array($action, $this->skip_before_action))
-      $this->before_action();
+    $this->init();
+    $this->callback();
   }
 
+  //to init you class, lib
+  function init() {
+  }
+
+  //override this in your controller
   function before_action(){
-    return true;
+
+  }
+
+  function callback() {
+
+    $action = $this->router->fetch_method();
+
+    if(is_string($this->skip_before_action) && $this->skip_before_action != "*"){
+      $this->before_action();
+    }
+
+
+    else if(is_array($this->skip_before_action) && !in_array($action, $this->skip_before_action)){
+      $this->before_action();
+    }
   }
 
   function filter_params($keys){
@@ -43,4 +61,6 @@ class BaseController extends CI_Controller {
   function render_unauthorized($errors) {
     $this->render_error($errors, 401);
   }
+
+
 }

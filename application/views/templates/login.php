@@ -12,7 +12,9 @@
 	<div class="container">
 	   <div><?php require_once APPPATH."views/general/header.php";?></div>
 	   <div><?php require_once APPPATH."views/general/banner_login.php";?></div>
-	   <div><?php require_once APPPATH."views/".$k_main_body_view.".php";?></div>
+	   <div class="login-box" style='margin-top: 50px; padding: 10px 20px;'>
+       <?php require_once APPPATH."views/".$k_main_body_view.".php";?>
+     </div>
 	</div>
 </body>
 </html>

@@ -2,7 +2,9 @@
 class ApiController extends BaseController {
   var $oauth = null;
 
-  function before_action() {
+  function init(){
+    parent::init();
+
     $this->load->helper("html");
     $this->load->helper('url');
     $this->load->helper('form');

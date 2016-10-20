@@ -30,14 +30,14 @@ class ApiOauthHelper {
     }
 
     $app_name = $application->name;
-    $ip = $this->params['ip_address'];
+    $ip = $this->ip_address();
 
     if(!$application->ok()) {
       $this->errors = array("error" => "invalid application",
                             "error_description" => "Application <{$app_name}> has been disabled");
       return false;
     }
-    else if($application->accessible_by_ip($ip)) {
+    else if(!$application->accessible_by_ip($ip)) {
       $this->errors = array("error" => "invalid application",
                             "error_description" => "Application <{$app_name}> is not allowed by <{$ip}>");
       return false;
@@ -88,6 +88,25 @@ class ApiOauthHelper {
     $this->application = $application;
     $this->scope = Scope::find($application->scope_id);
     return true;
+  }
+
+  function ip_address(){
+    $ipaddress = '';
+    if (getenv('HTTP_CLIENT_IP'))
+      $ipaddress = getenv('HTTP_CLIENT_IP');
+    else if(getenv('HTTP_X_FORWARDED_FOR'))
+      $ipaddress = getenv('HTTP_X_FORWARDED_FOR');
+    else if(getenv('HTTP_X_FORWARDED'))
+      $ipaddress = getenv('HTTP_X_FORWARDED');
+    else if(getenv('HTTP_FORWARDED_FOR'))
+      $ipaddress = getenv('HTTP_FORWARDED_FOR');
+    else if(getenv('HTTP_FORWARDED'))
+      $ipaddress = getenv('HTTP_FORWARDED');
+    else if(getenv('REMOTE_ADDR'))
+      $ipaddress = getenv('REMOTE_ADDR');
+    else
+      $ipaddress = 'UNKNOWN';
+    return $ipaddress;
   }
 
   function current_applicaiton_token(){

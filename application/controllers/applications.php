@@ -1,34 +1,37 @@
 <?php
-/**
- * Users controller
- * @author Sokha RUM
- */
-
 class Applications extends MpiController {
 
   function before_action() {
     parent::before_action();
+    $this->required_admin_user();
+
     $this->load->model("application");
     $this->load->model("scope");
-  }
-
-  function build_params($view_datas) {
-    $applications = Scope::mapper();
-    $view_datas["scopes"] = $applications;
-    return $view_datas;
   }
 
   function index() {
     $page = isset($_GET['page']) ? $_GET['page'] : 1;
     $applications = Application::all(array(), $page, "status DESC, name ASC");
-    $this->load->template("templates/general", "applications/index", Iconstant::MPI_APP_NAME,
-                          $this->build_params(array("applications" => $applications, "page" => $page)));
+
+    $this->set_view_variables(array(
+      "scopes" => Scope::mapper(),
+      "applications" => $applications,
+      "page" => $page
+    ));
+    $this->render_view();
+  }
+
+  function show($id) {
+    $application = Application::find($id);
+    $this->set_view_variables(array("scopes" => Scope::mapper(), "application" => $application));
+    $this->render_view();
   }
 
   function add() {
     $application = new Application();
-    $this->load->template("templates/general", "applications/add", Iconstant::MPI_APP_NAME,
-                          $this->build_params(array("application" => $application)));
+
+    $this->set_view_variables(array("scopes" => Scope::mapper(), "application" => $application));
+    $this->render_view();
   }
 
   function create(){
@@ -40,21 +43,15 @@ class Applications extends MpiController {
       redirect(site_url("applications/index"));
     }
     else{
-      $this->load->template("templates/general", "applications/add", Iconstant::MPI_APP_NAME,
-                            $this->build_params(array("application" => $application)));
+      $this->set_view_variables(array( "scopes" => Scope::mapper(), "application" => $application));
+      $this->render_view("add");
     }
   }
 
   function edit($id) {
     $application = Application::find($id);
-    $this->load->template("templates/general", "applications/edit", Iconstant::MPI_APP_NAME,
-                          $this->build_params(array("application" => $application)));
-  }
-
-  function show($id) {
-    $application = Application::find($id);
-    $this->load->template("templates/general", "applications/show", Iconstant::MPI_APP_NAME,
-                          $this->build_params(array("application" => $application)));
+    $this->set_view_variables(array("scopes" => Scope::mapper(), "application" => $application));
+    $this->render_view();
   }
 
   function update($id){
@@ -64,8 +61,8 @@ class Applications extends MpiController {
       redirect(site_url("applications/index"));
     }
     else{
-      $this->load->template("templates/general", "applications/edit", Iconstant::MPI_APP_NAME,
-                            $this->build_params(array("application" => $application)));
+      $this->set_view_variables(array("scopes" => Scope::mapper(), "application" => $application));
+      $this->render_view("edit");
     }
   }
 

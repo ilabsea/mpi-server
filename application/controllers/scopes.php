@@ -8,27 +8,26 @@ class Scopes extends MpiController {
 
   function before_action() {
     parent::before_action();
+    $this->required_admin_user();
     $this->load->model("scope");
     $this->load->model("field");
-  }
-
-  function build_params($payload) {
-    $fields = Field::mapper();
-    $payload["fields"] = $fields;
-    return $payload;
   }
 
   function index() {
     $page = isset($_GET['page']) ? $_GET['page'] : 1;
     $scopes = Scope::all(array(), $page, "name ASC");
-    $this->load->template("templates/general", "scopes/index", Iconstant::MPI_APP_NAME,
-                          $this->build_params(array("scopes" => $scopes, "page" => $page)));
+    $this->set_view_variables(array(
+      "scopes" => $scopes,
+      "page" => $page,
+      "fields" => Field::mapper(),
+    ));
+    $this->render_view();
   }
 
   function add() {
     $scope = new Scope();
-    $this->load->template("templates/general", "scopes/add", Iconstant::MPI_APP_NAME,
-                          $this->build_params(array("scope" => $scope)));
+    $this->set_view_variables(array( "scope" => $scope, "fields" => Field::mapper()));
+    $this->render_view();
   }
 
   function create(){
@@ -41,15 +40,15 @@ class Scopes extends MpiController {
       return;
     }
     else{
-      $this->load->template("templates/general", "scopes/add", Iconstant::MPI_APP_NAME,
-                            $this->build_params(array("scope" => $scope)));
+      $this->set_view_variables(array( "scope" => $scope,   "fields" => Field::mapper()));
+      $this->render_view("add");
     }
   }
 
   function edit($id) {
     $scope = Scope::find($id);
-    $this->load->template("templates/general", "scopes/edit", Iconstant::MPI_APP_NAME,
-                          $this->build_params(array("scope" => $scope)));
+    $this->set_view_variables(array("scope" => $scope, "fields" => Field::mapper()));
+    $this->render_view();
   }
 
   function update($id){
@@ -59,8 +58,8 @@ class Scopes extends MpiController {
       redirect(site_url("scopes/index"));
     }
     else{
-      $this->load->template("templates/general", "scopes/edit", Iconstant::MPI_APP_NAME,
-                            $this->build_params(array("scope" => $scope)));
+      $this->set_view_variables(array( "scope" => $scope,   "fields" => Field::mapper()));
+      $this->render_view("edit");
     }
   }
 

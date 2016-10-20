@@ -4,9 +4,10 @@
  * @author Sokha RUM
  */
 class Users extends MpiController {
-    /**
-     * User list
-     */
+
+  function before_action(){
+    $this->required_admin_user();
+  }
 	function userlist() {
 		$user = Isession::getUser();
 		if ($user["grp_id"] != Iconstant::USER_ADMIN) :
@@ -50,7 +51,7 @@ class Users extends MpiController {
     	$data["group_list"] = $this->usermodel->group_list();
         $this->load->template("templates/general", "users/user_new", Iconstant::MPI_APP_NAME, $data);
     }
-    
+
     /**
      * Create a new user
      */
@@ -68,7 +69,7 @@ class Users extends MpiController {
     	$data["user_fname"] = trim($_POST["user_fname"]);
     	$data["user_email"] = trim($_POST["user_email"]);
     	$data["grp_id"] = $_POST["grp_id"];
-        
+
     	$this->load->helper(array('form'));
         $this->load->library('form_validation');
         $this->form_validation->set_rules("user_login", "Login", "trim|required|alpha_numeric");
@@ -76,20 +77,20 @@ class Users extends MpiController {
         $this->form_validation->set_rules("user_fname", "First name", "trim|required");
         $this->form_validation->set_rules("user_email", "Email", "trim|valid_email");
         $this->form_validation->set_rules("user_pwd", "Password", "required");
-        
+
         $error = "";
         if ($this->form_validation->run() == FALSE) :
    	        $this->form_validation->set_error_delimiters("<li>", "</li>");
 		    $error = validation_errors();
         endif;
-	    
+
 	    if ($error != null) :
 	    	Isession::setFlash("user_data", $data);
 	        Isession::setFlash("error_list", "<ul>".$error."<ul>");
             redirect("users/usernew");
             return;
 	    endif;
-	    
+
 	    $this->load->model("usermodel");
 	    $user_found = $this->usermodel->user_by_login($data["user_login"]);
 	    if ($user_found != null) :
@@ -98,21 +99,21 @@ class Users extends MpiController {
             redirect("users/usernew");
             return;
 	    endif;
-	    
+
 	    if ($_POST["user_pwd"] != $_POST["user_confirm_pwd"]) :
 	    	Isession::setFlash("user_data", $data);
 	        Isession::setFlash("error_list", "<ul><li>Confirm Password is not correct</li><ul>");
             redirect("users/usernew");
             return;
 	    endif;
-	    
+
 	    $data["user_pwd"] = $_POST["user_pwd"];
 	    $data["user_create"] = $cur_user["user_id"];
 	    $this->usermodel->user_new($data);
 	    Isession::setFlash("success", "User was successfully created");
 	    redirect(site_url("users/userlist"));
     }
-    
+
     /**
      * User modification form
      * @param int $user_id
@@ -123,12 +124,12 @@ class Users extends MpiController {
 		    redirect(site_url("main/errorpage"));
 		    return;
 		endif;
-		
+
         if (!is_nint($user_id)) :
             redirect("users/userlist");
             return;
         endif;
-        
+
         $this->load->model("usermodel");
         $user = $this->usermodel->user_by_id($user_id);
         if ($user == null) :
@@ -136,12 +137,12 @@ class Users extends MpiController {
             redirect("users/userlist");
             return;
         endif;
-        
+
         $data = array();
         $data["error"] = Isession::getFlash("error");
     	$data["error_list"] = Isession::getFlash("error_list");
     	$data["success"] = Isession::getFlash("success");
-        
+
     	$data = array_merge($data, $user);
     	$user_data = Isession::getFlash("user_data");
     	if (!is_null($user_data) && is_array($user_data)) :
@@ -150,7 +151,7 @@ class Users extends MpiController {
     	$data["group_list"] = $this->usermodel->group_list();
         $this->load->template("templates/general", "users/user_edit", Iconstant::MPI_APP_NAME, $data);
     }
-    
+
     /**
      * update user
      */
@@ -168,27 +169,27 @@ class Users extends MpiController {
     	$data["user_fname"] = trim($_POST["user_fname"]);
     	$data["user_email"] = trim($_POST["user_email"]);
     	$data["grp_id"] = $_POST["grp_id"];
-        
+
     	$this->load->helper(array('form'));
         $this->load->library('form_validation');
         $this->form_validation->set_rules("user_login", "Login", "trim|required|alpha_numeric");
         $this->form_validation->set_rules("user_lname", "Last name", "trim|required");
         $this->form_validation->set_rules("user_fname", "First name", "trim|required");
         $this->form_validation->set_rules("user_email", "Email", "trim|valid_email");
-        
+
         $error = "";
         if ($this->form_validation->run() == FALSE) :
    	        $this->form_validation->set_error_delimiters("<li>", "</li>");
 		    $error = validation_errors();
         endif;
-	    
+
 	    if ($error != null) :
 	    	Isession::setFlash("user_data", $data);
 	        Isession::setFlash("error_list", "<ul>".$error."<ul>");
             redirect("users/useredit/".$data["user_id"]);
             return;
 	    endif;
-	    
+
 	    $this->load->model("usermodel");
 	    $user_found = $this->usermodel->user_by_login($data["user_login"]);
 	    if ($user_found != null && $data["user_id"] != $user_found["user_id"]) :
@@ -197,7 +198,7 @@ class Users extends MpiController {
             redirect("users/useredit/".$data["user_id"]);
             return;
 	    endif;
-	    
+
 	    $data["user_update"] = $cur_user["user_id"];
 	    $this->usermodel->user_update($data);
 	    Isession::setFlash("success", "User was successfully updated");
@@ -218,7 +219,7 @@ class Users extends MpiController {
             redirect("users/userlist");
             return;
         endif;
-        
+
         $this->load->model("usermodel");
         $user_found = $this->usermodel->user_by_id($user_id);
         if ($user_found == null) :
@@ -226,13 +227,13 @@ class Users extends MpiController {
             redirect("users/userlist");
             return;
         endif;
-        
+
         if ($user_id == $user["user_id"]) :
             Isession::setFlash("error", "You cannot delete yourself");
             redirect("users/userlist");
             return;
         endif;
-        
+
         $this->load->model("usermodel");
         $this->usermodel->delete_user($user_id);
         Isession::setFlash("success", "User ".$user_found["user_login"]." have been deleted");
@@ -253,7 +254,7 @@ class Users extends MpiController {
             redirect("users/userlist");
             return;
         endif;
-        
+
         $this->load->model("usermodel");
         $user_found = $this->usermodel->user_by_id($user_id);
         if ($user_found == null) :
@@ -261,7 +262,7 @@ class Users extends MpiController {
             redirect("users/userlist");
             return;
         endif;
-        
+
         $new_pwd = uniqid();
         $this->usermodel->update_pwd($user_id, $new_pwd, $user["user_id"]);
         Isession::setFlash("success", "Password has beed regenerated to: ".$new_pwd);
