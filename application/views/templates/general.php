@@ -36,7 +36,7 @@
   <div class="container">
      <div><?php require_once APPPATH."views/general/header.php";?></div>
      <div><?php require_once APPPATH."views/general/banner.php";?></div>
-     <div><?php require_once APPPATH."views/".$k_main_body_view.".php";?></div>
+     <div class="main-content"><?php require_once APPPATH."views/".$k_main_body_view.".php";?></div>
   </div>
   <br/>
 </body>

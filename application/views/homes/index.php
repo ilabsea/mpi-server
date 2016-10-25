@@ -1,76 +1,33 @@
-<br/><br/>
-<div class="row-fluid">
-  <div class="span2 offset1" align="center">
-    <a href="<?=site_url("patients/patientlist")?>">
-      <img style="width: 128px" src="<?=base_url("img/patients.jpg")?>" alt="Patients"/>
-    </a>
-    <h4><a href="<?=site_url("patients/patientlist")?>">Patients</a></h4>
-  </div>
+<?php
+  $cards = array(
+    array("title" => "Patients", "image" => "patients.jpg", "url" => "patients/patientlist", "admin" => false),
+    array("title" => "Sites", "image" => "hospital_icon2.png", "url" => "sites/sitelist", "admin" => false),
+    array("title" => "Reports", "image" => "reports_icon.png", "url" => "reports/reportmenu", "admin" => false),
 
-  <div class="span2 offset2" align="center">
-    <a href="<?=site_url("sites/sitelist")?>">
-      <img style="width: 128px" src="<?=base_url("img/hospital_icon2.png")?>" alt="Sites"/>
-    </a>
-    <h4><a href="<?=site_url("sites/sitelist")?>">Sites</a></h4>
-  </div>
+    array("title" => "Users", "image" => "users.png", "url" => "users/userlist", "admin" => true),
+    array("title" => "Members", "image" => "doctor.png", "url" => "members/memberlist", "admin" => true),
+    array("title" => "CSV Export", "image" => "csv.png", "url" => "datas/csvexport", "admin" => true),
 
-  <div class="span2 offset2" align="center">
-    <a href="<?=site_url("reports/reportmenu")?>">
-      <img style="width: 128px" src="<?=base_url("img/reports_icon.png")?>" alt="Reports"/>
-    </a>
-    <h4><a href="<?=site_url("reports/reportmenu")?>">Reports</a></h4>
-  </div>
-</div>
-<br/>
+    array("title" => "Dynamic field", "image" => "api-dynamic-field.png", "url" => "fields/index", "admin" => true),
+    array("title" => "API Scope", "image" => "api-scope.png", "url" => "scopes/index", "admin" => true),
+    array("title" => "Application", "image" => "api-application.png", "url" => "applications/index", "admin" => true)
+  );
+?>
 
-<div class="row-fluid">
-  <?php if ($current_user["grp_id"] == Iconstant::USER_ADMIN) : ?>
-  <div class="span2 offset1" align="center">
-    <a href="<?=site_url("users/userlist")?>"><img style="width: 128px" src="<?=base_url("img/users.png")?>" alt="Users"/></a>
-    <h4><a href="<?=site_url("users/userlist")?>">Users</a></h4>
-  </div>
-  <?php endif;?>
-
-   <?php if ($current_user["grp_id"] == Iconstant::USER_ADMIN) : ?>
-   <div class="span2 offset2" align="center">
-      <a href="<?=site_url("members/memberlist")?>"><img style="width: 128px" src="<?=base_url("img/doctor.png")?>" alt="Members"/></a>
-      <h4><a href="<?=site_url("members/memberlist")?>">Members</a></h4>
-   </div>
-   <?php endif;?>
-
-  <?php if ($current_user["grp_id"] == Iconstant::USER_ADMIN) : ?>
-  <div class="span2 offset2" align="center">
-    <a href="<?=site_url("datas/csvexport")?>"><img style="width: 128px" src="<?=base_url("img/csv.png")?>" alt="CSV Export"/></a>
-    <h4><a href="<?=site_url("datas/csvexport")?>">CSV Export</a></h4>
-  </div>
-  <?php endif;?>
-
-  <div class="row-fluid">
-    <?php if ($current_user["grp_id"] == Iconstant::USER_ADMIN) : ?>
-      <div class="span2 offset1" align="center">
-        <a href="<?=site_url("fields/index")?>">
-          <img style="width: 128px" src="<?=base_url("img/api-dynamic-field.png")?>" alt="Dynamic field"/>
-        </a>
-        <h4><a href="<?=site_url("fields/index")?>">Dynamic field</a></h4>
-      </div>
-    <?php endif;?>
-
-    <?php if ($current_user["grp_id"] == Iconstant::USER_ADMIN) : ?>
-      <div class="span2 offset2" align="center">
-        <a href="<?=site_url("scopes/index")?>">
-          <img style="width: 128px" src="<?=base_url("img/api-scope.png")?>" alt="API Scope"/>
-        </a>
-        <h4><a href="<?=site_url("scopes/index")?>">API Scope</a></h4>
-      </div>
-     <?php endif;?>
-
-    <?php if ($current_user["grp_id"] == Iconstant::USER_ADMIN) : ?>
-      <div class="span2 offset2" align="center">
-        <a href="<?=site_url("applications/index")?>">
-          <img style="width: 128px" src="<?=base_url("img/api-application.png")?>" alt="API application"/>
-        </a>
-        <h4><a href="<?=site_url("applications/index")?>">Application</a></h4>
-      </div>
-    <?php endif;?>
-  </div>
+<div class='row' style='margin: 0px;' >
+  <ul class="thumbnails">
+    <?php foreach($cards as $card) :?>
+      <?php $shown = !$card["admin"] || ($card["admin"] && $current_user["grp_id"] == Iconstant::USER_ADMIN); ?>
+      <?php if($shown) : ?>
+        <li class='span4 dashboard-item'>
+          <a class="thumbnail" href="<?= site_url($card["url"]); ?>">
+            <img src="<?= base_url("img/{$card['image']}") ?>" alt="<?=$card["title"] ?>" style="width: 80px;"/>
+            <div class="caption" style="text-align:center;">
+              <h4 style="font-size: 120%;"><?= $card["title"] ?></h4>
+            </div>
+          </a>
+        </li>
+      <?php endif; ?>
+  <?php endforeach ?>
+  </ul>
 </div>

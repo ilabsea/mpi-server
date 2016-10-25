@@ -27,3 +27,30 @@
 .content-hidden{
   cursor: pointer;
 }
+
+.session-box{
+  max-width: 400px;
+  width: 100%;
+  margin: 30px auto;
+}
+
+.main-content{
+  margin-top: 30px;
+}
+.dashboard-item{
+  /*width: 18%;
+  margin-right: 2.5%;
+  margin-left: 0px;*/
+
+}
+
+.dashboard-item:last-child{
+  margin-right: 0px;
+
+}
+
+.dashboard-item img {
+  width: 100%;
+  max-width: 90px;
+
+}

@@ -10,11 +10,32 @@ class ApiOauthHelper {
     $this->params = $request;
   }
 
-  function issue_token(){
-    $conditions = array("api_key" => $this->params["client_id"],
-                        "api_secret" => $this->params["client_secret"]);
+  function readParam($key) {
+    return isset($this->params[$key]) ? $this->params[$key] : '';
+  }
 
-    if($this->params['grant_type'] != "client_credentials") {
+  function issue_token(){
+    $this->errors = array();
+
+    $client_id = $this->readParam("client_id");
+    $client_secret = $this->readParam("client_secret");
+
+    $conditions = array("api_key" => $client_id,
+                        "api_secret" => $client_secret);
+
+    if($client_id == "" || $client_secret == ""){
+      $this->errors = array("error" => "invalid params",
+                            "error_description" => "require client_id and client_secret");
+      return false;
+    }
+
+    if(isset($this->params['refresh_token']) && $this->readParam("grant_type") != 'refresh_token'  ) {
+      $this->errors = array("error" => "invalid grant type",
+                            "error_description" => "require params grant_type to be set with value of refresh_token");
+      return false;
+    }
+
+    if(!isset($this->params['refresh_token']) && $this->readParam('grant_type') != "client_credentials") {
       $this->errors = array("error" => "invalid grant type",
                             "error_description" => "require params grant_type to be set with value of client_credentials");
       return false;
@@ -25,7 +46,7 @@ class ApiOauthHelper {
 
     if(!$application){
       $this->errors = array("error" => "invalid application",
-                            "error_description" => "This is no applicaiton with this credential ");
+                            "error_description" => "incorrect client_id/client_secret");
       return false;
     }
 
@@ -34,21 +55,32 @@ class ApiOauthHelper {
 
     if(!$application->ok()) {
       $this->errors = array("error" => "invalid application",
-                            "error_description" => "Application <{$app_name}> has been disabled");
+                            "error_description" => "application <{$app_name}> has been disabled");
       return false;
     }
     else if(!$application->accessible_by_ip($ip)) {
       $this->errors = array("error" => "invalid application",
-                            "error_description" => "Application <{$app_name}> is not allowed by <{$ip}>");
+                            "error_description" => "application <{$app_name}> is not allowed by <{$ip}>");
       return false;
     }
-
 
     $this->application = $application;
     $this->scope = Scope::find($application->scope_id);
 
-    $this->application_token = ApplicationToken::generate($application);
+    if($this->readParam("grant_type") == "client_credentials")
+      $this->application_token = ApplicationToken::generate($application);
 
+    else if($this->readParam("grant_type") == "refresh_token"){
+      $application_token = ApplicationToken::find_by(array("refresh_token" => $this->readParam("refresh_token"),
+                                                           "application_id" => $this->application->id ));
+
+      if(!$application_token) {
+        $this->errors = array("error" => "invalid refresh_token",
+                              "error_description" => "application refresh_token is incorrect");
+        return false;
+      }
+      $this->application_token = ApplicationToken::generate($application);
+    }
     return true;
   }
 

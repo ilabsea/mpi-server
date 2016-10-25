@@ -1,4 +1,4 @@
-<div style="max-width: 400px; width: 100%;" >
+<div class='session-box' >
   <? require dirname(dirname(__FILE__)). "/shared/flash.php" ?>
   <br />
 
