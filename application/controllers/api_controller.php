@@ -1,7 +1,6 @@
 <?php
 class ApiController extends BaseController {
   var $oauth = null;
-
   function init(){
     parent::init();
 
@@ -19,7 +18,6 @@ class ApiController extends BaseController {
     require_once APPPATH.'models/application_token.php';
     require_once APPPATH.'models/scope.php';
 
-    parent::before_action();
-    $this->oauth = new ApiOauthHelper($_POST);
+    $this->oauth = new ApiOauthHelper();
   }
 }

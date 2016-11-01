@@ -1,6 +1,6 @@
 <?php
 class Imodel extends CI_Model {
-  const PER_PAGE = 20;
+  const PER_PAGE = 100;
   protected $_errors = array();
   protected $_changes = array();
   protected $_not_sql_fields = array('_errors', '_changes', '_not_sql_fields');
@@ -310,7 +310,6 @@ class Imodel extends CI_Model {
 
   //redefine on child model
   function validation_rules() {
-
   }
 
   function validate(){

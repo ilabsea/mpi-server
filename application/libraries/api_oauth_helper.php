@@ -4,17 +4,16 @@ class ApiOauthHelper {
   var $application = null;
   var $scope = null;
   var $application_token = null;
-  var $params = array();
 
-  function __construct($request){
-    $this->params = $request;
+  function __construct(){
   }
 
   function readParam($key) {
     return isset($this->params[$key]) ? $this->params[$key] : '';
   }
 
-  function issue_token(){
+  function strategy_token($params){
+    $this->params = $params;
     $this->errors = array();
 
     $client_id = $this->readParam("client_id");
@@ -84,16 +83,16 @@ class ApiOauthHelper {
     return true;
   }
 
-  function authenticate_token(){
+  function authenticate_token($access_token){
     $this->errors = array();
 
-    if(!isset($this->params['access_token'])) {
+    if(!$access_token) {
       $this->errors = array("error" => "invalid token",
                             "error_description" => "access token is required");
       return false;
     }
 
-    $application_token = ApplicationToken::find_by( array("token" => $this->params['access_token']) );
+    $application_token = ApplicationToken::find_by( array("token" => $access_token) );
 
     if(!$application_token){
       $this->errors = array("error" => "invalid token",
