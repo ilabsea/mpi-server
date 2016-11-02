@@ -14,10 +14,14 @@ input, select {
   width: 240px;
 }
 
+input.short {
+  width: 74px;
+}
+
 select.tokenizer{
   width: 340px ;
   height: 40px;
 }
 select.tokenizer-short {
-  width: 250px;
+  width: 254px;
 }

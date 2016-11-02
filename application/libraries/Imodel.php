@@ -28,10 +28,18 @@ class Imodel extends CI_Model {
   static function serialize_fields(){
     return array();
   }
+  #Callback
+  function before_validate() {}
+  function before_create() {}
+  function after_create(){}
+  function before_update() {}
+  function after_update() {}
+  function after_destroy(){}
 
-  function __construct() {
+  function __construct($attrs = array()) {
     parent::__construct();
     $this->load->library('form_validation');
+    $this->set_attributes($attrs);
   }
 
   function get_errors() {
@@ -59,6 +67,10 @@ class Imodel extends CI_Model {
 
   function current_time() {
     return date("Y-m-d H:i:s");
+  }
+
+  function current_date() {
+    return date("Y-m-d");
   }
 
   //create create uniqueness validation for this shi**y framework
@@ -137,6 +149,24 @@ class Imodel extends CI_Model {
   static function is_serialized($field) {
     return in_array($field, static::serialize_fields());
   }
+
+  static function count($conditions=array()){
+    $class_name = static::class_name();
+    $active_record = new $class_name;
+
+    foreach($conditions as $field => $value){
+      if(is_array($value))
+        $active_record->db->where_in($field, $value);
+      else
+        $active_record->db->where($field, $value);
+    }
+
+    $active_record->db->from(static::table_name());
+    $count = $active_record->db->count_all_results();
+    ILog::debug_message("db query", $active_record->db->queries);
+    return $count;
+  }
+
 
   static function all($conditions=array(), $page=null, $order_by=null ){
     $limit = Imodel::PER_PAGE;
@@ -236,13 +266,11 @@ class Imodel extends CI_Model {
   }
 
   function insert(){
-    if(method_exists($this, "before_create"))
-      $this->before_create();
-
     if(static::timestampable()) {
       $this->created_at = $this->current_time();
       $this->updated_at = $this->current_time();
     }
+    $this->before_create();
 
     $this->db->insert(static::table_name(), $this->sql_attributes());
 
@@ -251,6 +279,7 @@ class Imodel extends CI_Model {
     else{
       $primary_key = static::primary_key();
       $this->{$primary_key} = $this->db->insert_id();
+      $this->after_create();
       return true;
     }
   }
@@ -260,21 +289,27 @@ class Imodel extends CI_Model {
     if(static::timestampable())
       $this->set_attribute('updated_at', $this->current_time());
 
-    $this->db->where('id', $this->id());
-    $this->db->update(static::table_name(), $this->sql_attributes());
+    $this->before_update();
+
+    $this->db->where($this->primary_key(), $this->id());
+    $this->db->update(static::table_name(), $this->change_attributes());
 
     if($this->db->affected_rows() == 0)
       return false;
-    else
+    else{
+      $this->after_update();
       return $this;
+    }
   }
 
   function delete(){
     $this->db->delete(static::table_name(), array('id' => $this->id()));
     if($this->db->affected_rows() == 0)
       return false;
-    else
+    else{
+      $this->after_destroy();
       return true;
+    }
   }
 
   function update_attributes($datas){
@@ -289,14 +324,24 @@ class Imodel extends CI_Model {
       return false;
     }
 
-    $this->db->where('id', $this->id());
-    $this->db->update(static::table_name(), $this->sql_attributes());
+    $this->before_update();
+
+    $this->db->where($this->primary_key(), $this->id());
+    $this->db->update(static::table_name(), $this->change_attributes());
 
     if($this->db->affected_rows() == 0)
       return null;
     else{
+      $this->after_update();
       return $this;
     }
+  }
+
+  function change_attributes() {
+    $attrs = array();
+    foreach($this->_changes as $field => $change)
+      $attrs[$field] = $change[1];
+    return $attrs;
   }
 
   /* validator requires data from $_POST */
@@ -310,30 +355,24 @@ class Imodel extends CI_Model {
 
   //redefine on child model
   function validation_rules() {
+    return false;
   }
 
   function validate(){
     $this->set_data_to_validate();
-    $this->validation_rules();
 
-    if($this->form_validation->run() == false){
+    if($this->validation_rules() && $this->form_validation->run() == false){
       $this->_errors = $this->form_validation->errors();
-      // ILog::debug_message($this->form_validation,1,1);
       return false;
     }
     return true;
   }
 
   function save($validate = true){
-    if(method_exists ($this , 'before_save'))
-      $this->before_save();
-
-    if($this->new_record() && method_exists ($this , 'before_create'))
-      $this->before_create();
+    $this->before_validate();
 
     if($validate && !$this->validate())
       return false;
-
     return $this->new_record() ? $this->insert() : $this->update();
   }
 }

@@ -1,44 +1,43 @@
-<?php 
-
-function pagination_direction($field, $orderby, $direction) {
-    if ($field == $orderby) :
-        if ($direction == "DESC") :
-        	return "<img src=\"".base_url("img/down.png")."\" />";
-        else:
-            return "<img src=\"".base_url("img/up.png")."\" />";
-        endif;
-    endif;
+<?php
+  function pagination_direction($field, $orderby, $direction) {
+    if ($field == $orderby){
+      if ($direction == "DESC")
+        return "<img src=\"".base_url("img/down.png")."\" />";
+      else
+        return "<img src=\"".base_url("img/up.png")."\" />";
+    }
     return "";
-}
+  }
 ?>
 
 <script type="text/javascript">
 function header_click(orderby, orderdirection) {
-	var newdirection = 'ASC';
-	if (orderby == '<?=$orderby?>') {
-		if ('<?=$orderdirection?>' == 'ASC') {
-			newdirection = "DESC";
-		} else {
-			newdirection = "ASC";
-		}
-	}
-	window.location='<?=site_url("patients/patientdetail/".$patient["pat_id"]."?orderby=")?>' + orderby + "&orderdirection=" + newdirection;
+  var newdirection = 'ASC';
+  if (orderby == '<?=$orderby?>') {
+    if ('<?=$orderdirection?>' == 'ASC')
+      newdirection = "DESC";
+    else
+      newdirection = "ASC";
+  }
+  window.location='<?=site_url("patients/patientdetail/".$patient["pat_id"]."?orderby=")?>' + orderby + "&orderdirection=" + newdirection;
 }
 </script>
 
 <ul class="breadcrumb">
-	<li><a href="<?=site_url("main")?>">Home</a> <span class="divider">&gt;</span></li>
-	<li><a href="<?=site_url("patients/patientlist")?>">Patients List</a> <span class="divider">&gt;</span></li>
-	<li class="active">Patient Detail</li>
+  <li><a href="<?=site_url("main")?>">Home</a> <span class="divider">&gt;</span></li>
+  <li><a href="<?=site_url("patients/patientlist")?>">Patients List</a> <span class="divider">&gt;</span></li>
+  <li class="active">Patient Detail</li>
 </ul>
+
 <h3>Patient Detail</h3>
 <div class="row-fluid">
-   <div class="span3">Master ID: </div>
-   <div class="span3"><?=htmlspecialchars($patient["pat_id"])?></div>
+  <div class="span3">Master ID: </div>
+  <div class="span3"><?=htmlspecialchars($patient["pat_id"])?></div>
 </div>
+
 <div class="row-fluid">
-   <div class="span3">Gender: </div>
-   <div class="span3"><?=($patient["pat_gender"] == 2 ? "Female" : "Male")?></div>
+  <div class="span3">Gender: </div>
+  <div class="span3"><?=($patient["pat_gender"] == 2 ? "Female" : "Male")?></div>
 </div>
 
 <div class="row-fluid">
@@ -65,9 +64,9 @@ function header_click(orderby, orderdirection) {
       <th onclick="header_click('info')" class="headerclickable">Information <?=pagination_direction("info", $orderby, $orderdirection)?></th>
    </tr>
    <?php
-      $row_nb = 0; 
+      $row_nb = 0;
       foreach($visit_list->result_array() as $row) :
-      	$row_nb++;
+        $row_nb++;
    ?>
    <tr <?=(($row_nb % 2)?"":"class=\"even_row\"")?> <?=(strtolower($row["info"])=="positive"?"style=\"background: red\"":"")?>>
       <td align="center"><?=htmlspecialchars($row["serv_code"])?></td>
@@ -80,12 +79,3 @@ function header_click(orderby, orderdirection) {
    </tr>
    <?php endforeach;?>
 </table>
-
-<?php 
-/*
-    uuid_create(&$context);
-    uuid_make($context, UUID_MAKE_V4);
-    uuid_export($context, UUID_FMT_STR, &$uuid);
-    echo "result=". trim($uuid);
-*/
-?>

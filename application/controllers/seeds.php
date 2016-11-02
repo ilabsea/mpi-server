@@ -10,6 +10,10 @@ class Seeds extends MpiController {
     $this->load->model("field");
   }
 
+  functon console() {
+    exit;
+  }
+
   function visit_fields() {
     $visits = array(
       array("code" => "visit_id", "type" => "Integer"),

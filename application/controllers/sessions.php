@@ -7,7 +7,7 @@ class Sessions extends MpiController {
     $current_user = $this->auth->current_user();
 
     if($this->auth->current_user())
-      return redirect(site_url("pages/home"));
+      return redirect(site_url("homes/index"));
     else
       $this->render_view("add");
   }

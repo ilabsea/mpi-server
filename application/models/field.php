@@ -50,5 +50,6 @@ class Field extends Imodel {
     $this->form_validation->set_rules('name', 'Name', 'trim|required');
     $this->form_validation->set_rules('code', 'Code', "trim|required|{$code_uniqueness}");
     $this->form_validation->set_rules('type', 'Type', 'required');
+    return true;
   }
 }
