@@ -39,5 +39,6 @@ class Scope extends Imodel {
   function validation_rules(){
     $code_uniqueness = $this->uniqueness_field('name');
     $this->form_validation->set_rules('name', 'Name', "trim|required|{$code_uniqueness}");
+    return true;
   }
 }

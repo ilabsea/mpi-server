@@ -70,8 +70,9 @@ class Application extends Imodel {
     $api_secret_uniqueness = $this->uniqueness_field('api_secret');
 
     $this->form_validation->set_rules('name', 'Name', "trim|required|{$name_uniqueness}");
-    $this->form_validation->set_rules('scope_id', 'Name', "trim|required");
-    $this->form_validation->set_rules('api_key', 'Name', "trim|required|{$api_key_uniqueness}");
-    $this->form_validation->set_rules('api_secret', 'Name', "trim|required|{$api_secret_uniqueness}");
+    $this->form_validation->set_rules('scope_id', 'Scope', "trim|required");
+    $this->form_validation->set_rules('api_key', 'Api Key', "trim|required|{$api_key_uniqueness}");
+    $this->form_validation->set_rules('api_secret', 'Api Secret', "trim|required|{$api_secret_uniqueness}");
+    return true;
   }
 }

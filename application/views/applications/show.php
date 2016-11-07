@@ -6,7 +6,7 @@
 
 <h3><?= $application->name ?></h3>
 
-<table class="table_list">
+<table class="table table-striped">
   <tbody>
       <tr>
         <td width='180'> Name</td>

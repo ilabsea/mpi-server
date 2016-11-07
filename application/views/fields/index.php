@@ -10,15 +10,14 @@
 </h3>
 
 <? require dirname(dirname(__FILE__)). "/shared/flash.php" ?>
-<table class="table_list">
+<table class="table table-striped">
   <thead>
     <tr>
       <th>No</th>
       <th>Name</th>
       <th>Code</th>
-      <th>Encrypted</th>
+      <th>Encryption</th>
       <th>Field Type</th>
-      <!-- <th>Editable</th> -->
       <th>Created at</th>
       <th>Updated at</th>
       <th>Action</th>
@@ -30,9 +29,12 @@
         <td><?= (($page-1) * Imodel::PER_PAGE) + $index + 1 ?></td>
         <td><?= $field->name ?></td>
         <td><?= $field->code ?></td>
-        <td><?= $field->is_encrypted ? "Encrypted" : "Plain" ?></td>
-        <td><?= $field->type ?></td>
-        <!-- <td><?= $field->dynamic_field == 1 ? "Dynamic" : "Built-in" ?></td> -->
+        <td>
+          <span class="label item">
+            <?= $field->is_encrypted ? "Encrypted" : "Plain" ?>
+          </span>
+        </td>
+        <td> <span class="label item"><?= $field->type ?></span></td>
         <td><?= $field->created_at?></td>
         <td><?= $field->updated_at?> </td>
         <td>

@@ -4,7 +4,7 @@
     array("title" => "Sites", "image" => "hospital_icon2.png", "url" => "sites/sitelist", "admin" => false),
     array("title" => "Reports", "image" => "reports_icon.png", "url" => "reports/reportmenu", "admin" => false),
 
-    array("title" => "Users", "image" => "users.png", "url" => "users/userlist", "admin" => true),
+    array("title" => "Users", "image" => "users.png", "url" => "users/index", "admin" => true),
     array("title" => "Members", "image" => "doctor.png", "url" => "members/memberlist", "admin" => true),
     array("title" => "CSV Export", "image" => "csv.png", "url" => "datas/csvexport", "admin" => true),
 
@@ -17,7 +17,7 @@
 <div class='row' style='margin: 0px;' >
   <ul class="thumbnails">
     <?php foreach($cards as $card) :?>
-      <?php $shown = !$card["admin"] || ($card["admin"] && $current_user["grp_id"] == Iconstant::USER_ADMIN); ?>
+      <?php $shown = !$card["admin"] || ($card["admin"] && $current_user->is_admin()); ?>
       <?php if($shown) : ?>
         <li class='span4 dashboard-item'>
           <a class="thumbnail" href="<?= site_url($card["url"]); ?>">

@@ -36,16 +36,13 @@ class MpiController extends BaseController {
     require_once APPPATH.'libraries/params_helper.php';
     require_once APPPATH.'helpers/mpi_helper.php';
 
+    require_once APPPATH.'models/user.php';
+
     ILog::getInstance();
     $session_status = Isession::initializeSession();
 
     $this->auth = new MpiAuthHelper();
     $this->view_params = new ParamsHelper();
-  }
-
-  function is_admin_user(){
-    $current_user = $this->auth->current_user();
-    return $current_user && $current_user["grp_id"] == Iconstant::USER_ADMIN;
   }
 
   function require_user_signed_in(){
@@ -56,8 +53,13 @@ class MpiController extends BaseController {
     }
   }
 
+  function current_user(){
+    return $this->auth->current_user();
+  }
+
   function required_admin_user(){
-    if(!$this->is_admin_user()){
+    $current_user = $this->auth->current_user();
+    if(!$current_user || !$current_user->is_admin()){
       Isession::setFlash("error", "Your don't have access to this resource");
       redirect(site_url("errors/index"));
       exit;

@@ -1,9 +1,9 @@
 $(function(){
-  deleteButtonClick();
+  confirmButtonClick();
 })
 
-function deleteButtonClick() {
-  $(".btn-delete").on('click', function(e){
+function confirmButtonClick() {
+  $(".btn-delete, .btn-confirm").on('click', function(e){
     var confirmMessage = $(this).attr('data-confirm');
     if(!confirm(confirmMessage)){
       e.preventDefault();

@@ -3,6 +3,10 @@
 class Sessions extends MpiController {
   var $skip_before_action = array("add", "create");
 
+  function layout(){
+    return parent::layout();
+  }
+
   function add() {
     $current_user = $this->auth->current_user();
 
@@ -13,9 +17,8 @@ class Sessions extends MpiController {
   }
 
   function create() {
-    $this->load->model("usermodel");
-    $this->view_params->bind($_POST);
-    $user = $this->usermodel->authentication($this->view_params->get("login"), $this->view_params->get("password"));
+    $params = $this->filter_params(array("login", "password"));
+    $user = User::authenticate($params["login"], $params["password"]);
     if ($user == null){
       Isession::setFlash("error", "Login or Password is not correct");
       $this->render_view("add");

@@ -4,9 +4,9 @@
     	  window.location='<?=site_url("users/generagepwd/".$user_id)?>';
     	  return true;
       } else {
-          return false;    	  
+          return false;
       }
-      
+
    }
 </script>
 
@@ -45,7 +45,7 @@
    <div class="span2">Group*</div>
    <div class="span2">
        <select name="grp_id">
-           <?php 
+           <?php
                foreach($group_list->result_array() as $row) :
                  $selected = $row["grp_id"] == $grp_id ? "selected" : "";
            ?>
@@ -59,7 +59,8 @@
    <div class="span2"><input type="text" name="user_email" value="<?=htmlspecialchars($user_email)?>"></div>
 </div>
 <div>
-   <button type="submit" class="btn">Save</button> &nbsp; <button type="reset" class="btn" onclick="window.location='<?=site_url("users/useredit/".$user_id)?>'">Reset</button>
+   <button type="submit" class="btn">Save</button> &nbsp;
+   <button type="reset" class="btn" onclick="window.location='<?=site_url("users/useredit/".$user_id)?>'">Reset</button>
    &nbsp; <button type="button" class="btn" onclick="return confirm_pwd_generate('<?=$user_id?>')">Generate Password</button>
 </div>
-</form> 
+</form>

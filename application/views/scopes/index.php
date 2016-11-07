@@ -9,7 +9,7 @@
 </h3>
 
 <? require dirname(dirname(__FILE__)). "/shared/flash.php" ?>
-<table class="table_list">
+<table class="table table-striped">
   <thead>
     <tr>
       <th>No</th>

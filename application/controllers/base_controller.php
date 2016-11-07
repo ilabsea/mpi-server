@@ -42,7 +42,7 @@ class BaseController extends CI_Controller {
     $result = array();
     foreach($keys as $key){
       if(isset($_REQUEST[$key]))
-        $result[$key] = trim($_REQUEST[$key]);
+        $result[$key] = $_REQUEST[$key];
       else
         $result[$key] = null;
     }

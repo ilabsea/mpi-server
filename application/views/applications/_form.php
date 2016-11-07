@@ -6,14 +6,14 @@
 
 <div class="row-fluid input-row <?=$class_error ?>" >
   <div class="span2">Name*</div>
-  <div class="span9">
+  <div class="span10">
     <?= form_input(array("name" => "name", "id" => "name", "value" => $application->name )) ?>
   </div>
 </div>
 
 <div class="row-fluid input-row">
   <div class="span2">Scope*</div>
-  <div class="span9">
+  <div class="span10">
     <?= form_dropdown('scope_id', $scopes, $application->scope_id,
                       'id="scope_id" class="tokenizer tokenizer-short"' ) ?>
   </div>
@@ -21,9 +21,9 @@
 
 <div class="row-fluid input-row">
   <div class="span2">Whitelist access API</div>
-  <div class="span9">
+  <div class="span10">
     <p class='field-hint'>
-      If you enter IP address, only server from this IP can access the API.
+      If you enter IP address(comma separated), only server from this IP can access the API.
     </p>
     <?= form_input(array("name" => "whitelist", "id" => "whitelist", "value" => $application->whitelist)) ?>
   </div>
@@ -31,7 +31,7 @@
 
 <div class="row-fluid input-row">
   <div class="span2">Status*</div>
-  <div class="span9">
+  <div class="span10">
     <?= form_dropdown('status', Application::statuses(), $application->status,
                       'id="status" class="tokenizer tokenizer-short"' ) ?>
   </div>

@@ -21,7 +21,7 @@ class Imodel extends CI_Model {
   }
 
   //if you have fields in model that are not part of db table field list them down here
-  static function accessible_fields(){
+  static function virtual_fields(){
     return array();
   }
 
@@ -29,11 +29,13 @@ class Imodel extends CI_Model {
     return array();
   }
   #Callback
-  function before_validate() {}
+  function before_save() {}
+  function after_save() {}
   function before_create() {}
   function after_create(){}
   function before_update() {}
   function after_update() {}
+
   function after_destroy(){}
 
   function __construct($attrs = array()) {
@@ -94,7 +96,7 @@ class Imodel extends CI_Model {
   }
 
   function exclude_field($field_name){
-    $fields = array_merge($this->_not_sql_fields, static::accessible_fields());
+    $fields = array_merge($this->_not_sql_fields, static::virtual_fields());
     return in_array($field_name, $fields);
   }
 
@@ -210,7 +212,7 @@ class Imodel extends CI_Model {
 
     $active_record->db->where($conditions);
     $active_record->db->limit(1);
-    $active_record->db->order_by("id DESC");
+    $active_record->db->order_by($active_record->primary_key()." DESC ");
 
     $query = $active_record->db->get();
 
@@ -265,12 +267,15 @@ class Imodel extends CI_Model {
     }
   }
 
-  function insert(){
+  function insert($validate = true){
     if(static::timestampable()) {
       $this->created_at = $this->current_time();
       $this->updated_at = $this->current_time();
     }
+    $this->before_save();
     $this->before_create();
+    if($validate && !$this->validate())
+      return false;
 
     $this->db->insert(static::table_name(), $this->sql_attributes());
 
@@ -279,17 +284,21 @@ class Imodel extends CI_Model {
     else{
       $primary_key = static::primary_key();
       $this->{$primary_key} = $this->db->insert_id();
+      $this->before_save();
       $this->after_create();
       return true;
     }
   }
 
-  function update() {
+  function update($validate=true) {
     $class_name = static::class_name();
     if(static::timestampable())
       $this->set_attribute('updated_at', $this->current_time());
 
+    $this->before_save();
     $this->before_update();
+    if($validate && !$this->validate())
+      return false;
 
     $this->db->where($this->primary_key(), $this->id());
     $this->db->update(static::table_name(), $this->change_attributes());
@@ -297,13 +306,15 @@ class Imodel extends CI_Model {
     if($this->db->affected_rows() == 0)
       return false;
     else{
+      $this->after_save();
       $this->after_update();
       return $this;
     }
   }
 
   function delete(){
-    $this->db->delete(static::table_name(), array('id' => $this->id()));
+    $primary_key = $this->primary_key();
+    $this->db->delete(static::table_name(), array("{$primary_key}" => $this->id()));
     if($this->db->affected_rows() == 0)
       return false;
     else{
@@ -320,11 +331,10 @@ class Imodel extends CI_Model {
     if(static::timestampable())
       $this->set_attribute('updated_at', $this->current_time());
 
-    if(!$this->validate()){
-      return false;
-    }
-
+    $this->before_save();
     $this->before_update();
+    if(!$this->validate())
+      return false;
 
     $this->db->where($this->primary_key(), $this->id());
     $this->db->update(static::table_name(), $this->change_attributes());
@@ -332,6 +342,7 @@ class Imodel extends CI_Model {
     if($this->db->affected_rows() == 0)
       return null;
     else{
+      $this->after_save();
       $this->after_update();
       return $this;
     }
@@ -339,8 +350,10 @@ class Imodel extends CI_Model {
 
   function change_attributes() {
     $attrs = array();
-    foreach($this->_changes as $field => $change)
-      $attrs[$field] = $change[1];
+    foreach($this->_changes as $field => $change){
+      $value = $change[1];
+      $attrs[$field] = static::is_serialized($field) ? serialize($value) : $value;
+    }
     return $attrs;
   }
 
@@ -369,10 +382,6 @@ class Imodel extends CI_Model {
   }
 
   function save($validate = true){
-    $this->before_validate();
-
-    if($validate && !$this->validate())
-      return false;
-    return $this->new_record() ? $this->insert() : $this->update();
+    return $this->new_record() ? $this->insert($validate) : $this->update($validate);
   }
 }
