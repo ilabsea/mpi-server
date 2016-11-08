@@ -53,8 +53,10 @@
 
       <tr>
         <td>API secret</td>
-        <td class='content-hidden' data-hidden-content="<?= $application->api_secret ?>">
-          <?= str_repeat("&#x2022;", strlen($application->api_secret))?>
+        <td >
+          <span class='content-hidden' data-hidden-content="<?= $application->api_secret ?>">
+            <?= str_repeat("&#x2022;", strlen($application->api_secret))?>
+          </span>
         </td>
       </tr>
   </tbody>
