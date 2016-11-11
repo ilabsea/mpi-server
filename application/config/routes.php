@@ -42,6 +42,7 @@ $route['default_controller'] = "sessions/add";
 $route['main'] = "homes/index";
 $route['login'] = "sessions/add";
 $route['logout'] = "sessions/destroy";
+$route['access_logs'] = "access_logs/index";
 // $route['api/oauth/token'] = "api_oauth/token";
 // $route['api/(:controller)/(:method)'] = "api_$1/$2";
 $route['api/([a-zA-Z_-]+)/(:any)'] = 'api_$1/$2';

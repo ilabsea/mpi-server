@@ -1,8 +1,4 @@
 <?php
-/**
- * Users controller
- * @author Sokha RUM
- */
 
 class Scopes extends MpiController {
 

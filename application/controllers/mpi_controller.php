@@ -37,6 +37,11 @@ class MpiController extends BaseController {
     require_once APPPATH.'helpers/mpi_helper.php';
 
     require_once APPPATH.'models/user.php';
+    require_once APPPATH.'models/api_access_log.php';
+    require_once APPPATH.'models/scope.php';
+    require_once APPPATH.'models/field.php';
+    require_once APPPATH.'models/application.php';
+
 
     ILog::getInstance();
     $session_status = Isession::initializeSession();
@@ -76,7 +81,7 @@ class MpiController extends BaseController {
     }
   }
 
-  function render_view($action=null) {
+  function render_view($action=null, $status=200) {
     $template_name = "templates/".$this->layout();
 
     $controller_name = $this->router->fetch_class();
@@ -86,6 +91,8 @@ class MpiController extends BaseController {
     $this->set_view_variables(array( "view_params" => $this->view_params,
                                      "current_user" => $this->auth->current_user()));
 
+    $this->http_response_code($status);
     $this->load->template($template_name, $view_name, Iconstant::MPI_APP_NAME, $this->_raw_datas);
+    $this->after_action();
   }
 }

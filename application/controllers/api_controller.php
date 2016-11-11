@@ -21,6 +21,7 @@ class ApiController extends BaseController {
     require_once APPPATH.'models/service.php';
     require_once APPPATH.'models/visit.php';
     require_once APPPATH.'models/patient.php';
+    require_once APPPATH.'models/api_access_log.php';
 
     $this->oauth = new ApiOauthHelper();
   }

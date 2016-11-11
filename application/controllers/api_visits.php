@@ -26,6 +26,6 @@ class Api_visits extends ApiAccessController{
 
     $visit->set_attributes($attrs);
     $result = $visit->save();
-    $this->render_json($visit);
+    $this->render_json($visit, 200);
   }
 }
