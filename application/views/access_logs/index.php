@@ -3,6 +3,7 @@
   <li class="active">Access Logs</li>
 </ul>
 <h3>Access Logs</h3>
+<? require dirname(__FILE__). "/_search.php" ?>
 
 <table class="table table-striped">
   <thead>
@@ -19,9 +20,9 @@
     </tr>
   </thead>
   <tbody>
-    <?php foreach($logs as $index => $log): ?>
+    <?php foreach($paginate_logs->records as $index => $log): ?>
       <tr>
-        <td><?= (($page-1) * Imodel::PER_PAGE) + $index + 1 ?></td>
+        <td><?= Paginator::offset() + $index + 1 ?></td>
         <td><?= $log->application_name ?></td>
         <td><?= $log->created_at ?></td>
         <td><?= $log->ip ?></td>
@@ -40,3 +41,5 @@
     <? endforeach ?>
   </tbody>
 </table>
+
+<?= $paginate_logs->render(); ?>

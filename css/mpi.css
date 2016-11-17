@@ -1,7 +1,9 @@
 @CHARSET "UTF-8";
 
 #bar_login{
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #eee;
+  margin-right: 5px;
+  padding-bottom: 10px;
 }
 
 #banner {

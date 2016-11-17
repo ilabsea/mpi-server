@@ -22,9 +22,9 @@
     </tr>
   </thead>
   <tbody>
-    <?php foreach($scopes as $index => $scope): ?>
+    <?php foreach($paginate_scopes->records as $index => $scope): ?>
       <tr>
-        <td><?= (($page-1) * Imodel::PER_PAGE) + $index + 1 ?></td>
+        <td><?= Paginator::offset() + $index + 1 ?></td>
         <td><?= $scope->name ?></td>
         <td>
           <?php foreach($scope->searchable_fields as $field_id): ?>
@@ -51,6 +51,4 @@
   </tbody>
 </table>
 
-<!-- <div class='new-item'>
-   <a class='btn' href='<?=site_url("scopes/add")?>'> New Scope</a>
-</div> -->
+<?= $paginate_scopes->render() ?>

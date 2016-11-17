@@ -12,6 +12,7 @@
 <? require dirname(dirname(__FILE__)). "/shared/flash.php" ?>
 <table class="table table-striped">
    <tr valign="middle">
+      <th>No</th>
       <th>Login</th>
       <th>Name</th>
       <th>Group</th>
@@ -19,8 +20,9 @@
       <th width='90' valign='middle'> Action </th>
    </tr>
 
-   <?php foreach($users as $index => $user) : ?>
+   <?php foreach($paginate_users->records as $index => $user) : ?>
      <tr>
+        <td> <?=Paginator::offset() + $index + 1?> </td>
         <td> <?=$user->user_login?> </td>
         <td> <?=$user->full_name()?> </td>
         <td> <?=$user->group_name()?> </td>
@@ -36,3 +38,5 @@
      </tr>
    <?php endforeach;?>
 </table>
+
+<?= $paginate_users->render() ?>

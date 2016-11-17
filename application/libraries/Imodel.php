@@ -1,6 +1,5 @@
 <?php
 class Imodel extends CI_Model {
-  const PER_PAGE = 100;
   protected $_errors = array();
   protected $_changes = array();
   protected $_not_sql_fields = array('_errors', '_changes', '_not_sql_fields');
@@ -165,14 +164,18 @@ class Imodel extends CI_Model {
 
     $active_record->db->from(static::table_name());
     $count = $active_record->db->count_all_results();
-    ILog::debug_message("db query", $active_record->db->queries);
     return $count;
   }
 
+  static function paginate($conditions=array(), $order_by=null){
+    $total_counts = static::count($conditions);
+    $records = static::all($conditions=array(), $order_by, Paginator::offset(), Paginator::per_page());
+    $paginator = new Paginator($total_counts, $records );
 
-  static function all($conditions=array(), $page=null, $order_by=null ){
-    $limit = Imodel::PER_PAGE;
+    return $paginator;
+  }
 
+  static function all($conditions=array(), $order_by=null, $offset=0, $limit=10){
     $class_name = static::class_name();
     $active_record = new $class_name;
 
@@ -185,11 +188,10 @@ class Imodel extends CI_Model {
 
     $active_record->db->from(static::table_name());
 
-    if($page) {
-      $offset = $page < 2 ? 0 : ($page-1) * $limit;
+    if($limit)
       $active_record->db->limit($limit);
+    if($offset)
       $active_record->db->offset($offset);
-    }
 
     if($order_by)
       $active_record->db->order_by($order_by);

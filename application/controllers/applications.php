@@ -10,13 +10,11 @@ class Applications extends MpiController {
   }
 
   function index() {
-    $page = isset($_GET['page']) ? $_GET['page'] : 1;
-    $applications = Application::all(array(), $page, "status DESC, name ASC");
+    $paginate_applications = Application::paginate(array(), "status DESC, name ASC");
 
     $this->set_view_variables(array(
       "scopes" => Scope::mapper(),
-      "applications" => $applications,
-      "page" => $page
+      "paginate_applications" => $paginate_applications
     ));
     $this->render_view();
   }

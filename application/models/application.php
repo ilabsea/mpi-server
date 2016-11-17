@@ -35,6 +35,14 @@ class Application extends Imodel {
     return $this->status == 1;
   }
 
+  static function mapper() {
+    $applications = Application::all(array(), "name DESC");
+    $result = [];
+    foreach($applications as $application)
+      $result[$application->id] = $application->name;
+    return $result;
+  }
+
   function accessible_by_ip($ip){
     if(!$this->whitelist)
       return true;

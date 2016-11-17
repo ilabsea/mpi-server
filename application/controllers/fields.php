@@ -8,9 +8,8 @@ class Fields extends MpiController {
   }
 
   function index() {
-    $page = isset($_GET['page']) ? $_GET['page'] : 1;
-    $fields = Field::all(array(), $page, "dynamic_field DESC, name ASC");
-    $this->set_view_variables(array("page" =>$page, "fields" => $fields));
+    $paginate_fields = Field::paginate(array(), "dynamic_field DESC, name ASC");
+    $this->set_view_variables(array("paginate_fields" => $paginate_fields));
     $this->render_view();
   }
 

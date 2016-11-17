@@ -7,11 +7,9 @@ class Access_logs extends MpiController {
   }
 
   function index() {
-    $page = isset($_GET['page']) ? $_GET['page'] : 1;
-    $logs = ApiAccessLog::all(array(), $page, "created_at ASC");
+    $paginate_logs = ApiAccessLog::paginate(array(),"created_at ASC");
     $this->set_view_variables(array(
-      "logs" => $logs,
-      "page" => $page
+      "paginate_logs" => $paginate_logs
     ));
     $this->render_view();
   }
@@ -20,5 +18,9 @@ class Access_logs extends MpiController {
     $log = ApiAccessLog::find($id);
     $this->set_view_variables(array("log" => $log));
     $this->render_view();
+  }
+
+  function page(){
+    echo AppHelper::paginate(10);
   }
 }

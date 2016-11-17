@@ -34,6 +34,8 @@ class MpiController extends BaseController {
     require_once APPPATH.'libraries/ILog.php';
     require_once APPPATH.'libraries/mpi_auth_helper.php';
     require_once APPPATH.'libraries/params_helper.php';
+    require_once APPPATH.'libraries/app_helper.php';
+    require_once APPPATH.'libraries/paginator.php';
     require_once APPPATH.'helpers/mpi_helper.php';
 
     require_once APPPATH.'models/user.php';

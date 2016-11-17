@@ -23,9 +23,9 @@
     </tr>
   </thead>
   <tbody>
-    <?php foreach($applications as $index => $application): ?>
+    <?php foreach($paginate_applications->records as $index => $application): ?>
       <tr>
-        <td><?= (($page-1) * Imodel::PER_PAGE) + $index + 1 ?></td>
+        <td><?= Paginator::offset() + $index + 1 ?></td>
         <td><?= $application->name ?></td>
         <td>
             <span style="margin-right: 5px" class="label item">
@@ -51,6 +51,4 @@
   </tbody>
 </table>
 
-<!-- <div class='new-item'>
-   <a class='btn' href='<?=site_url("applications/add")?>'> New Application</a>
-</div> -->
+<?= $paginate_applications->render() ?>

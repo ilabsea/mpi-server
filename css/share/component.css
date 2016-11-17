@@ -54,3 +54,11 @@
   max-width: 90px;
 
 }
+
+input.mini-size, select.mini-size {
+  width: 120px;
+}
+
+label-inline {
+  margin-right: 10px;
+}

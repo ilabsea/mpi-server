@@ -24,9 +24,9 @@
     </tr>
   </thead>
   <tbody>
-    <?php foreach($fields as $index => $field): ?>
+    <?php foreach($paginate_fields->records as $index => $field): ?>
       <tr>
-        <td><?= (($page-1) * Imodel::PER_PAGE) + $index + 1 ?></td>
+        <td><?= Paginator::offset() + $index + 1 ?></td>
         <td><?= $field->name ?></td>
         <td><?= $field->code ?></td>
         <td>
@@ -51,6 +51,4 @@
   </tbody>
 </table>
 
-<!-- <div class='new-item'>
-  <a class='btn btn-new' href='<?=site_url("fields/add")?>'> New Dynamic Field</a>
-</div> -->
+<?= $paginate_fields->render(); ?>

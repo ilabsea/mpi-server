@@ -10,11 +10,9 @@ class Scopes extends MpiController {
   }
 
   function index() {
-    $page = isset($_GET['page']) ? $_GET['page'] : 1;
-    $scopes = Scope::all(array(), $page, "name ASC");
+    $paginate_scopes = Scope::paginate(array(), "name ASC");
     $this->set_view_variables(array(
-      "scopes" => $scopes,
-      "page" => $page,
+      "paginate_scopes" => $paginate_scopes,
       "fields" => Field::mapper(),
     ));
     $this->render_view();

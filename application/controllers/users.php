@@ -5,8 +5,8 @@ class Users extends MpiController {
   }
 
   function index() {
-    $users = User::all();
-    $this->set_view_variables(array("users" => $users));
+    $paginate_users = User::paginate();
+    $this->set_view_variables(array("paginate_users" => $paginate_users));
     $this->render_view();
   }
 

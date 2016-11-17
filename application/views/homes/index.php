@@ -10,18 +10,20 @@
 
     array("title" => "Dynamic field", "image" => "api-dynamic-field.png", "url" => "fields/index", "admin" => true),
     array("title" => "API Scope", "image" => "api-scope.png", "url" => "scopes/index", "admin" => true),
-    array("title" => "Application", "image" => "api-application.png", "url" => "applications/index", "admin" => true)
+    array("title" => "Application", "image" => "api-application.png", "url" => "applications/index", "admin" => true),
+    array("title" => "Access Log", "image" => "monitor-ok-icon.png", "url" => "access_logs/index", "admin" => true)
   );
 ?>
+<h3> Admin Dashboard</h3>
 
 <div class='row' style='margin: 0px;' >
   <ul class="thumbnails">
     <?php foreach($cards as $card) :?>
       <?php $shown = !$card["admin"] || ($card["admin"] && $current_user->is_admin()); ?>
       <?php if($shown) : ?>
-        <li class='span4 dashboard-item'>
+        <li class='span2 dashboard-item'>
           <a class="thumbnail" href="<?= site_url($card["url"]); ?>">
-            <img src="<?= base_url("img/{$card['image']}") ?>" alt="<?=$card["title"] ?>" style="width: 80px;"/>
+            <img src="<?= base_url("img/{$card['image']}") ?>" alt="<?=$card["image"] ?>" style="width: 80px;"/>
             <div class="caption" style="text-align:center;">
               <h4 style="font-size: 120%;"><?= $card["title"] ?></h4>
             </div>

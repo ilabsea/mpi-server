@@ -25,3 +25,7 @@ select.tokenizer{
 select.tokenizer-short {
   width: 254px;
 }
+
+select.tokenizer-mini {
+  width: 180px;
+}
