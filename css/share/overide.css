@@ -29,3 +29,7 @@ select.tokenizer-short {
 select.tokenizer-mini {
   width: 180px;
 }
+
+.pagination {
+  text-align: right;
+}

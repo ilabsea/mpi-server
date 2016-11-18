@@ -39,7 +39,7 @@ class Application extends Imodel {
     $applications = Application::all(array(), "name DESC");
     $result = [];
     foreach($applications as $application)
-      $result[$application->id] = $application->name;
+      $result[$application->id()] = $application->name;
     return $result;
   }
 

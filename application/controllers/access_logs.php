@@ -7,9 +7,12 @@ class Access_logs extends MpiController {
   }
 
   function index() {
-    $paginate_logs = ApiAccessLog::paginate(array(),"created_at ASC");
+    $params = $this->filter_params(array('application_id', 'from', 'to'));
+    $paginate_logs = ApiAccessLog::search_paginate($params,"created_at ASC");
+
     $this->set_view_variables(array(
-      "paginate_logs" => $paginate_logs
+      "paginate_logs" => $paginate_logs,
+      "params" => $params
     ));
     $this->render_view();
   }

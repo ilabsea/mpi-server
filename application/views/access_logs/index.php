@@ -13,7 +13,7 @@
       <th>Access Time</th>
       <th>IP</th>
       <th>Status</th>
-      <th>Params</th>
+      <!-- <th>Params</th> -->
       <th>Action</th>
       <th>Type</th>
       <th></th>
@@ -27,13 +27,13 @@
         <td><?= $log->created_at ?></td>
         <td><?= $log->ip ?></td>
         <td><?= $log->status ?></td>
-        <td>
+        <!-- <td>
           <?php foreach($log->params as $key => $value): ?>
             <span style="margin-right: 5px" class="label item">
               <?= "{$key}={$value}" ?>
             </span>
           <?php endforeach; ?>
-        </td>
+        </td> -->
         <td><?= $log->action ?></td>
         <td><?= $log->http_verb ?></td>
         <td><a href="<?= site_url("access_logs/show/".$log->id) ?>"> View </a></td>

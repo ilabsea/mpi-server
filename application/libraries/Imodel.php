@@ -66,13 +66,22 @@ class Imodel extends CI_Model {
     return $CI->$model_name;
   }
 
-  function current_time() {
+  static function current_time() {
     return date("Y-m-d H:i:s");
   }
 
-  function current_date() {
+  static function current_date() {
     return date("Y-m-d");
   }
+
+  static function beginning_of_day($date){
+    return "$date 00:00:00";
+  }
+
+  static function end_of_day($date){
+    return "$date 23:59:59";
+  }
+
 
   //create create uniqueness validation for this shi**y framework
   function uniqueness_field($field_name) {
@@ -169,7 +178,7 @@ class Imodel extends CI_Model {
 
   static function paginate($conditions=array(), $order_by=null){
     $total_counts = static::count($conditions);
-    $records = static::all($conditions=array(), $order_by, Paginator::offset(), Paginator::per_page());
+    $records = static::all($conditions, $order_by, Paginator::offset(), Paginator::per_page());
     $paginator = new Paginator($total_counts, $records );
 
     return $paginator;
@@ -271,8 +280,8 @@ class Imodel extends CI_Model {
 
   function insert($validate = true){
     if(static::timestampable()) {
-      $this->created_at = $this->current_time();
-      $this->updated_at = $this->current_time();
+      $this->created_at = Imodel::current_time();
+      $this->updated_at = Imodel::current_time();
     }
     $this->before_save();
     $this->before_create();
@@ -295,7 +304,7 @@ class Imodel extends CI_Model {
   function update($validate=true) {
     $class_name = static::class_name();
     if(static::timestampable())
-      $this->set_attribute('updated_at', $this->current_time());
+      $this->set_attribute('updated_at', Imodel::current_time());
 
     $this->before_save();
     $this->before_update();
@@ -331,7 +340,7 @@ class Imodel extends CI_Model {
     $class_name = static::class_name();
 
     if(static::timestampable())
-      $this->set_attribute('updated_at', $this->current_time());
+      $this->set_attribute('updated_at', Imodel::current_time());
 
     $this->before_save();
     $this->before_update();
