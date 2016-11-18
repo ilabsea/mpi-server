@@ -62,3 +62,24 @@ input.mini-size, select.mini-size {
 label-inline {
   margin-right: 10px;
 }
+
+.item-nav {
+  background: #eee;
+  border-radius: 6px;
+  color: white;
+  margin-left: 6px;
+  padding: 5px 10px;
+}
+
+.item-nav.active {
+  background: #aaa;
+}
+
+.item-nav-group {
+  text-align: right;
+  margin: 10px 0px;
+}
+
+.title-items{
+  float: right;
+}

@@ -3,7 +3,7 @@
   <li class="active">Application Lists</li>
 </ul>
 <h3>Application Lists
-  <div style="float:right;">
+  <div class='title-items'>
     <a class='btn' href='<?=site_url("applications/add")?>'> New Application</a>
   </div>
 </h3>

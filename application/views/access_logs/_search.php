@@ -1,7 +1,8 @@
-<?= form_open('access_logs/index', array("method"=> "GET")) ?>
-  <div class="well">
+<div class="well">
+  <h4>Access Logs filter</h4>
+  <?= form_open('access_logs/index', array("method"=> "GET")) ?>
     <span class="label-inline"> </span>
-    <?= form_dropdown('application_id', array(""=>"Select Application") + Application::mapper(), $params["application_id"],
+    <?= form_dropdown('application_id', AppHelper::merge_array(array(""=>"Select Application"),  Application::mapper()), $params["application_id"],
                       'id="application_id" class="tokenizer tokenizer-short"' ) ?>
 
     <span class="label-inline"> </span>
@@ -21,6 +22,5 @@
                          "placeholder" => "To Date(YYYY-MM-DD)")) ?>
 
     <button class='btn btn-primary' style="margin-left: 20px;"> Show </button>
-    </div>
-  </div>
-</form>
+  </form>
+</div>

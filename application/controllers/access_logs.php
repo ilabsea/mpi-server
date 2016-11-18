@@ -7,7 +7,7 @@ class Access_logs extends MpiController {
   }
 
   function index() {
-    $params = $this->filter_params(array('application_id', 'from', 'to'));
+    $params = $this->filter_params(array('application_id', 'from', 'to', 'type'));
     $paginate_logs = ApiAccessLog::search_paginate($params,"created_at ASC");
 
     $this->set_view_variables(array(

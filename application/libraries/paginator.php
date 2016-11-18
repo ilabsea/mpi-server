@@ -58,11 +58,7 @@
     }
 
     function link($text, $page, $class=''){
-      $form = array();
-      parse_str($_SERVER['QUERY_STRING'], $form);
-      $form["page"] = $page;
-
-      $url = $_SERVER['PHP_SELF']. "?".http_build_query($form);
+      $url = AppHelper::url(array("page" => $page));
       return "<li class='{$class}'><a href='{$url}'> {$text} </a></li> ";
     }
 

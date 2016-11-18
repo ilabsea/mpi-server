@@ -33,3 +33,6 @@ select.tokenizer-mini {
 .pagination {
   text-align: right;
 }
+.well{
+  padding: 0px 15px;
+}
