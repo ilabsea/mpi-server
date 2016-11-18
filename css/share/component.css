@@ -75,6 +75,10 @@ label-inline {
   background: #aaa;
 }
 
+.item-nav:hover{
+    background: #ccc;
+}
+
 .item-nav-group {
   text-align: right;
   margin: 10px 0px;
