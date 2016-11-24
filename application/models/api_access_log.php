@@ -36,7 +36,7 @@ class ApiAccessLog extends Imodel {
 
     $active_record->db->select("application_name, DATE(created_at) AS access_date, count(*) AS access_counts");
     $active_record->db->group_by("application_name, access_date");
-    $active_record->db->order_by("access_date");
+    $active_record->db->order_by("access_date DESC");
     $active_record->db->from(ApiAccessLog::table_name());
 
     $query = $active_record->db->get();

@@ -84,7 +84,6 @@ class Patient extends Imodel {
               FROM mpi_patient p";
 
     $where = $this->generate_where($criteria);
-    ILog::debug_message('criterias', $criteria);
 
     if ($where != "")
       $sql .= " WHERE ".$where;

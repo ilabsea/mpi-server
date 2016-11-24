@@ -184,7 +184,7 @@ class Imodel extends CI_Model {
     return $paginator;
   }
 
-  static function all($conditions=array(), $order_by=null, $offset=0, $limit=10){
+  static function all($conditions=array(), $order_by=null, $offset=null, $limit=null){
     $class_name = static::class_name();
     $active_record = new $class_name;
 
