@@ -16,30 +16,20 @@ class Patients extends MpiController {
   }
 
   function patientlist() {
-    
+
     $data = array();
     $data["services"] = Service::mapper();
-    $criteria = $this->build_criterias();
-
-    if (isset($_REQUEST["orderby"]))
-      $criteria["orderby"] = $_REQUEST["orderby"];
-
-    if (isset($_REQUEST["orderdirection"]))
-      $criteria["orderdirection"] = $_REQUEST["orderdirection"];
-
-    if (isset($_REQUEST["cur_page"]))
-      $criteria["cur_page"] = $_REQUEST["cur_page"];
-
-
-    if ($criteria["date_from"] != null && date_html_to_php($criteria["date_from"]) == null){
-      Isession::setFlash("error", "Visit date (from) format is not correct");
-      return $this->render_error(array_merge($criteria, $data));
-    }
-
-    if($criteria["date_to"] != null && date_html_to_php($criteria["date_to"]) == null){
-      Isession::setFlash("error", "Visit date (to) format is not correct");
-      return $this->render_error(array_merge($criteria, $data));
-    }
+    $criteria = $this->filter_params(array("cri_serv_id",
+                                          "cri_master_id",
+                                          "cri_pat_gender",
+                                          "cur_page",
+                                          "cri_site_code",
+                                          "cri_external_code",
+                                          "cri_external_code2",
+                                          "date_from",
+                                          "date_to",
+                                          "orderby",
+                                          "orderdirection"));
 
     $total_patients = $this->patient->count_patient_list($criteria);
     $total_pages = (int)($total_patients / Iconstant::PAGINATION_ROW_PER_PAGE);
@@ -108,20 +98,5 @@ class Patients extends MpiController {
     $data["orderdirection"] = $orderdirection;
     $this->set_view_variables($data);
     $this->render_view();
-  }
-
-  function build_criterias() {
-    $criteria = $this->filter_params(array("cri_serv_id",
-                                          "cri_master_id",
-                                          "cri_pat_gender",
-                                          "cur_page",
-                                          "cri_site_code",
-                                          "cri_external_code",
-                                          "cri_external_code2",
-                                          "date_from",
-                                          "date_to",
-                                          "orderby",
-                                          "orderdirection"));
-    return $criteria;
   }
 }

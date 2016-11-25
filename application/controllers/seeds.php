@@ -8,10 +8,16 @@ class Seeds extends MpiController {
   function init(){
     parent::init();
     $this->load->model("field");
+    $this->load->model("patient");
+
   }
 
   functon console() {
     exit;
+  }
+
+  function patient_visits_counter(){
+    Patient::migrate_counter_cache();
   }
 
   function visit_fields() {

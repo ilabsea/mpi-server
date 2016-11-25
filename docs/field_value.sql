@@ -1,0 +1,10 @@
+CREATE TABLE `field_value` (
+  `id` int(11) NOT NULL,
+  `field_owner_id` int(11) NOT NULL,
+  `field_owner_type` varchar(20) NOT NULL,
+  `field_id` int(11) NOT NULL,
+  `field_type` char(24) NOT NULL,
+  `value` text NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

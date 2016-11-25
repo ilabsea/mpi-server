@@ -33,21 +33,28 @@ class Visit extends Imodel {
     return 'Visit';
   }
 
-  function after_create(){
-    $visits_count = Visit::count(array("pat_id" => $this->pat_id));
-    $visit_positives_count = Visit::count(array("pat_id" => $this->pat_id, "info"=> "positive"));
-    $patient = Patient::find($this->pat_id);
+  static update_count_cache($patient){
+    $patient_id = $patient->id();
+    $visits_count = Visit::count(array("pat_id" => $patient_id));
+    $visit_positives_count = Visit::count(array("pat_id" => $patient_id, "info"=> "positive"));
+
 
     $patient->update_attributes(array("visits_count" => $visits_count,
                                       "visit_positives_count" => $visit_positives_count ));
 
-    ILog::debug_message('patient:', $patient,1);
+    ILog::debug_message('patient visits updated:', $patient,1);
+  }
+
+  function after_create(){
+    $patient = Patient::find($this->pat_id);
+    Visit::update_count_cache($patient);
 
   }
 
   function after_update() {
-    $visit_positives_count = Visit::count(array("pat_id" => $this->pat_id, "info"=> "positive"));
     $patient = Patient::find($this->pat_id);
+    $visit_positives_count = Visit::count(array("pat_id" => $patient->id(), "info"=> "positive"));
+
     $patient->update_attributes(array("visit_positives_count" => $visit_positives_count ));
   }
 }

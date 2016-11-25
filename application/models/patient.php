@@ -42,6 +42,28 @@ class Patient extends Imodel {
     return 'Patient';
   }
 
+  static function migrate_counter_cache() {
+    $limit=100
+    $count = Patient::count(array("visits_count" => 0, "visit_positives_count" => 0));
+
+    $repeat = ceil($count/$limit);
+    for($i=0; $i< $repeat; $i++) {
+      Patient::foreach_migrate($limit);
+    }
+  }
+
+  static function foreach_migrate($limit=100) {
+    $order_by=null
+    $offset=null
+    $patients = Patient::all(array("visits_count" => 0, "visit_positives_count" => 0),
+                    $order_by,
+                    $offset,
+                    $limit);
+    foreach($patients as $patient){
+      Visit::update_count_cache($patient);
+    }
+  }
+
   function search ($gender="") {
     ILog::debug("search patient");
     $sql = "SELECT p.pat_id,
@@ -78,8 +100,8 @@ class Patient extends Imodel {
                    p.pat_dob,
                    p.date_create,
                    p.pat_register_site,
-                   (SELECT COUNT(ps.visit_id) FROM mpi_visit ps WHERE ps.pat_id = p.pat_id) AS nb_visit,
-                   (SELECT COUNT(ps.visit_id) FROM mpi_visit ps WHERE ps.pat_id = p.pat_id AND LOWER(ps.info) = 'positive') AS nb_visit_positive,
+                   p.visits_count, //nb_visit
+                   p.visit_postives_count, // nb_visit_positive,
                    p.new_pat_id
               FROM mpi_patient p";
 
