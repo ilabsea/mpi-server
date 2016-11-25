@@ -33,7 +33,7 @@ class Visit extends Imodel {
     return 'Visit';
   }
 
-  static update_count_cache($patient){
+  static function update_count_cache($patient){
     $patient_id = $patient->id();
     $visits_count = Visit::count(array("pat_id" => $patient_id));
     $visit_positives_count = Visit::count(array("pat_id" => $patient_id, "info"=> "positive"));
@@ -42,7 +42,6 @@ class Visit extends Imodel {
     $patient->update_attributes(array("visits_count" => $visits_count,
                                       "visit_positives_count" => $visit_positives_count ));
 
-    ILog::debug_message('patient visits updated:', $patient,1);
   }
 
   function after_create(){

@@ -26,6 +26,11 @@ class Patient extends Imodel {
   var $created_at = null;
   var $updated_at = null;
 
+  function gender(){
+    $gender = $this->pat_gender == 2 ? "Female" : "Male";
+    return $gender;
+  }
+
   static function timestampable() {
     return true;
   }
@@ -43,7 +48,7 @@ class Patient extends Imodel {
   }
 
   static function migrate_counter_cache() {
-    $limit=100
+    $limit=100;
     $count = Patient::count(array("visits_count" => 0, "visit_positives_count" => 0));
 
     $repeat = ceil($count/$limit);
@@ -53,8 +58,8 @@ class Patient extends Imodel {
   }
 
   static function foreach_migrate($limit=100) {
-    $order_by=null
-    $offset=null
+    $order_by=null;
+    $offset=null;
     $patients = Patient::all(array("visits_count" => 0, "visit_positives_count" => 0),
                     $order_by,
                     $offset,
@@ -65,7 +70,6 @@ class Patient extends Imodel {
   }
 
   function search ($gender="") {
-    ILog::debug("search patient");
     $sql = "SELECT p.pat_id,
                    p.pat_gender,
                    p.pat_dob,
@@ -93,120 +97,84 @@ class Patient extends Imodel {
     return $query;
   }
 
-  function patient_list($criteria, $start, $rows) {
-    $sql = "SELECT p.pat_id,
-                   p.pat_gender,
-                   p.pat_age,
-                   p.pat_dob,
-                   p.date_create,
-                   p.pat_register_site,
-                   p.visits_count, //nb_visit
-                   p.visit_postives_count, // nb_visit_positive,
-                   p.new_pat_id
-              FROM mpi_patient p";
-
-    $where = $this->generate_where($criteria);
-
-    if ($where != "")
-      $sql .= " WHERE ".$where;
-    if($criteria["orderby"])
-      $sql .= " ORDER BY ".$criteria["orderby"]." ".$criteria["orderdirection"];
-
-    $sql .= " LIMIT ".$start.", ".$rows;
-
-    return $this->db->query($sql);
+  static function count_filter($criterias){
+    $active_record = new Patient();
+    $active_record->db->select("count(*)");
+    $active_record = Patient::where_filter($active_record, $criterias);
+    $count = $active_record->db->count_all_results();
+    return $count;
   }
 
-  private function generate_where($criteria) {
-    $where = "";
-    $conditions = array();
+  static function all_filter($criterias){
+    $active_record = new Patient();
+    $active_record->db->select("p.pat_id, p.pat_gender, p.pat_age, p.pat_dob, p.date_create, p.pat_register_site, p.visits_count, p.visit_positives_count,p.new_pat_id");
+    $active_record = Patient::where_filter($active_record, $criterias);
 
-    if ($criteria["cri_pat_gender"])
-      $conditions[] =  "p.pat_gender =".$criteria["cri_pat_gender"];
-
-    if ($criteria["cri_master_id"])
-      $conditions[] = "p.pat_id LIKE '%".mysql_real_escape_string($criteria["cri_master_id"])."%'";
-
-    $sub_where = [];
-
-
-    if ($criteria["date_from"])
-      $sub_where[] = "p.date_create >= '".date_html_to_mysql($criteria["date_from"])." 00:00:00'";
-
-    if ($criteria["date_to"])
-      $sub_where[] = "p.date_create <= '".date_html_to_mysql($criteria["date_to"])." 23:59:59'";
-
-    if ($criteria["cri_site_code"])
-      $sub_where[] = "p.pat_register_site ='".mysql_real_escape_string($criteria["cri_site_code"])."'";
-
-    $sub_sql = [];
-    $sub_sql2 = [];
-    $sub_sql0 = "";
-
-
-    $sub_sql2[] = "v.pat_id = p.pat_id";
-
-    if ($criteria["date_from"])
-      $sub_sql2[] = " v.visit_date >= '".date_html_to_mysql($criteria["date_from"])."'";
-
-    if ($criteria["date_to"])
-      $sub_sql2[] = " v.visit_date <= '".date_html_to_mysql($criteria["date_to"])."'";
-
-    if ($criteria["cri_site_code"] )
-      $sub_sql2[] = " v.site_code = '".mysql_real_escape_string($criteria["cri_site_code"])."'";
-
-
-    if ($criteria["cri_serv_id"] || $criteria["cri_external_code"] || $criteria["cri_external_code2"] ){
-      $sub_sql[] = " EXISTS (SELECT v.visit_id FROM mpi_visit v WHERE";
-
-      $sub_sql[] = " v.pat_id = p.pat_id";
-      if ($criteria["cri_serv_id"])
-        $sub_sql[] = " v.serv_id = ".$criteria["cri_serv_id"];
-
-
-      if ($criteria["cri_external_code"])
-        $sub_sql[] = " v.ext_code = '".mysql_real_escape_string($criteria["cri_external_code"])."'";
-
-      if ($criteria["cri_external_code2"])
-        $sub_sql [] = " v.ext_code_2 = '".mysql_real_escape_string($criteria["cri_external_code2"])."'";
-    }
-
-    if (count($sub_sql2) ){
-      if (count($sub_sql))
-        $sub_sql0 = implode(" AND ", $sub_sql) . " AND " . implode(" AND ", $sub_sql2) ;
-      else
-        $sub_sql0 = " EXISTS (SELECT v.visit_id FROM mpi_visit v WHERE". implode(" AND", $sub_sql2) . ")";
-    }
-
-    if ($sub_where == ""){
-      if ($sub_sql != "")
-        $where .=" AND ".$sub_sql;
-      else{
-        if ($sub_sql == "")
-          $where .=" AND (".$sub_where." OR ".$sub_sql0.")";
-        else
-          $where .= " AND ((".$sub_where." AND ".$sub_sql.") OR ".$sub_sql0.")";
-      }
-
-      if ($where != ""){
-        $where = trim($where, " AND");
-        $where = trim($where, " ");
-      }
-    }
-    return $where;
+    if($criterias["order_direction"])
+      $active_record->db->order_by($criterias["order_by"], $criterias["order_direction"]);
+    $active_record->db->limit(Paginator::per_page());
+    $active_record->db->offset(Paginator::offset());
+    $query = $active_record->db->get();
+    return $query->result();
   }
 
-  function count_patient_list($criteria) {
-    $sql = "SELECT count(pat_id) as nb_patient FROM mpi_patient p";
-    $where = $this->generate_where($criteria);
-    if ($where != "")
-      $sql .= " WHERE ".$where;
+  static function where_filter($active_record, $criterias){
+    $active_record->db->from('mpi_patient p');
 
-    $query = $this->db->query($sql);
-    if ($query->num_rows() <= 0)
-      return 0;
-    $row = $query->row_array();
-    return $row["nb_patient"];
+    $patient_conditions = array();
+    $visit_conditions = array();
+
+    if($criterias['pat_gender'])
+      $patient_conditions['p.pat_gender'] = $criterias['pat_gender'];
+
+    if($criterias["master_id"])
+      $patient_conditions['p.pat_id LIKE'] = "%". $criterias["master_id"] . "%";
+
+    if($criterias["date_from"]){
+      $patient_conditions["p.date_create >="] = Imodel::beginning_of_day($criterias["date_from"]);
+      $visit_conditions["v.visit_date >="] = $criterias["date_from"];
+    }
+
+    if($criterias["date_to"]){
+      $patient_conditions["p.date_create <="] = Imodel::end_of_day($criterias["date_to"]);
+      $visit_conditions["v.visit_date <="] = $criterias["date_to"];
+    }
+
+    if($criterias["site_code"]){
+      $patient_conditions['p.pat_register_site'] = $criterias["site_code"];
+      $visit_conditions['v.site_code = '] = $criterias["site_code"];
+    }
+
+    if($criterias["serv_id"])
+      $visit_conditions["v.serv_id = "] = $criterias["serv_id"];
+
+    if($criterias["external_code"])
+      $visit_conditions["v.ext_code = "] = $criterias["external_code"];
+
+    if($criterias["external_code2"])
+      $visit_conditions["v.ext_code_2 = "] = $criterias["external_code2"];
+
+    foreach($patient_conditions as $key => $value)
+      $active_record->db->where($key, $value);
+
+    if(count($visit_conditions) >0 ){
+      $query_string = array();
+      foreach($visit_conditions as $key => $value)
+        $query_string[] = $key . "" . mysql_real_escape_string($value);
+
+      $where = implode(" AND ", $query_string);
+      $visit_query = "SELECT v.pat_id FROM mpi_visit v WHERE {$where} GROUP BY v.pat_id";
+      $active_record->db->where("p.pat_id IN ($visit_query) ");
+    }
+
+    return $active_record;
+  }
+
+  static function paginate_filter($criterias) {
+    $total_counts = Patient::count_filter($criterias);
+    $records = Patient::all_filter($criterias);
+    $paginator = new Paginator($total_counts, $records);
+    return $paginator;
   }
 
   function newPatientFingerprint($data) {
@@ -279,44 +247,30 @@ class Patient extends Imodel {
     return $pat_id;
   }
 
-  function getPatientById($pat_id) {
-    $sql = "SELECT pat_id,
-                   pat_gender,
-                   pat_age,
-                   date_create,
-                   pat_register_site,
-                   pat_dob
-              FROM mpi_patient
-             WHERE pat_id = '".mysql_real_escape_string($pat_id)."'";
-    $query = $this->db->query($sql);
-    if ($query->num_rows() <= 0)
-      return null;
+  static function visits($patient_ids, $order_by, $order_direction) {
+    $active_record = new Patient();
+    $ids = implode(",", $patient_ids);
+    $order_by = $order_by == "" ? "visit_date" : $order_by;
+    $order_direction = $order_direction == "" ? "DESC" : $order_direction;
 
-    return $query->row_array();
-  }
-
-  function getVisits($var, $orderby="visit_date", $orderdirection="DESC") {
-    if (count($var) <= 0 )
-       return null;
-
-    $patient_ids = implode("','", $var);
-    $patient_ids = "'".$patient_ids."'";
     $sql = "SELECT ps.visit_id,
-                  ps.pat_id,
-                  ps.serv_id,
-                  s.serv_code,
-                  ps.site_code,
-                  site.site_name,
-                  ps.ext_code,
-                  ps.ext_code_2,
-                  ps.visit_date,
-                  ps.pat_age,
-                  ps.info
+                   ps.pat_id,
+                   ps.serv_id,
+                   s.serv_code,
+                   ps.site_code,
+                   site.site_name,
+                   ps.ext_code,
+                   ps.ext_code_2,
+                   ps.visit_date,
+                   ps.pat_age,
+                   ps.info
               FROM mpi_visit ps
               LEFT JOIN mpi_service s ON (s.serv_id = ps.serv_id)
               LEFT JOIN mpi_site site ON (site.site_code = ps.site_code)
-              WHERE pat_id IN (".$patient_ids.") ORDER BY ".$orderby." ".$orderdirection;
-    return $this->db->query($sql);
+              WHERE pat_id IN ({$ids}) ORDER BY {$order_by} {$order_direction} ";
+
+    $query = $active_record->db->query($sql);
+    return $query->result();
   }
 
   function getVisitsByPID($pid) {

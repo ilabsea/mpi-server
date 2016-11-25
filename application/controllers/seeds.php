@@ -9,11 +9,8 @@ class Seeds extends MpiController {
     parent::init();
     $this->load->model("field");
     $this->load->model("patient");
+    $this->load->model("visit");
 
-  }
-
-  functon console() {
-    exit;
   }
 
   function patient_visits_counter(){

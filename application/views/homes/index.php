@@ -1,6 +1,6 @@
 <?php
   $cards = array(
-    array("title" => "Patients", "image" => "patients.jpg", "url" => "patients/patientlist", "admin" => false),
+    array("title" => "Patients", "image" => "patients.jpg", "url" => "patients/index", "admin" => false),
     array("title" => "Sites", "image" => "hospital_icon2.png", "url" => "sites/sitelist", "admin" => false),
     array("title" => "Reports", "image" => "reports_icon.png", "url" => "reports/reportmenu", "admin" => false),
 
