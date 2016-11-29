@@ -3,12 +3,19 @@ class ApiAccessController extends ApiController {
 
   function before_action() {
     parent::before_action();
-    $access_token = $this->access_token();
 
+    if($this->skip_authenticate())
+      return true;
+
+    $access_token = $this->access_token();
     if(!$this->oauth->authenticate_token($access_token)) {
       return $this->render_unauthorized($this->oauth->errors);
       exit;
     }
+  }
+
+  function skip_authenticate(){
+    return false;
   }
 
   function after_action($status){
@@ -17,24 +24,22 @@ class ApiAccessController extends ApiController {
   }
 
   function access_log($status){
-    $request_type = $_SERVER['REQUEST_METHOD'];
-    if($request_type == 'POST')
-      $params = $_POST;
-    else if($request_type == 'GET')
-      $params = $_GET;
-
+    $params = AppHelper::is_post_request() ? $_POST : $_GET;
     $api_access_log = new ApiAccessLog();
 
     $attrs = array(
-      "application_id" => $this->oauth->application->id(),
-      "application_name" => $this->oauth->application->name,
       "ip" => $this->oauth->ip_address(),
       "status" => $status,
       "params" => $params,
-      "http_verb" => $request_type,
+      "http_verb" => AppHelper::request_type(),
       "action" => $this->router->fetch_class(). "/".$this->router->fetch_method(),
       "url" => $_SERVER['REQUEST_URI']
     );
+
+    if($this->oauth->application){
+      $attrs["application_id"] = $this->oauth->application->id();
+      $attrs["application_name"] = $this->oauth->application->name;
+    }
 
     $api_access_log->set_attributes($attrs);
     $api_access_log->save();

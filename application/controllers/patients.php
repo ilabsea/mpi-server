@@ -7,14 +7,6 @@ class Patients extends MpiController {
     $this->load->model("patient");
   }
 
-  function render_error($datas){
-    $data["patient_list"] = null;
-    $data["total_record"] = 0;
-    $data["nb_of_page"] = 1;
-    $this->set_view_variables($data);
-    $this->render_view();
-  }
-
   function index() {
 
     $data = array();

@@ -52,4 +52,4 @@
 </script>
 
 <div id="chart_div" style="width: 100%; height: 300px; background: #eee;"></div>
-<? require dirname(__FILE__). "/_aggregate_table.php" ?>
+<? require dirname(__FILE__). "/_aggregate_list.php" ?>

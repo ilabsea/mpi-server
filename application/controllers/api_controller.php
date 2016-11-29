@@ -13,6 +13,7 @@ class ApiController extends BaseController {
 
     require_once APPPATH.'libraries/Imodel.php';
     require_once APPPATH.'libraries/api_oauth_helper.php';
+    require_once APPPATH.'libraries/app_helper.php';
 
     require_once APPPATH.'models/field.php';
     require_once APPPATH.'models/application.php';

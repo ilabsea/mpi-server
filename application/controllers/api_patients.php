@@ -3,8 +3,14 @@
 class Api_patients extends ApiAccessController{
 
   function index() {
-    $response = array("status" => "OK");
-    $this->render_json($response);
+    $params = $_GET;
+    $this->render_json($params);
+  }
+
+  function skip_authenticate(){
+    if($this->router->fetch_method() == "index")
+      return true;
+    return false;
   }
 
   //URL: patients/update/$id

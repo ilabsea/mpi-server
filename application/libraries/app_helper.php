@@ -14,4 +14,19 @@ class AppHelper {
       $result[$key] = $value;
     return $result;
   }
+
+  static function is_post_request(){
+    $request_type = AppHelper::request_type();
+    return $request_type == 'POST';
+
+  }
+
+  static function is_get_request(){
+    $request_type = AppHelper::request_type();
+    return $request_type == 'GET';
+  }
+
+  static function request_type(){
+    return $_SERVER['REQUEST_METHOD'];
+  }
 }
