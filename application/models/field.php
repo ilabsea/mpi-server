@@ -5,10 +5,21 @@ class Field extends Imodel {
   var $code = '';
   var $is_encrypted = 0;
   var $type = "";
+  var $table_type = "";
   var $soft_delete = false;
   var $dynamic_field = 1;
   var $created_at = null;
   var $updated_at = null;
+
+  const PATIENT = 'Patient';
+  const VISIT = 'Visit';
+
+  static function table_types(){
+    return array(
+      self::PATIENT => self::PATIENT,
+      self::VISIT => self::VISIT
+    );
+  }
 
   static function types() {
     return array(
@@ -42,7 +53,18 @@ class Field extends Imodel {
     $result = [];
     foreach($fields as $field)
       $result[$field->id] = $field->code;
+
+    $result["visit.*"] = "visit.*";
+    $result["patient.*"] = "patient.*";
     return $result;
+  }
+
+  function before_save(){
+    parent::before_save();
+
+    $code = str_replace(' ', '', $this->code);
+    $code = preg_replace('/[^A-Za-z0-9]/', '_', $code);
+    $this->set_attribute("code", $code);
   }
 
   function validation_rules(){
@@ -51,5 +73,13 @@ class Field extends Imodel {
     $this->form_validation->set_rules('code', 'Code', "trim|required|{$code_uniqueness}");
     $this->form_validation->set_rules('type', 'Type', 'required');
     return true;
+  }
+
+  function is_patient_field(){
+    return $this->table_type == Field::PATIENT;
+  }
+
+  function is_visit_field(){
+    return $this->table_type == Field::VISIT;
   }
 }

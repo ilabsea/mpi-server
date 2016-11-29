@@ -344,6 +344,7 @@ class Imodel extends CI_Model {
 
     $this->before_save();
     $this->before_update();
+
     if(!$this->validate())
       return false;
 

@@ -64,7 +64,7 @@ class Fields extends MpiController {
   }
 
   function field_params(){
-    return $this->filter_params(array("name", "code", "type", "is_encrypted"));
+    return $this->filter_params(array("name", "code", "type", "is_encrypted", "table_type"));
   }
 
   function load_field($id) {

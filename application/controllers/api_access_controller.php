@@ -43,4 +43,32 @@ class ApiAccessController extends ApiController {
   function access_token(){
     return isset($_SERVER["HTTP_TOKEN"]) ? $_SERVER["HTTP_TOKEN"] : null;
   }
+
+  function authorize_write_access(){
+    $params = $_POST;
+    if(!$this->oauth->scope->has_write_access($params)){
+      $allow_fields = implode(", ", $this->oauth->scope->writeable_fields_code());
+      $errors = array(
+        "error" => 'Unauthorized',
+        "error_description" => "You can only access these fields: ({$allow_fields})"
+      );
+      return $this->render_unauthorized($errors);
+      exit;
+    }
+    return true;
+  }
+
+  function authorize_read_access(){
+    $params = $_GET;
+    if(!$this->oauth->scope->has_read_access($params)){
+      $allow_fields = implode(", ", $this->oauth->scope->readable_fields_code());
+      $errors = array(
+        "error" => 'Unauthorized',
+        "error_description" => "You can only access these fields: ({$allow_fields})"
+      );
+      return $this->render_unauthorized($errors);
+      exit;
+    }
+    return true;
+  }
 }

@@ -16,6 +16,7 @@
       <th>No</th>
       <th>Name</th>
       <th>Code</th>
+      <th>Table</th>
       <th>Encryption</th>
       <th>Field Type</th>
       <th>Created at</th>
@@ -29,6 +30,7 @@
         <td><?= Paginator::offset() + $index + 1 ?></td>
         <td><?= $field->name ?></td>
         <td><?= $field->code ?></td>
+        <td><?= $field->table_type ?></td>
         <td>
           <span class="label item">
             <?= $field->is_encrypted ? "Encrypted" : "Plain" ?>

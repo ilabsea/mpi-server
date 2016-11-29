@@ -15,6 +15,15 @@ class ApplicationToken extends Imodel {
     $this->expires_in = 30 * 24 * 60 * 60;
   }
 
+  function to_json(){
+    return array(
+      "token" => $this->token,
+      "refresh_token" => $this->refresh_token,
+      "expires_in" => $this->expires_in,
+      "created_at" => $this->created_at
+    );
+  }
+
   function expired() {
     $created_at = strtotime($this->created_at);
     return $created_at + $this->expires_in < time();

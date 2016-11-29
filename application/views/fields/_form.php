@@ -19,10 +19,19 @@
   </div>
 </div>
 
+
+
 <div class="row-fluid input-row">
-  <div class="span2">Type*</div>
+  <div class="span2">Data Type*</div>
   <div class="span10">
     <?= form_dropdown('type', Field::types(), $field->type, 'id="type" class="tokenizer tokenizer-short"' ) ?>
+  </div>
+</div>
+
+<div class="row-fluid input-row">
+  <div class="span2">Table*</div>
+  <div class="span10">
+    <?= form_dropdown('table_type', Field::table_types(), $field->table_type, 'id="type" class="tokenizer tokenizer-short"' ) ?>
   </div>
 </div>
 

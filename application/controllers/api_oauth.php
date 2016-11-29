@@ -12,7 +12,7 @@ class Api_oauth extends ApiController {
   function token(){
     $params = $_POST;
     if($this->oauth->strategy_token($params))
-      return $this->render_json($this->oauth->application_token);
+      return $this->render_json($this->oauth->application_token->to_json());
     return $this->render_unauthorized($this->oauth->errors);
   }
 }

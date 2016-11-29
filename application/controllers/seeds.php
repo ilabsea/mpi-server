@@ -13,11 +13,16 @@ class Seeds extends MpiController {
 
   }
 
+  function fields(){
+    $this->create_fields($this->visit_fields(), "Visit");
+    $this->create_fields($this->patient_fields(), "Patient");
+  }
+
   function patient_visits_counter(){
     Patient::migrate_counter_cache();
   }
 
-  function visit_fields() {
+  private function visit_fields() {
     $visits = array(
       array("code" => "visit_id", "type" => "Integer"),
       array("code" => "pat_id", "type" => "String"),
@@ -36,7 +41,7 @@ class Seeds extends MpiController {
     return $visits;
   }
 
-  function patient_fields(){
+  private function patient_fields(){
     $patients = array(
       array("code" => "pat_id", "type" => "String"),
       array("code" => "pat_gender", "type" => "Integer"),
@@ -62,14 +67,16 @@ class Seeds extends MpiController {
     return $patients;
   }
 
-  function fields(){
-    $table_fields = array_merge($this->visit_fields(), $this->patient_fields());
-    ILog::debug_message("fields merged: ", $table_fields);
-
+  private function create_fields($table_fields, $table_type){
+    $prefix = $table_type == "Visit" ? 'v_' : 'p_';
     foreach($table_fields as $field_attrs) {
+      $code = $field_attrs['code'];
       $field_attrs['dynamic_field'] = 0;
       $field_attrs['is_encrypted'] = 0;
-      $field_attrs['name'] = $field_attrs["code"];
+      $field_attrs['code'] = $prefix.$code;
+      $field_attrs['name'] = $table_type . ' ' . $code;
+      $field_attrs['table_type'] = $table_type;
+
       ILog::debug_message("fields: ", $field_attrs);
       $field = Field::find_by(array("code" => $field_attrs["code"] ));
 
@@ -82,6 +89,5 @@ class Seeds extends MpiController {
           ILog::debug_message("errors", $field->get_errors());
       }
     }
-
   }
 }
