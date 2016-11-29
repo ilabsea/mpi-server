@@ -6,8 +6,9 @@
     var row = dataSources[i];
     var dateSplit = row[0].split("-");
     row[0] = new Date(dateSplit[0], dateSplit[1], dateSplit[2]);
-    row[1] = parseInt(row[1]);
-    row[2] = parseInt(row[2]);
+    for(var rindex=1; rindex< row.length; rindex++)
+      row[rindex] = parseInt(row[rindex]);
+
     rows.push(row);
   }
 

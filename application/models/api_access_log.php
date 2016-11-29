@@ -21,7 +21,7 @@ class ApiAccessLog extends Imodel {
     if($params['to'] != '')
       $conditions["created_at <="] = Imodel::end_of_day($params['to']);
 
-    return ApiAccessLog::paginate($conditions,"created_at ASC");
+    return ApiAccessLog::paginate($conditions,"created_at DESC");
   }
 
   static function search_graph($params) {

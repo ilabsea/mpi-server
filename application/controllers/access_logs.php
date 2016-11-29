@@ -15,7 +15,7 @@ class Access_logs extends MpiController {
       $view_params["rows"] = $rows;
     }
     else{
-      $paginate_logs = ApiAccessLog::search_paginate($params,"created_at ASC");
+      $paginate_logs = ApiAccessLog::search_paginate($params);
       $view_params["paginate_logs"] = $paginate_logs;
     }
     $this->set_view_variables($view_params);

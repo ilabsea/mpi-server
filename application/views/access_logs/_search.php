@@ -1,6 +1,11 @@
 <div class="well">
   <h4>Access Logs filter</h4>
   <?= form_open('access_logs/index', array("method"=> "GET")) ?>
+  <?= form_input(array("name" => "type",
+                       "id" => "type",
+                       "type" => "hidden",
+                       "value" => $params["type"])) ?>
+
     <span class="label-inline"> </span>
     <?= form_dropdown('application_id', AppHelper::merge_array(array(""=>"Select Application"),  Application::mapper()), $params["application_id"],
                       'id="application_id" class="tokenizer tokenizer-short"' ) ?>
