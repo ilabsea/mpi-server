@@ -23,6 +23,18 @@
 </div>
 
 <div class="row-fluid input-row">
+  <div class="span2">Display fields</div>
+
+  <div class="span9">
+    <p class='field-hint'>
+      Only fields listed below will be returned by this scope
+    </p>
+    <?= form_dropdown('display_fields[]', $fields, $scope->display_fields,
+                      'multiple id="display_fields" class="tokenizer"' ) ?>
+  </div>
+</div>
+
+<div class="row-fluid input-row">
   <div class="span2">Updatable fields</div>
 
   <div class="span9">

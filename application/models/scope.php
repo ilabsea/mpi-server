@@ -2,8 +2,10 @@
 class Scope extends Imodel {
   var $id = null;
   var $name = '';
+
   var $searchable_fields = array();
-  var $updatable_fields = array();
+  var $display_fields    = array();
+  var $updatable_fields  = array();
 
   var $created_at = null;
   var $updated_at = null;
@@ -13,7 +15,7 @@ class Scope extends Imodel {
   }
 
   static function serialize_fields() {
-    return array('searchable_fields', 'updatable_fields');
+    return array('searchable_fields', 'display_fields', 'updatable_fields');
   }
 
   static function primary_key() {

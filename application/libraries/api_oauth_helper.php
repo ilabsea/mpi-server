@@ -12,6 +12,10 @@ class ApiOauthHelper {
     return isset($this->params[$key]) ? $this->params[$key] : '';
   }
 
+  function error_message(){
+    return $this->errors['error']." (".$this->errors['error_description']. ")";
+  }
+
   function strategy_token($params){
     $this->params = $params;
     $this->errors = array();

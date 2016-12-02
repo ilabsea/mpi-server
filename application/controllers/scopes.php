@@ -1,5 +1,4 @@
 <?php
-
 class Scopes extends MpiController {
 
   function before_action() {
@@ -58,13 +57,14 @@ class Scopes extends MpiController {
   }
 
   public function scope_params(){
-    $params =  $this->filter_params(array("name", "searchable_fields", "updatable_fields"));
+    $params =  $this->filter_params(array("name", "searchable_fields", "display_fields", "updatable_fields"));
 
     if(!isset($params['updatable_fields']))
       $params['updatable_fields'] = array();
     if(!isset($params['searchable_fields']))
       $params['searchable_fields'] = array();
-
+    if(!isset($params['display_fields']))
+      $params['display_fields'] = array();
     return $params;
   }
 

@@ -25,10 +25,9 @@
 
       <tr>
         <td>Status</td>
-        <td>
-          <span style="margin-right: 5px" class="label item">
-            <?= $log->status ?>
-          </span>
+        <td valign='middle'>
+          <span class="label item"> <?= $log->status ?> </span>
+          <?= $log->status_description ?>
         </td>
       </tr>
 
@@ -50,7 +49,7 @@
 
       <tr>
         <td>Type</td>
-        <td><?= $log->http_verb?></td>
+        <td><span class="label item"><?= $log->http_verb?></span></td>
       </tr>
 
       <tr>

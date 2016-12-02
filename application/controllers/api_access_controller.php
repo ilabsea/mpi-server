@@ -9,11 +9,12 @@ class ApiAccessController extends ApiController {
 
     $access_token = $this->access_token();
     if(!$this->oauth->authenticate_token($access_token)) {
+      $this->access_log(401, "Unauthorized: ".$this->oauth->error_message());
       return $this->render_unauthorized($this->oauth->errors);
       exit;
     }
   }
-
+  //override in child controller
   function skip_authenticate(){
     return false;
   }
@@ -23,13 +24,14 @@ class ApiAccessController extends ApiController {
     $this->access_log($status);
   }
 
-  function access_log($status){
+  function access_log($status, $description=''){
     $params = AppHelper::is_post_request() ? $_POST : $_GET;
     $api_access_log = new ApiAccessLog();
 
     $attrs = array(
       "ip" => $this->oauth->ip_address(),
       "status" => $status,
+      "status_description" => $description,
       "params" => $params,
       "http_verb" => AppHelper::request_type(),
       "action" => $this->router->fetch_class(). "/".$this->router->fetch_method(),

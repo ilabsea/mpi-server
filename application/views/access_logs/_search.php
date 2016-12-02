@@ -7,7 +7,7 @@
                        "value" => $params["type"])) ?>
 
     <span class="label-inline"> </span>
-    <?= form_dropdown('application_id', AppHelper::merge_array(array(""=>"Select Application"),  Application::mapper()), $params["application_id"],
+    <?= form_dropdown('application_id', AppHelper::merge_array(array("all"=>"All Application", "" => "Unknown"),  Application::mapper()), $params["application_id"],
                       'id="application_id" class="tokenizer tokenizer-short"' ) ?>
 
     <span class="label-inline"> </span>

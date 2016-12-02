@@ -14,12 +14,13 @@
   </thead>
   <tbody>
     <?php foreach($paginate_logs->records as $index => $log): ?>
-      <tr>
+      <? $klass = $log->status >=400 ? 'item-danger' : '' ?>
+      <tr class='<?= $klass?>'>
         <td><?= Paginator::offset() + $index + 1 ?></td>
         <td><?= $log->application_name ?></td>
         <td><?= $log->created_at ?></td>
         <td><?= $log->ip ?></td>
-        <td><?= $log->status ?></td>
+        <td><span class="label item <?=$klass ?>"><?= $log->status ?></span></td>
         <!-- <td>
           <?php foreach($log->params as $key => $value): ?>
             <span style="margin-right: 5px" class="label item">
@@ -28,7 +29,7 @@
           <?php endforeach; ?>
         </td> -->
         <td><?= $log->action ?></td>
-        <td><?= $log->http_verb ?></td>
+        <td><span class="label item <?=$klass ?>"><?= $log->http_verb ?></span></td>
         <td><a href="<?= site_url("access_logs/show/".$log->id) ?>"> View </a></td>
       </tr>
     <? endforeach ?>

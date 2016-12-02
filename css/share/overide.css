@@ -10,6 +10,14 @@
   text-overflow: ellipsis;
 }
 
+span.item-danger {
+  background: red;
+}
+
+tr.item-danger {
+  color:red;
+}
+
 input, select {
   width: 240px;
 }

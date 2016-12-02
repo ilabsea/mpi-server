@@ -26,6 +26,21 @@ class Patient extends Imodel {
   var $created_at = null;
   var $updated_at = null;
 
+  static function fingerprint_fields(){
+    return array(
+      "fingerprint_r1",
+      "fingerprint_r2",
+      "fingerprint_r3",
+      "fingerprint_r4",
+      "fingerprint_r5",
+      "fingerprint_l1",
+      "fingerprint_l2",
+      "fingerprint_l3",
+      "fingerprint_l4",
+      "fingerprint_l5"
+    );
+  }
+
   function gender(){
     $gender = $this->pat_gender == 2 ? "Female" : "Male";
     return $gender;
@@ -383,7 +398,7 @@ class Patient extends Imodel {
     $seq = -1;
     $this->db->trans_start();
 
-    $sql = "SELECT pro_pat_seq 	FROM mpi_province WHERE pro_code = '".mysql_real_escape_string($province)."'";
+    $sql = "SELECT pro_pat_seq FROM mpi_province WHERE pro_code = '".mysql_real_escape_string($province)."'";
     $query = $this->db->query($sql);
 
     if ($query->num_rows() > 0){
