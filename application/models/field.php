@@ -21,6 +21,19 @@ class Field extends Imodel {
     );
   }
 
+  function cast_value($value) {
+    if($this->type == "Boolean")
+      return strtolower($value) == 'true' ? true: false;
+
+    if($this->type == "Integer")
+      return intval($value);
+
+    if($this->type == "Float")
+      return floatval($value);
+
+    return $value;
+  }
+
   static function types() {
     return array(
       "Boolean" => "Boolean",
@@ -56,6 +69,14 @@ class Field extends Imodel {
 
     $result["visit.*"] = "visit.*";
     $result["patient.*"] = "patient.*";
+    return $result;
+  }
+
+  static function dynamic_fields() {
+    $fields = Field::all(array("dynamic_field" => 1));
+    $result = array();
+    foreach($fields as $field)
+      $result[$field->code] = $field;
     return $result;
   }
 

@@ -14,7 +14,7 @@ class ApiAccessController extends ApiController {
       exit;
     }
   }
-  //override in child controller
+
   function skip_authenticate(){
     return false;
   }
@@ -28,14 +28,9 @@ class ApiAccessController extends ApiController {
     $params = AppHelper::is_post_request() ? $_POST : $_GET;
     $api_access_log = new ApiAccessLog();
 
-    $attrs = array(
-      "ip" => $this->oauth->ip_address(),
-      "status" => $status,
-      "status_description" => $description,
-      "params" => $params,
-      "http_verb" => AppHelper::request_type(),
+    $attrs = array( "ip" => $this->oauth->ip_address(), "status" => $status, "status_description" => $description,
+      "params" => $params, "http_verb" => AppHelper::request_type(), "url" => $_SERVER['REQUEST_URI'],
       "action" => $this->router->fetch_class(). "/".$this->router->fetch_method(),
-      "url" => $_SERVER['REQUEST_URI']
     );
 
     if($this->oauth->application){

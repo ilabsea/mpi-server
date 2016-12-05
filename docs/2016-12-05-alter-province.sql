@@ -1,0 +1,6 @@
+ALTER TABLE `mpi_province` ADD `id` INT(11) NOT NULL FIRST;
+ALTER TABLE `mpi_update`.`mpi_province`
+CHANGE COLUMN `id` `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '' ,
+CHANGE COLUMN `pro_id` `pro_id` INT(11) NOT NULL COMMENT '' ,
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (`id`)  COMMENT '';

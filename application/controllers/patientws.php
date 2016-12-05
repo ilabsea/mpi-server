@@ -10,7 +10,7 @@ class Patientws extends  MpiController {
 	function __construct() {
 	    parent::__construct(true, false);
 	}
-	
+
 	/**
 	 * Reload the SDK
 	 */
@@ -18,7 +18,7 @@ class Patientws extends  MpiController {
 		$grFingerprint = new GrFingerService();
 		$grFingerprint->initialize(true);
 	}
-	
+
 	/**
 	 * patient identify
 	 */
@@ -28,7 +28,7 @@ class Patientws extends  MpiController {
     	ILog::info(print_r($_POST, true));
     	$result = array("patients" => array(),
     	                "error" => "");
-    	
+
     	try {
     		// detect the fingerprint SDK
 	    	$grFingerprint = new GrFingerService();
@@ -38,14 +38,14 @@ class Patientws extends  MpiController {
 	            echo json_encode($result);
 	            return;
 	        endif;
-	       
+
 	        if (!$this->accept_webservice($grFingerprint)) :
 	        	$result["error"] = "The request was rejected. Contact application administrator for more detail";
 	        	ILog::error($result["error"]);
 	        	echo json_encode($result);
 	            return;
 	        endif;
-	        
+
 	        // get the valid fingerprint from the request
 	        $fingerprints = $this->valid_fingerprint($grFingerprint, $result);
 	        if($result["error"] != "") :
@@ -53,14 +53,14 @@ class Patientws extends  MpiController {
 	             echo json_encode($result);
 	             return;
 	        endif;
-	        
+
 	        if (count($fingerprints) <= 0) :
 	             $result["error"] = "Could not find fingerprint";
 	             ILog::error($result["error"]);
 	             echo json_encode($result);
 	             return;
 	        endif;
-	        
+
 	        // Prepare for searching according to the most prioritied
             $ret = $grFingerprint->GrFingerX->IdentifyPrepareBase64($_POST[$fingerprints[0]], $grFingerprint->GR_DEFAULT_CONTEXT);
             if ($ret != $grFingerprint->GR_OK) :
@@ -69,18 +69,18 @@ class Patientws extends  MpiController {
         	    echo json_encode($result);
 	            return;
         	endif;
-	        
+
             $gender = "";
             if (isset($_POST["gender"]) && ($_POST["gender"] == 1 || $_POST["gender"] == 2)) :
                 $gender = $_POST["gender"];
             endif;
-            
+
             $this->load->model("patient");
-            
+
             // get the list of patient with the specific gender
             $patients = $this->patient->search();
             $arr_patient = array();
-            
+
             // start doing the matching
             //$cpt = 0;
             //ILog::info("patients: ".$patients->num_rows());
@@ -91,9 +91,9 @@ class Patientws extends  MpiController {
                 if ($row[$fingerprints[0]] == null || $row[$fingerprints[0]] == "") :
                     continue;
                 endif;
-                                
+
                 $ret = $grFingerprint->GrFingerX->IdentifyBase64($row[$fingerprints[0]],$score,$grFingerprint->GR_DEFAULT_CONTEXT);
-                if( $ret == $grFingerprint->GR_MATCH) : 
+                if( $ret == $grFingerprint->GR_MATCH) :
                     $patient = array();
                     $patient["patientid"] = $row["pat_id"];
                     $patient["gender"] = $row["pat_gender"];
@@ -136,7 +136,7 @@ class Patientws extends  MpiController {
             $result["patients"] = $arr_patient;
 
 	        // Write the JSON object and send back to client
-	        ILog::info("Success"); 
+	        ILog::info("Success");
         	echo json_encode($result);
         	$grFingerprint->finalize();
 		} catch (Exception $e) {
@@ -163,49 +163,49 @@ class Patientws extends  MpiController {
 	            echo json_encode($result);
 	            return;
 	        endif;
-	  
+
 	        if (!$this->accept_webservice($grFingerprint)) :
 	        	$result["error"] = "The request was rejected. Contact application administrator for more detail";
 	        	echo json_encode($result);
 	            return;
 	        endif;
-	        
+
 	        // get the valid fingerprint from the request
 	        $fingerprints = $this->valid_fingerprint($grFingerprint, $result);
 		    if($result["error"] != "") :
 	             echo json_encode($result);
 	             return;
 		    endif;
-	        
+
 		    if (count($fingerprints) <= 0) :
 	             $result["error"] = "Could not find fingerprint";
 	             echo json_encode($result);
 	             return;
 	        endif;
-	        
+
 	        if (count($fingerprints) <= 1) :
 	             $result["error"] = "At least 2 fingerprints are required for registration";
 	             echo json_encode($result);
 	             return;
 	        endif;
-		        
+
 	        $data = array();
 	        foreach ($fingerprints as $fingerprint) :
 	        	$data[$fingerprint] = $_POST[$fingerprint];
 	        endforeach;
-	        
+
 	        if (isset($_POST["gender"])) :
-	            $data["gender"] = $_POST["gender"]; 
+	            $data["gender"] = $_POST["gender"];
 	        endif;
-	        
+
 	        if (isset($_POST["age"]) && is_nint($_POST["age"])) :
-	            $data["age"] = $_POST["age"]; 
+	            $data["age"] = $_POST["age"];
 	        endif;
-	        
+
 	        if (isset($_POST["birthdate"])) :
-	            $data["birthdate"] = $_POST["birthdate"]; 
+	            $data["birthdate"] = $_POST["birthdate"];
 	        endif;
-	        
+
 	        if (isset($_POST["sitecode"]) && $_POST["sitecode"] != "") :
 	            $data["sitecode"] = $_POST["sitecode"];
 	            $this->load->model("site");
@@ -214,18 +214,18 @@ class Patientws extends  MpiController {
 		             echo json_encode($result);
 		             return;
 	            endif;
-	        else : 
+	        else :
 	        	$result["error"] = "Side code is required";
 		        echo json_encode($result);
 		        return;
 	        endif;
-	        
+
 	        $this->load->model("patient");
 
-	        
+
 	        // creating new patient and return the new patient id
 	        $pat_id = $this->patient->newPatientFingerprint($data);
-	        ILog::info("Patient registered with id: ".$pat_id);        
+	        ILog::info("Patient registered with id: ".$pat_id);
 	        $result["patientid"] = $pat_id;
 	        echo json_encode($result);
 	        $grFingerprint->finalize();
@@ -253,25 +253,25 @@ class Patientws extends  MpiController {
 	            echo json_encode($result);
 	            return;
 	        endif;
-	  
+
 	        if (!$this->accept_webservice($grFingerprint)) :
 	        	$result["error"] = "The request was rejected. Contact application administrator for more detail";
 	        	echo json_encode($result);
 	            return;
 	        endif;
-	        
+
 	        if (isset($_POST["gender"])) :
-	            $data["gender"] = $_POST["gender"]; 
+	            $data["gender"] = $_POST["gender"];
 	        endif;
-	        
+
 	        if (isset($_POST["age"]) && is_nint($_POST["age"])) :
-	            $data["age"] = $_POST["age"]; 
+	            $data["age"] = $_POST["age"];
 	        endif;
-	        
+
 	        if (isset($_POST["birthdate"])) :
-	            $data["birthdate"] = $_POST["birthdate"]; 
+	            $data["birthdate"] = $_POST["birthdate"];
 	        endif;
-	        
+
 	        if (isset($_POST["sitecode"]) && $_POST["sitecode"] != "") :
 	            $data["sitecode"] = $_POST["sitecode"];
 	            $this->load->model("site");
@@ -280,18 +280,18 @@ class Patientws extends  MpiController {
 		             echo json_encode($result);
 		             return;
 	            endif;
-	        else : 
+	        else :
 	        	$result["error"] = "Side code is required";
 		        echo json_encode($result);
 		        return;
 	        endif;
-	        
+
 	        $this->load->model("patient");
 
-	        
+
 	        // creating new patient and return the new patient id
 	        $pat_id = $this->patient->newPatient($data);
-	        ILog::info("Patient registered with id: ".$pat_id);        
+	        ILog::info("Patient registered with id: ".$pat_id);
 	        $result["patientid"] = $pat_id;
 	        echo json_encode($result);
 	        $grFingerprint->finalize();
@@ -301,7 +301,7 @@ class Patientws extends  MpiController {
     		echo json_encode($result);
     	}
     }
-    
+
     /**
      * Create service or visit when the patient visit a site
      */
@@ -311,7 +311,7 @@ class Patientws extends  MpiController {
     	ILog::info(print_r($_POST, true));
     	$return = array("patientid" => "", "error" => "");
     	try {
-    		
+
     		// detect the fingerprint SDK
 	    	$grFingerprint = new GrFingerService();
 	        if (!$grFingerprint->initialize()) :
@@ -319,19 +319,19 @@ class Patientws extends  MpiController {
 	            echo json_encode($return);
 	            return;
 	        endif;
-	  
+
 	        if (!$this->accept_webservice($grFingerprint)) :
 	        	$return["error"] = "The request was rejected. Contact application administrator for more detail";
 	        	echo json_encode($return);
 	            return;
 	        endif;
-	        
+
 	    	if (!isset($_POST["patientid"])) :
 	    	     $return["error"] = "patientid is required";
 	    	     echo json_encode($return);
 	    	     return;
 	    	endif;
-	    	
+
 	    	$return["patientid"] = $_POST["patientid"];
 	    	if (!isset($_POST["serviceid"])) :
 	    	     $return["error"] = "serviceid is required";
@@ -342,7 +342,7 @@ class Patientws extends  MpiController {
 	    	     echo json_encode($return);
 	    	     return;
 	    	endif;
-	    	
+
 	    	/*
 	    	if (!isset($_POST["sitecode"])) :
 	    	     $return["error"] = "sitecode is required";
@@ -350,7 +350,7 @@ class Patientws extends  MpiController {
 	    	     return;
 	    	endif;
 	    	*/
-	    	
+
 	    	if (isset($_POST["sitecode"]) && $_POST["sitecode"] != "") :
 	            $data["sitecode"] = $_POST["sitecode"];
 	            $this->load->model("site");
@@ -359,19 +359,19 @@ class Patientws extends  MpiController {
 		             echo json_encode($result);
 		             return;
 	            endif;
-		    else : 
+		    else :
 		         $return["error"] = "sitecode is required";
 	    	     echo json_encode($return);
 	    	     return;
 		    endif;
-	    	
-	    	
+
+
 	    	if (!isset($_POST["visitdate"])) :
 	    	     $return["error"] = "visitdate is required";
 	    	     echo json_encode($return);
 	    	     return;
 	    	endif;
-	    	
+
 	    	$this->load->model("patient");
 	    	$patient = $this->patient->getPatientById($_POST["patientid"]);
 	    	if ($patient == null) :
@@ -379,7 +379,7 @@ class Patientws extends  MpiController {
 	    	    echo json_encode($return);
 	    	    return;
 	    	endif;
-	        
+
 	        $data = array();
 	        $data["pat_id"] = $_POST["patientid"];
 	        /*$data["gender"] = $_POST["gender"];
@@ -395,13 +395,13 @@ class Patientws extends  MpiController {
 	        $data["refer_to_oiart"] = isset($_POST["refer_to_oiart"]) && is_nint($_POST["refer_to_oiart"]) ? $_POST["refer_to_oiart"] : 0;
 	        $data["refer_to_std"] = isset($_POST["refer_to_std"]) && is_nint($_POST["refer_to_std"]) ? $_POST["refer_to_std"] : 0;
 	        $data["info"] = $_POST["info"];
-	        
+
 	        $visitid = $this->patient->newVisit($data);
 	        $return["visitid"] = $visitid;
-	        
+
 	        /*
 	        if ($data["serv_id"] == 1) :  // VCCT Service
-	        	if (($patient["fingerprint_r1"] == null || $patient["fingerprint_r1"] == "") 
+	        	if (($patient["fingerprint_r1"] == null || $patient["fingerprint_r1"] == "")
 	        		&& ($patient["fingerprint_r2"] == null || $patient["fingerprint_r2"] == "")
 	        		&& ($patient["fingerprint_r3"] == null || $patient["fingerprint_r3"] == "")
 	        		&& ($patient["fingerprint_r4"] == null || $patient["fingerprint_r4"] == "")
@@ -412,7 +412,7 @@ class Patientws extends  MpiController {
 	        		&& ($patient["fingerprint_l4"] == null || $patient["fingerprint_l4"] == "")
 	        		&& ($patient["fingerprint_l5"] == null || $patient["fingerprint_l5"] == "")
 	        		) :
-	        		
+
 	        		$this->patient->manageVcctNoFpFromVcct($data);
 	        	endif;
 	        endif;
@@ -426,7 +426,7 @@ class Patientws extends  MpiController {
 	        		$this->patient->manageVcctNoFpFromOiart($vcct_info);
 	        	endif;
 	        endif;
-	        
+
 	        echo json_encode($return);
 	    	return;
     	} catch (Exception $e) {
@@ -435,7 +435,7 @@ class Patientws extends  MpiController {
     		echo json_encode($return);
     	}
     }
-    
+
     /**
      * Synchronization module
      */
@@ -452,19 +452,19 @@ class Patientws extends  MpiController {
 	            echo json_encode($patient_array);
 	            return;
 	        endif;
-	        
+
 	        if (!$this->accept_webservice($grFingerprint)) :
 	        	$patient_array["error"] = "The request was rejected. Contact application administrator for more detail";
 	        	ILog::error($patient_array["error"]);
 	        	echo json_encode($patient_array);
 	            return;
 	        endif;
-	        
+
 	    	$patient_str = $_POST["patient"];
 	    	$patient = json_decode($patient_str, true);
-	    
+
 	    	$data = array();
-	    	
+
 	    	$fingerprints = $this->valid_fingerprint($grFingerprint, $patient_array, $patient);
 		    if($patient_array["error"] != "") :
 		    	 ILog::error($patient_array["error"]);
@@ -480,8 +480,8 @@ class Patientws extends  MpiController {
 	    	$array_found = array();
 	    	if ($patient_found == null) :
 		    	$patient_list = $this->patient->search($gender);
-		    	
-		    	
+
+
 		    	foreach ($fingerprints as $fingerprint) :
 		    	    $array_found2 = array();
 		    		$ret = $grFingerprint->GrFingerX->IdentifyPrepareBase64($patient[$fingerprint], $grFingerprint->GR_DEFAULT_CONTEXT);
@@ -491,14 +491,14 @@ class Patientws extends  MpiController {
 		                 echo json_encode($patient_array);
 		                 return;
 		            endif;
-		            
+
 		            if (count($array_found) > 1) :
 		               foreach ($array_found as $row) :
 		               		$score = 0;
 			            	if ($row[$fingerprint] == null || $row[$fingerprint] == "") :
 			            	    continue;
 			            	endif;
-			            	
+
 			                $ret = $grFingerprint->GrFingerX->IdentifyBase64($row[$fingerprint],$score,$grFingerprint->GR_DEFAULT_CONTEXT);
 			                if( $ret == $grFingerprint->GR_MATCH) :
 			                     array_push($array_found2, $row);
@@ -510,22 +510,22 @@ class Patientws extends  MpiController {
 			            	if ($row[$fingerprint] == null || $row[$fingerprint] == "") :
 			            	    continue;
 			            	endif;
-	
+
 			                $ret = $grFingerprint->GrFingerX->IdentifyBase64($row[$fingerprint],$score,$grFingerprint->GR_DEFAULT_CONTEXT);
 			                if( $ret == $grFingerprint->GR_MATCH) :
 			                     array_push($array_found2, $row);
 				            endif;
 		               endforeach;
 		            endif;
-		            
+
 		            $array_found = $array_found2;
 		            if (count($array_found) <= 1) :
 		                break;
 		            endif;
 	    	endforeach;
 	    	endif;
-		    
-	        if ($patient_found != null || count($array_found) == 0 || count($array_found) == 1): 
+
+	        if ($patient_found != null || count($array_found) == 0 || count($array_found) == 1):
 	            if ($patient_found != null) :
 	            	// Do nothing
 		        elseif (count($array_found) == 0) :
@@ -533,7 +533,7 @@ class Patientws extends  MpiController {
 		            foreach (Iconstant::$MPI_FINGERPRINT as $fingerprint) :
 		                $patient_data[$fingerprint] = isset($patient[$fingerprint]) ? $patient[$fingerprint] : "";
 		            endforeach;
-		            
+
 		            $patient_data["age"] = isset($patient["age"]) ? $patient["age"] : "";
 		            $patient_data["sitecode"] = isset($_POST["sitecode"]) ? $_POST["sitecode"] : null;
 		            $patient_data["pat_dob"] = isset($patient["datebirth"]) ? $patient["datebirth"] : null;
@@ -543,8 +543,8 @@ class Patientws extends  MpiController {
 		        elseif (count($array_found) == 1) :
 		            $patient["patientid"] = $array_found[0]["pat_id"];
 		        endif;
-		        
-		        
+
+
 		        foreach($patient["visits"] as $visit) :
 		            $data_visit = array();
 		            $data_visit["pat_id"] = $patient["patientid"];
@@ -561,8 +561,8 @@ class Patientws extends  MpiController {
 		            $data_visit["date_create"] = $visit["createdate"];
 		            $data_visit["visit_date"] = $visit["visitdate"];
 		            $this->patient->newVisit($data_visit);
-		            
-		            
+
+
 		             if ($data_visit["serv_id"] == 2) : // OI/ART Service
 			        	if (isset($visit["vcctsite"]) && $visit["vcctsite"] != "" && isset($visit["vcctnumber"]) && $visit["vcctnumber"] != "") :
 			        		$vcct_info = array();
@@ -572,13 +572,13 @@ class Patientws extends  MpiController {
 			        		$this->patient->manageVcctNoFpFromOiart($vcct_info);
 			        	endif;
 			        endif;
-		            
+
 		        endforeach;
-		        
+
 		        // prepare to send back to client
-		        
+
 		        $visits = $this->patient->getVisitsByPID($patient["patientid"]);
-		        
+
 		        $patient["visits"] = array();
 	            foreach($visits->result_array() as $row) :
 		            $visit = array();
@@ -598,19 +598,19 @@ class Patientws extends  MpiController {
 		            $visit["createdate"] = $row["date_create"];
 		            array_push($patient["visits"], $visit);
 		        endforeach;
-		        
+
 		        foreach (Iconstant::$MPI_FINGERPRINT as $fingerprint) :
 		             if (isset($patient[$fingerprint])) :
 		             	unset($patient[$fingerprint]);
 		             endif;
 		        endforeach;
-		        
+
 		        array_push($patient_array["patients"], $patient);
 				ILog::info("success");
 		        echo json_encode($patient_array);
 		        return;
 	        endif;
-	        
+
 	        if (count($array_found) > 1) :
 	        	foreach ($array_found as $elt) :
 	        	    $arr_elt = array();
@@ -647,16 +647,16 @@ class Patientws extends  MpiController {
 	        	echo json_encode($patient_array);
 		        return;
             endif;
-            
-    	} catch (Exception $e) { 
+
+    	} catch (Exception $e) {
     		$patient_array["error"] = $e->getMessage() ;
     		ILog::error("error during synchronizing: ".$e->getMessage());
             echo json_encode($patient_array);
     	}
     }
-    
+
     /**
-     * 
+     *
      * @param unknown_type $grFingerprint
      */
     private function valid_fingerprint($grFingerprint, &$result, $reference=null) {
@@ -677,7 +677,7 @@ class Patientws extends  MpiController {
     	endforeach;
         return $arr;
     }
-    
+
     /**
      * synchronize update
      */
@@ -693,23 +693,23 @@ class Patientws extends  MpiController {
 	            echo json_encode($patient_array);
 	            return;
 	        endif;
-	        
+
 	        if (!$this->accept_webservice($grFingerprint)) :
 	        	$result["error"] = "The request was rejected. Contact application administrator for more detail";
 	        	echo json_encode($result);
 	            return;
 	        endif;
-	        
+
 	    	$patient_str = $_POST["patient"];
 
 	    	$patient = json_decode($patient_str, true);
-	    	
+
 	    	if (!isset($_POST["patientid"]) || $_POST["patientid"] == "") :
 	    	    $patient_array["error"] = "Could not find master id";
             	echo json_encode($patient_array);
             	return;
 	    	endif;
-	    	
+
 	    	$patient_id = $_POST["patientid"];
 	    	$this->load->model("patient");
 	    	$patient_found = $this->patient->getPatientById($patient_id);
@@ -718,7 +718,7 @@ class Patientws extends  MpiController {
             	echo json_encode($patient_array);
             	return;
 	    	endif;
-	    	
+
 	    	foreach ($patient["visits"] as $visit) :
     			$data_visit = array();
 	            $data_visit["pat_id"] = $patient_id;
@@ -744,7 +744,7 @@ class Patientws extends  MpiController {
 		        	endif;
 		        endif;
 	    	endforeach;
-	    	
+
 	    	// prepare to send back to client
 	    	$visits = $this->patient->getVisitsByPID($patient_id);
 	        $patient["visits"] = array();
@@ -766,7 +766,7 @@ class Patientws extends  MpiController {
 	            $visit["createdate"] = $row["date_create"];
 	            array_push($patient["visits"], $visit);
 	        endforeach;
-	        
+
 	        foreach (Iconstant::$MPI_FINGERPRINT as $fingerprint) :
 	             if (isset($patient[$fingerprint])) :
 	             	unset($patient[$fingerprint]);
@@ -775,30 +775,30 @@ class Patientws extends  MpiController {
 	        $patient_array["patient"] = $patient;
 	    	echo json_encode($patient_array);
 	    	//log_message($message)
-	    	
-        } catch (Exception $e) { 
+
+        } catch (Exception $e) {
     		$patient_array["error"] = $e->getMessage() ;
     		ILog::error("error during synchronize update: ".$e->getMessage());
             echo json_encode($patient_array);
     	}
     }
-    
+
     /**
      * The test for this controller
      */
     function testAll() {
     	$grFingerprint = new GrFingerService();
-		
+
     	$this->load->library('unit_test');
     	$this->unit->run($grFingerprint->initialize(), true, "loadsdk");
     	//$this->unit->run(1+1, 2, "Test1");
-    	
+
     	//echo "<pre>";
     	//print_r ($this->unit->result());
     	//echo "</pre>";
     	echo $this->unit->report();
     }
-    
+
 	/**
      * Detect if the finger is ok with the site
      * @param Object $grFingerprint
@@ -808,16 +808,16 @@ class Patientws extends  MpiController {
     	if ($reference == null) :
     	   $reference = $_POST;
     	endif;
-    	
+
     	/*if (true) :
     	   return true;
     	endif;
     	*/
-    	
+
     	$site_code = !isset($_POST["sitecode"]) || $_POST["sitecode"] == "" ? null : $_POST["sitecode"];
     	$fp_name = !isset($_POST["member_fp_name"]) || $_POST["member_fp_name"] == "" ? null : $_POST["member_fp_name"];
     	$fp_val = !isset($_POST["member_fp_value"]) || $_POST["member_fp_value"] == "" ? null : $_POST["member_fp_value"];
-    	
+
     	if ($site_code == null || $fp_name == null || $fp_val == null) :
     	    ILog::info("Detect webservice: missing parameters");
     	    return false;
@@ -842,16 +842,16 @@ class Patientws extends  MpiController {
     	ILog::info("Detect webservice: Not match fingerprint");
     	return false;
     }
-    
+
     /**
      * Init log path
      */
     private function initLogPath() {
         if (isset($_POST["sitecode"]) && $_POST["sitecode"] != "") :
             ILog::setPath($_POST["sitecode"]);
-        endif; 
+        endif;
     }
-    
+
 	/**
      * Enroll patient
      */
@@ -869,25 +869,25 @@ class Patientws extends  MpiController {
 	            echo json_encode($result);
 	            return;
 	        endif;
-	  
+
 	        if (!$this->accept_webservice($grFingerprint)) :
 	        	$result["error"] = "The request was rejected. Contact application administrator for more detail";
 	        	echo json_encode($result);
 	            return;
 	        endif;
-	        
+
 	        if (!isset($_POST["master_id"]) || $_POST["master_id"] == "") :
 	        	$result["error"] = "Parameter master_id is required";
 	        	echo json_encode($result);
 	            return;
 	        endif;
-	        
+
 	        if (!isset($_POST["new_master_id"]) || $_POST["new_master_id"] == "") :
 	        	$result["error"] = "Parameter master_id is required";
 	        	echo json_encode($result);
 	            return;
 	        endif;
-	        
+
 	        $this->load->model("patient");
 	        $old_patient = $this->patient->getPatientById($_POST["master_id"]);
 	        if ($old_patient == null) :
@@ -895,7 +895,7 @@ class Patientws extends  MpiController {
 	        	echo json_encode($result);
 	        	return;
 	        endif;
-	        
+
 	        $new_patient = $this->patient->getPatientById($_POST["new_master_id"]);
 	        if ($new_patient == null) :
 	        	$result["error"] = "Could not find patient with master id ".$_POST["new_master_id"];
@@ -904,7 +904,7 @@ class Patientws extends  MpiController {
 	        endif;
 
 	        $this->patient->updateReplacePatientId($_POST["master_id"], $_POST["new_master_id"]);
-	        
+
 	        ILog::info("Update successfully");
 	        echo json_encode($result);
 	        $grFingerprint->finalize();

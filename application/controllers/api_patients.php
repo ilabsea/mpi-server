@@ -10,7 +10,10 @@ class Api_patients extends ApiAccessController{
   function skip_authenticate(){
     if($this->router->fetch_method() == "index")
       return true;
-    return false;
+    return true;
+  }
+
+  function create(){
   }
 
   //URL: patients/update/$id
@@ -18,5 +21,4 @@ class Api_patients extends ApiAccessController{
   function update($id){
     $this->authorize_read_access();
   }
-
 }

@@ -42,8 +42,14 @@ class MpiController extends BaseController {
     require_once APPPATH.'models/api_access_log.php';
     require_once APPPATH.'models/scope.php';
     require_once APPPATH.'models/field.php';
+    require_once APPPATH.'models/field_value.php';
     require_once APPPATH.'models/application.php';
-
+    require_once APPPATH.'models/patient.php';
+    require_once APPPATH.'models/patient.php';
+    require_once APPPATH.'models/visit.php';
+    require_once APPPATH.'models/site.php';
+    require_once APPPATH.'models/province.php';
+    require_once APPPATH.'models/patient_module.php';
 
     ILog::getInstance();
     $session_status = Isession::initializeSession();

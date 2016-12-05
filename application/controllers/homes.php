@@ -3,7 +3,39 @@
 class Homes extends MpiController {
   var $skip_before_action = "*";
 
+  function console(){
+    $patient_ids = array("KH002100000001" , "KH002100000002" );
+    $visits = PatientModule::patient_visits($patient_ids);
+    ILog::debug_message("visits", $visits,1 ,1);
+  }
+
   function index() {
+    $params = array(
+      "pat_register_site" => "0202",
+      "pat_age" => 30,
+      "fingerprint_r1" => "fpr1",
+      "fingerprint_l1" => "fpl1",
+      "pat_gender" => 1,
+      "is_referred" => false,
+      "p_is_referral" => true,
+      "v_tb" => "positve"
+    );
+
+    $patient_params = Patient::field_params($params);
+    $patient_dynamic_params = Patient::dynamic_field_params($params);
+    ILog::debug_message("params", $patient_params);
+    ILog::debug_message("dynamic params", $patient_params);
+
+    // $params = array(
+    //   "pat_register_site" => "0202",
+    //   "pat_age" => 30,
+    //   "fingerprint_r1" => "fpr1",
+    //   "fingerprint_l1" => "fpl1",
+    //   "pat_gender" => 1,
+    // );
+    // $exclude_patient_ids = array("'KH002100003193'", "'KH002100000002'", "'KH002100000051'");
+    // $patients = PatientModule::patients($params);
+    // ILog::debug_message("patients", $patients, 1, 1);
     $this->render_view();
   }
 

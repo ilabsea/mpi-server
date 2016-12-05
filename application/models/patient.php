@@ -1,5 +1,6 @@
 <?php
 class Patient extends Imodel {
+  var $id = null;
   var $pat_id = null;
   var $pat_gender = null;
   var $pat_dob = null;
@@ -26,6 +27,58 @@ class Patient extends Imodel {
   var $created_at = null;
   var $updated_at = null;
 
+
+  function to_json(){
+    return array(
+      "patientid" => $this->pat_id,
+      "gender" => $this->pat_gender,
+      "birthdate" => $this->pat_dob,
+      "sitecode" => $this->pat_register_site,
+      "createdate" => $this->date_create,
+      "age" => $this->pat_age
+    );
+  }
+
+  static function auto_increment(){
+    return false;
+  }
+
+  static function field_params($params){
+    $result = array();
+    foreach($params as $field_name => $field_value) {
+      if(Patient::is_field($field_name))
+        $result[$field_name] = $field_value;
+    }
+    return $result;
+
+  }
+
+  static function dynamic_field_params($params) {
+    $result = array();
+    $dynamic_fields = Field::dynamic_fields();
+    foreach($params as $field_name => $field_value) {
+      if(isset($dynamic_fields[$field_name]))
+        $result[$field_name] = $field_value;
+    }
+    return $result;
+  }
+
+
+
+  static function is_field($field_name) {
+    $patient = new Patient();
+    foreach($patient as $key => $value) {
+      if($field_name == $key)
+        return true;
+    }
+    return false;
+  }
+
+  function has_fingerprint($fingerprint_name){
+    if($this->$fingerprint_name)
+      return true;
+    return false;
+  }
   static function fingerprint_fields(){
     return array(
       "fingerprint_r1",
@@ -51,7 +104,7 @@ class Patient extends Imodel {
   }
 
   static function primary_key() {
-    return "pat_id";
+    return "id";
   }
 
   static function table_name() {
