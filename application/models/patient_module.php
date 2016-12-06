@@ -159,32 +159,12 @@ class PatientModule {
   static function enroll($params){
     $params["date_create"] = isset($params["date_create"]) ? $params["date_create"] : Imodel::current_time();
     $params["pat_register_site"] = isset($params["pat_register_site"]) ? $params["pat_register_site"] : "0201";
+    $patient = new Patient($params);
 
-    $site = Site::find_by(array("site_code" => $params["pat_register_site"]));
-    $province = Province::find_by(array("pro_code" => $site->pro_code));
-
-    $country = "KH";
-    $version = 1;
-
-    $sequence_fill_8_chars = str_pad($province->pro_pat_seq + 1, 8, "0", STR_PAD_LEFT);
-    $province_fill_3_chars = str_pad($site->pro_code, 3, "0", STR_PAD_LEFT);
-    $params["pat_id"] = $country.$province_fill_3_chars.$version.$sequence_fill_8_chars;
-
-    $patient_fields = Patient::field_params($params);
-    $dynamic_fields = Patient::dynamic_field_params($params);
-
-    $patient = new Patient();
-    $patient->set_attributes($patient_fields);
-
-    if($patient->save()) {
-      FieldValue::create_fields($dynamic_fields, $patient);
-      $province->update_attributes(array("pro_pat_seq" => $province->pro_pat_seq + 1 ));
+    if($patient->save())
       return $patient;
-    }
-    else{
-      ILog::debug_message("patient", $patient);
+    else
       return null;
-    }
   }
 
 }

@@ -23,8 +23,6 @@ class Homes extends MpiController {
 
     $patient_params = Patient::field_params($params);
     $patient_dynamic_params = Patient::dynamic_field_params($params);
-    ILog::debug_message("params", $patient_params);
-    ILog::debug_message("dynamic params", $patient_params);
 
     // $params = array(
     //   "pat_register_site" => "0202",

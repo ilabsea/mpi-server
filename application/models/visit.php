@@ -16,11 +16,39 @@ class Visit extends Imodel {
   var $refer_to_std = 0;
   var $created_at = null;
   var $updated_at = null;
+
+  //virtual attributes
   var $vcctsite = null;
   var $vcctnumber = null;
+  var $dynamic_fields = array();
+
+  function __construct($params = array()) {
+    $visit_fields = Visit::field_params($params);
+    $this->dynamic_fields = Visit::dynamic_field_params($params);
+    parent::__construct($visit_fields);
+  }
 
   static function virtual_fields() {
-    return array("vcctsite", "vcctnumber");
+    return array("dynamic_fields", "vcctsite", "vcctnumber");
+  }
+
+  static function field_params($params){
+    $result = array();
+    foreach($params as $field_name => $field_value) {
+      if(property_exists("Visit", $field_name))
+        $result[$field_name] = $field_value;
+    }
+    return $result;
+  }
+
+  static function dynamic_field_params($params) {
+    $result = array();
+    $dynamic_fields = Field::dynamic_fields();
+    foreach($params as $field_name => $field_value) {
+      if(isset($dynamic_fields[$field_name]))
+        $result[$field_name] = $field_value;
+    }
+    return $result;
   }
 
   static function timestampable() {
@@ -55,6 +83,8 @@ class Visit extends Imodel {
   }
 
   function after_create(){
+    FieldValue::create_fields($this->dynamic_fields, $this);
+
     $patient = Patient::find_by(array("pat_id" => $this->pat_id));
     Visit::update_count_cache($patient);
 

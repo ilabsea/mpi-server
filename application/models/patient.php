@@ -27,6 +27,37 @@ class Patient extends Imodel {
   var $created_at = null;
   var $updated_at = null;
 
+  var $province = null;
+  var $dynamic_fields = array();
+
+  public static function virtual_fields() {
+    return array("province", 'dynamic_fields');
+  }
+
+  function __construct($params = array()) {
+    $patient_fields = Patient::field_params($params);
+    $this->dynamic_fields = Patient::dynamic_field_params($params);
+    parent::__construct($patient_fields);
+  }
+
+  function after_create() {
+    FieldValue::create_fields($this->dynamic_fields, $this);
+    $this->province->update_attributes(array("pro_pat_seq" => $this->province->pro_pat_seq + 1 ));
+  }
+
+  function before_create() {
+    $site = Site::find_by(array("site_code" => $this->pat_register_site));
+    $this->province = Province::find_by(array("pro_code" => $site->pro_code));
+
+    $country = "KH";
+    $version = 1;
+
+    $sequence_fill_8_chars = str_pad($this->province->pro_pat_seq + 1, 8, "0", STR_PAD_LEFT);
+    $province_fill_3_chars = str_pad($site->pro_code, 3, "0", STR_PAD_LEFT);
+    $pat_id = $country.$province_fill_3_chars.$version.$sequence_fill_8_chars;
+    $this->set_attribute('pat_id', $pat_id);
+  }
+
 
   function to_json(){
     return array(
@@ -39,18 +70,13 @@ class Patient extends Imodel {
     );
   }
 
-  static function auto_increment(){
-    return false;
-  }
-
   static function field_params($params){
     $result = array();
     foreach($params as $field_name => $field_value) {
-      if(Patient::is_field($field_name))
+      if(property_exists("Patient", $field_name))
         $result[$field_name] = $field_value;
     }
     return $result;
-
   }
 
   static function dynamic_field_params($params) {
@@ -61,17 +87,6 @@ class Patient extends Imodel {
         $result[$field_name] = $field_value;
     }
     return $result;
-  }
-
-
-
-  static function is_field($field_name) {
-    $patient = new Patient();
-    foreach($patient as $key => $value) {
-      if($field_name == $key)
-        return true;
-    }
-    return false;
   }
 
   function has_fingerprint($fingerprint_name){

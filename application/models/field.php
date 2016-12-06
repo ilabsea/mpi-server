@@ -31,6 +31,16 @@ class Field extends Imodel {
     if($this->type == "Float")
       return floatval($value);
 
+    if($this->type == "Date") {
+      $format = '%Y-%m-%d';
+      return strptime($value, $format) ? $value : '';
+    }
+
+    if($this->type == 'DateTime') {
+      $format = '%Y-%m-%d %H:%M:%S';
+      return strptime($value, $format) ? $value : '' ;
+    }
+
     return $value;
   }
 

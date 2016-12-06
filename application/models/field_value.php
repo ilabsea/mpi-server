@@ -22,16 +22,16 @@ class FieldValue extends Imodel {
 
     $field_owner_type = is_a( $field_owner, $class_name ) ? FieldValue::PATIENT : FieldValue::VISIT;
 
-    foreach($params as $field_code => $field_value) {
+    foreach($params as $field_code => $value) {
       $dynamic_field = $dynamic_fields[$field_code];
       $attrs = array( "field_owner_id" => $field_owner_id,
                       "field_owner_type" => $field_owner_type,
                       "field_id" => $dynamic_field->id(),
                       "field_type" => $dynamic_field->type,
-                      "value" => ($field_value) );
+                      "value" => $dynamic_field->cast_value($value)
+                    );
 
-      $field_value = new FieldValue();
-      $field_value->set_attributes($attrs);
+      $field_value = new FieldValue($attrs);
       $field_value->save();
     }
   }
