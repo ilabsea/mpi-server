@@ -16,6 +16,7 @@ class ApiController extends BaseController {
     require_once APPPATH.'libraries/app_helper.php';
 
     require_once APPPATH.'models/field.php';
+    require_once APPPATH.'models/field_value.php';
     require_once APPPATH.'models/application.php';
     require_once APPPATH.'models/application_token.php';
     require_once APPPATH.'models/scope.php';
@@ -23,6 +24,7 @@ class ApiController extends BaseController {
     require_once APPPATH.'models/visit.php';
     require_once APPPATH.'models/patient.php';
     require_once APPPATH.'models/api_access_log.php';
+    require_once APPPATH.'models/vcct_from_oiart.php';
 
     $this->oauth = new ApiOauthHelper();
   }

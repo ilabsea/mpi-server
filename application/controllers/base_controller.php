@@ -61,6 +61,10 @@ class BaseController extends CI_Controller {
     $this->render_json($errors, $status);
   }
 
+  function render_bad_request($errors) {
+    $this->render_json($errors, 400);
+  }
+
   function render_unauthorized($errors) {
     $this->render_error($errors, 401);
   }

@@ -109,8 +109,10 @@ class Imodel extends CI_Model {
   }
 
   function set_attribute($field, $value){
-    if($this->exclude_field($field) || $field == static::primary_key())
+    if($field == static::primary_key())
       return;
+
+    // $this->exclude_field($field) ||
 
     $this->_changes[$field] = array($this->$field, $value);
     $this->$field = $value;
@@ -214,6 +216,17 @@ class Imodel extends CI_Model {
       $records[] = $active_record;
     }
     return $records;
+  }
+
+  static function find_by_or_new($attrs) {
+    $object = static::find_by($attrs);
+    if($object)
+      return $object;
+    else {
+      $class_name = static::class_name();
+      $active_record = new $class_name($attrs);
+      return $active_record;
+    }
   }
 
   static function find_by($conditions){
@@ -363,6 +376,9 @@ class Imodel extends CI_Model {
   function change_attributes() {
     $attrs = array();
     foreach($this->_changes as $field => $change){
+      if($this->exclude_field($field) || $field == static::primary_key())
+        continue;
+
       $value = $change[1];
       $attrs[$field] = static::is_serialized($field) ? serialize($value) : $value;
     }
@@ -395,5 +411,14 @@ class Imodel extends CI_Model {
 
   function save($validate = true){
     return $this->new_record() ? $this->insert($validate) : $this->update($validate);
+  }
+
+  function to_array() {
+    $json = array();
+    foreach($this as $field => $value) {
+      if(!$this->exclude_field($field))
+        $json[$field] = $value;
+    }
+    return $json;
   }
 }

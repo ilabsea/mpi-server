@@ -50,6 +50,7 @@ class MpiController extends BaseController {
     require_once APPPATH.'models/site.php';
     require_once APPPATH.'models/province.php';
     require_once APPPATH.'models/patient_module.php';
+    require_once APPPATH.'models/vcct_from_oiart.php';
 
     ILog::getInstance();
     $session_status = Isession::initializeSession();

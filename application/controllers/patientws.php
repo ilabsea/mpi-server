@@ -22,7 +22,7 @@ class Patientws extends  MpiController {
 	/**
 	 * patient identify
 	 */
-    function search() {
+  function search() {
     	$this->initLogPath();
     	ILog::info("Patient searching");
     	ILog::info(print_r($_POST, true));
@@ -149,7 +149,7 @@ class Patientws extends  MpiController {
     /**
      * Enroll patient
      */
-    function enroll() {
+  function enroll() {
     	$this->initLogPath();
     	ILog::info("Patient registration");
     	ILog::info(print_r($_POST, true));
@@ -239,7 +239,7 @@ class Patientws extends  MpiController {
 	/**
      * Enroll patient
      */
-    function enrollWithoutFingerprint() {
+  function enrollWithoutFingerprint() {
     	$this->initLogPath();
     	ILog::info("Patient registration without fingerprint");
     	ILog::info(print_r($_POST, true));
@@ -439,7 +439,7 @@ class Patientws extends  MpiController {
     /**
      * Synchronization module
      */
-    function synchronize() {
+  function synchronize() {
     	$this->initLogPath();
     	ILog::info("Synchronization");
     	ILog::info(print_r($_POST, true));
@@ -681,7 +681,7 @@ class Patientws extends  MpiController {
     /**
      * synchronize update
      */
-    function synchronizeupdate() {
+  function synchronizeupdate() {
     	$this->initLogPath();
     	ILog::info("Synchronization Update");
     	ILog::info(print_r($_POST, true));
@@ -804,7 +804,7 @@ class Patientws extends  MpiController {
      * @param Object $grFingerprint
      * @param array $reference
      */
-    private function accept_webservice($grFingerprint, $reference=null) {
+  private function accept_webservice($grFingerprint, $reference=null) {
     	if ($reference == null) :
     	   $reference = $_POST;
     	endif;
@@ -855,7 +855,7 @@ class Patientws extends  MpiController {
 	/**
      * Enroll patient
      */
-    function replaceUpdateMasterId() {
+  function replaceUpdateMasterId() {
     	$this->initLogPath();
     	ILog::info("Update replace patient id");
     	ILog::info(print_r($_POST, true));

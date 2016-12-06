@@ -7,25 +7,18 @@ class Api_visits extends ApiAccessController{
   }
 
   function create(){
-    $visit = Visit::find(27);
-    $visit->set_attribute("info", "positive");
-    $visit->update();
+    $params = $this->visit_params();
+    $visit = new Visit($params);
+    if($visit->save())
+      return $this->render_json($visit->to_array());
+    else
+      return $this->render_bad_request($visit->get_errors());
+  }
 
-    $visit = new Visit();
-    $attrs = array( "pat_id" => "KH002100000001",
-                    "serv_id" => 2,
-                    "site_code" => "0202",
-                    "ext_code" => "003690",
-                    "ext_code_2" => "020202069",
-                    "visit_date" => $visit->current_date(),
-                    "date_create" => $visit->current_time(),
-                    "refer_to_vcct" => 1,
-                    "refer_to_oiart" => 0,
-                    "refer_to_std" => 1,
-                    "info" => "Positive");
-
-    $visit->set_attributes($attrs);
-    $result = $visit->save();
-    $this->render_json($visit, 200);
+  function visit_params() {
+    $params = $this->filter_params(array(
+      "pat_id", "pat_age", "serv_id", "visit_date", "site_code", "ext_code", "ext_code_2", "",
+       "refer_to_vcct", "refer_to_oiart", "refer_to_std", "info", "vcctnumber", "vcctsite"
+    ));
   }
 }

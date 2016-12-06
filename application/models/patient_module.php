@@ -185,7 +185,6 @@ class PatientModule {
       ILog::debug_message("patient", $patient);
       return null;
     }
-
   }
 
 }
