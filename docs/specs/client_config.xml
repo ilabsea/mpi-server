@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <appSettings>
+    <!-- Fingerprint configuration settings-->
+    <add key="DBType" value="VCCT.DataAccess.SqlServerDatabase" />
+    <add key="ImagePath" value="C:\FingerprintImages" />
+    <add key="NumberOfSyn" value="1" />
+    <add key="RequestTimeOut" value="10000" />
+    <!--Set every form of this app to be topmost. Value can be "true" or "false"-->
+    <add key="topmost" value="false" />
+    <!--add key="Server" value="http://192.168.100.145/projects/mpi_server/index.php"/-->
+    <!--add key="Server" value="http://192.168.100.112/projects/mpi_server/index.php"/-->
+    <add key="Server" value="http://192.168.100.140/projects/mpi_server/index.php"/>
+    <add key="IdentifyURL" value="/patientws/search" />
+    <add key="EnrollURL" value="/patientws/enroll" />
+    <add key="MemberRegister" value="/memberws/register" />
+    <add key="SynURL" value="/patientws/synchronize" />
+    <add key="SynUpdateURL" value="/patientws/synchronizeupdate" />
+    <add key="EnrollServiceURL" value="/patientws/createservice" />
+    <add key="ClientSettingsProvider.ServiceUri" value="" />
+  </appSettings>
+  <system.diagnostics>
+    <sources>
+      <!-- This section defines the logging configuration for My.Application.Log -->
+      <source name="DefaultSource" switchName="DefaultSwitch">
+        <listeners>
+          <add name="FileLog" />
+          <!-- Uncomment the below section to write to the Application Event Log -->
+          <!--<add name="EventLog"/>-->
+        </listeners>
+      </source>
+    </sources>
+    <switches>
+      <add name="DefaultSwitch" value="Information" />
+    </switches>
+    <sharedListeners>
+      <add name="FileLog" type="Microsoft.VisualBasic.Logging.FileLogTraceListener, Microsoft.VisualBasic, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" initializeData="FileLogWriter" />
+      <!-- Uncomment the below section and replace APPLICATION_NAME with the name of your application to write to the Application Event Log -->
+      <!--<add name="EventLog" type="System.Diagnostics.EventLogTraceListener" initializeData="APPLICATION_NAME"/> -->
+    </sharedListeners>
+  </system.diagnostics>
+  <system.web>
+    <membership defaultProvider="ClientAuthenticationMembershipProvider">
+      <providers>
+        <add name="ClientAuthenticationMembershipProvider" type="System.Web.ClientServices.Providers.ClientFormsAuthenticationMembershipProvider, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" serviceUri="" />
+      </providers>
+    </membership>
+    <roleManager defaultProvider="ClientRoleProvider" enabled="true">
+      <providers>
+        <add name="ClientRoleProvider" type="System.Web.ClientServices.Providers.ClientRoleProvider, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" serviceUri="" cacheTimeout="86400" />
+      </providers>
+    </roleManager>
+  </system.web>
+</configuration>
