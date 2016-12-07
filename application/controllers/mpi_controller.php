@@ -21,6 +21,7 @@ class MpiController extends BaseController {
   }
 
   function init(){
+    parent::init();
     $this->load->helper("html");
     $this->load->helper('url');
     $this->load->helper('form');
@@ -50,6 +51,7 @@ class MpiController extends BaseController {
     require_once APPPATH.'models/site.php';
     require_once APPPATH.'models/province.php';
     require_once APPPATH.'models/patient_module.php';
+    require_once APPPATH.'models/dynamic_value.php';
     require_once APPPATH.'models/vcct_from_oiart.php';
 
     ILog::getInstance();

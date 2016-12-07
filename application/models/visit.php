@@ -119,4 +119,18 @@ class Visit extends Imodel {
     $this->form_validation->set_rules('visit_date', 'Visit Date', 'required');
     return true;
   }
+
+  static function bulk_insert($visit_params){
+    $trans = new Visit();
+    $trans->db->trans_start();
+
+    foreach($visit_params as $index => $visit_param) {
+      $visit = new Visit($visit_param);
+      if(!$visit->save()){
+        $message = "Trying to add " . count($visit_params) . " visits but failed at {$index} . \n\n";
+        throw new RollbackException($message. print_r($visit_param, true));
+      }
+    }
+    $trans->db->trans_complete();
+  }
 }

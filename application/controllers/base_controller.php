@@ -17,6 +17,37 @@ class BaseController extends CI_Controller {
 
   //to init you class, lib
   function init() {
+    $this->load->helper("html");
+    $this->load->helper('url');
+    $this->load->helper('form');
+    $this->load->library('form_validation');
+
+    require_once BASEPATH.'core/model.php';
+
+    require_once APPPATH.'libraries/Imodel.php';
+    require_once APPPATH.'libraries/api_oauth_helper.php';
+    require_once APPPATH.'libraries/app_helper.php';
+
+    require_once APPPATH.'models/field.php';
+    require_once APPPATH.'models/field_value.php';
+    require_once APPPATH.'models/application.php';
+    require_once APPPATH.'models/application_token.php';
+    require_once APPPATH.'models/scope.php';
+    require_once APPPATH.'models/service.php';
+    require_once APPPATH.'models/visit.php';
+    require_once APPPATH.'models/patient.php';
+    require_once APPPATH.'models/patient_module.php';
+    require_once APPPATH.'models/dynamic_value.php';
+    require_once APPPATH.'models/api_access_log.php';
+    require_once APPPATH.'models/vcct_from_oiart.php';
+
+    require_once APPPATH.'models/serializer.php';
+    require_once APPPATH.'models/visit_detail_serializer.php';
+    require_once APPPATH.'models/patient_detail_serializer.php';
+
+    require_once APPPATH.'models/rollback_exception.php';
+
+
   }
 
   //override this in your controller

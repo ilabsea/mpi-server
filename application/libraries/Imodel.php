@@ -414,11 +414,11 @@ class Imodel extends CI_Model {
   }
 
   function to_array() {
-    $json = array();
+    $result = array();
     foreach($this as $field => $value) {
       if(!$this->exclude_field($field))
-        $json[$field] = $value;
+        $result[$field] = $value;
     }
-    return $json;
+    return $result;
   }
 }
