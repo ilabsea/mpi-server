@@ -4,9 +4,8 @@
   <li class="active">Detail</li>
 </ul>
 
-
 <? require_once dirname(__FILE__) ."/_patient.php"; ?>
-<? require_once dirname(__FILE__) ."/_helper.php"; ?>
+<? require_once dirname(dirname(__FILE__)) ."/shared/helper.php"; ?>
 
 <table  class="table table-striped">
    <tr valign="middle">
@@ -19,14 +18,14 @@
       <th data-field-id='info' class="headerclickable">Information <?=pagination_direction("info", $params)?></th>
    </tr>
    <?php foreach($visits as $row) : ?>
-   <tr style="<?= strtolower($row->info) == "positive" ? "color: red" : "" ?>" >
-      <td align="center"><?=$row->serv_code?></td>
-      <td align="center"><?=$row->site_code?></td>
-      <td align="center"><?=$row->site_name?></td>
-      <td align="center"><?=date_mysql_to_html($row->visit_date)?></td>
-      <td align="center"><?=$row->ext_code?></td>
-      <td align="center"><?=$row->ext_code_2?></td>
-      <td><?=$row->info?></td>
-   </tr>
+     <tr style="<?= strtolower($row->info) == "positive" ? "color: red" : "" ?>" >
+        <td align="center"><?=$row->serv_code?></td>
+        <td align="center"><?=$row->site_code?></td>
+        <td align="center"><?=$row->site_name?></td>
+        <td align="center"><?=date_mysql_to_html($row->visit_date)?></td>
+        <td align="center"><?=$row->ext_code?></td>
+        <td align="center"><?=$row->ext_code_2?></td>
+        <td><?=$row->info?></td>
+     </tr>
    <?php endforeach;?>
 </table>

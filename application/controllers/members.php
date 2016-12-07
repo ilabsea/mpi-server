@@ -1,139 +1,21 @@
 <?php
-/**
- * Member
- * @author sokha
- */
+
 class Members extends MpiController {
-	/**
-	 * Enter description here ...
-	 */
-    function memberlist() {
-    	$user = Isession::getUser();
-		if ($user["grp_id"] != Iconstant::USER_ADMIN) :
-		    redirect(site_url("main/errorpage"));
-		    return;
-		endif;
-        $data = array();
-		$data["error"] = Isession::getFlash("error");
-    	$data["error_list"] = Isession::getFlash("error_list");
-    	$data["success"] = Isession::getFlash("success");
-    	
-    	$this->load->model("service");
-    	$data["services"] = $this->service->getServices();
-    	
-    	$criteria = array(
-    						"cri_serv_id" => "",
-    						"cri_site_code" => "",
-    						"cri_member_login" => "",
-    						"cur_page" => 1,
-    						"orderby" => "site_code",
-    						"orderdirection" => "ASC"
-    					);
-        
-        $start = 0;
-    	
-    	$session_data = Isession::getCriteria("member_list");
-    	$first_access = false;
-    	if ($session_data != null) :
-    		$criteria = array_merge($criteria, $session_data);
-    	else : 
-    	    $first_access = true;
-    	endif;
-    	
-    	if (isset($_REQUEST["orderby"])) :
-    		$criteria["orderby"] = $_REQUEST["orderby"];
-    	endif;
-    	
-    	if (isset($_REQUEST["orderdirection"])) :
-    		$criteria["orderdirection"] = $_REQUEST["orderdirection"];
-    	endif;
-    	
-    	if (isset($_REQUEST["cur_page"])) :
-    		$criteria["cur_page"] = $_REQUEST["cur_page"];
-    	endif;
-    	
-    	if ($first_access) :
-    	    $data = array_merge($data, $criteria);
-    	    $data["member_list"] = null;
-    	    $data["total_record"] = 0;
-    	    $data["nb_of_page"] = 1;
-    	    $this->load->template("templates/general", "members/member_list", Iconstant::MPI_APP_NAME, $data);
-    	    return;
-    	endif;
-    	
-    	$this->load->model("member");
-    	$total_sites = $this->member->count_member_list($criteria);
-    	$total_pages = (int)($total_sites / Iconstant::PAGINATION_ROW_PER_PAGE);
-    	if ($total_pages == 0 || $total_pages * Iconstant::PAGINATION_ROW_PER_PAGE < $total_sites) :
-    	    $total_pages++;
-    	endif;
-    	
-    	if ($criteria["cur_page"] > $total_pages) :
-    		$criteria["cur_page"] = $total_pages;
-    	endif; 
-    	
-    	Isession::setCriteria("member_list", $criteria);
-    	
-    	
-    	
-    	$start = ($criteria["cur_page"] - 1) * Iconstant::PAGINATION_ROW_PER_PAGE;
-    	
-    	//$criteria["orderby"] = $orderby;
-    	//$criteria["orderdirection"] = $orderdirection;
+  function index() {
+    $services = Service::mapper();
+    $params = $this->filter_params(array("serv_id", "site_code", "member_login"  ,"order_by", "order_direction"));
 
-    	$data["member_list"] = $this->member->getMembers($criteria, $start, Iconstant::PAGINATION_ROW_PER_PAGE);
-    	//$data["cur_page"] = $cur_page;
-    	$data["total_record"] = $total_sites;
-    	$data["nb_of_page"] = $total_pages;
-    	$data = array_merge($data, $criteria);
-    	$this->load->template("templates/general", "members/member_list", Iconstant::MPI_APP_NAME, $data);
-    }
-    
-    /**
-     * Searching for member
-     */
-    function search() {
-    	$user = Isession::getUser();
-		if ($user["grp_id"] != Iconstant::USER_ADMIN) :
-		    redirect(site_url("main/errorpage"));
-		    return;
-		endif;
-    	$criteria = $_POST;
-    	$criteria["cri_site_code"] = trim($criteria["cri_site_code"]);
+    $paginate_members = Member::paginate_filter($params);
+    $this->set_view_variables(array("params" => $params, "services" => $services, "paginate_members" => $paginate_members));
+    $this->render_view();
+  }
 
-    	$session_data = Isession::getCriteria("member_list");
-    	if ($session_data != null) :
-    		$criteria = array_merge($session_data, $criteria);
-    	endif;
-    	
-    	Isession::setCriteria("member_list", $criteria);
-    	redirect(site_url("members/memberlist"));
-    }
-    
-    function memberdelete($member_id) {
-    	$user = Isession::getUser();
-		if ($user["grp_id"] != Iconstant::USER_ADMIN) :
-		    redirect(site_url("main/errorpage"));
-		    return;
-		endif;
-		
-		$this->load->model("member");
-		
-		if (!is_nint($member_id)) :
-            redirect(site_url("members/memberlist"));
-            return;
-        endif;
-        
-        $member_found = $this->member->getMemberById($member_id);
-        if ($member_found == null) :
-            Isession::setFlash("error", "Member was not found");
-            redirect(site_url("members/memberlist"));
-            return;
-        endif;
-        
-        $this->member->delete_member($member_id);
-        Isession::setFlash("success", "Member ".$member_found["member_login"]." has been deleted");
-		
-    	redirect(site_url("members/memberlist"));
-    }
+  function delete($member_id) {
+    $member = Member::find($member_id);
+    if($member && $member->delete())
+      Isession::setFlash("success", "Member has been removed");
+    else
+      Isession::setFlash("error", "Failed to remove the member");
+    redirect(site_url("members/index"));
+  }
 }

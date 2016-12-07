@@ -13,7 +13,7 @@
   <div class="row-fluid input-row" >
     <div class="span2">Service</div>
     <div class="span9">
-      <?= form_dropdown('serv_id', array_merge(array("" => "All"), $services), $params["serv_id"],
+      <?= form_dropdown('serv_id', AppHelper::merge_array(array("" => "All"), $services), $params["serv_id"],
                         'id="serv_id" class="tokenizer tokenizer-short"' ) ?>
     </div>
   </div>

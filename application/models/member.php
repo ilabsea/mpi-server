@@ -166,7 +166,7 @@ class Member extends Imodel {
             LEFT JOIN mpi_service ser ON (ser.serv_id = s.serv_id)
             WHERE m.site_code = s.site_code ";
 
-    $where = $this->generate_where($criteria);
+      $where = $this->generate_where($criteria);
     if ($where != "")
       $sql .= " AND ".$where;
 
@@ -214,5 +214,58 @@ class Member extends Imodel {
   function delete_member($member_id) {
     $sql = "DELETE FROM mpi_member WHERE member_id = '".mysql_real_escape_string($member_id)."'";
     $this->db->query($sql);
+  }
+
+  static function paginate_filter($criterias) {
+    $total_counts = Member::count_filter($criterias);
+    $records = Member::all_filter($criterias);
+    $paginator = new Paginator($total_counts, $records);
+    return $paginator;
+  }
+
+  static function all_filter($criterias){
+    $active_record = new Member();
+    $active_record->db->select("member.member_id, member.member_login, member.date_create, site.site_id, site.site_code, site.site_name,
+                               site.pro_code, site.serv_id, province.pro_name, service.serv_code");
+
+    $active_record = Member::where_filter($active_record, $criterias);
+
+    if($criterias["order_direction"])
+      $active_record->db->order_by($criterias["order_by"], $criterias["order_direction"]);
+    $active_record->db->limit(Paginator::per_page());
+    $active_record->db->offset(Paginator::offset());
+    $query = $active_record->db->get();
+    return $query->result();
+  }
+
+  static function count_filter($criterias){
+    $active_record = new Member();
+    $active_record->db->select("count(*)");
+    $active_record = Member::where_filter($active_record, $criterias);
+    $count = $active_record->db->count_all_results();
+    return $count;
+  }
+
+  static function where_filter($active_record, $criterias){
+    $active_record->db->from('mpi_member member');
+    $active_record->db->join("mpi_site site", "site.site_code = member.site_code", "left");
+    $active_record->db->join("mpi_province province", "province.pro_code = site.pro_code", "left");
+    $active_record->db->join("mpi_service service", "service.serv_id = site.serv_id", "left");
+
+    $conditions = array();
+
+    if ($criterias["serv_id"] != "")
+      $conditions["service.serv_id"] = $criterias["serv_id"];
+
+    if ($criterias["site_code"] != "")
+      $conditions["site.site_code LIKE "] =  "%".$criterias["site_code"]."%";
+
+    if ($criterias["member_login"] != "")
+      $conditions["member.member_login LIKE "] = "%".$criterias["member_login"]."%";
+
+    foreach($conditions as $key => $value)
+      $active_record->db->where($key, $value);
+
+    return $active_record;
   }
 }

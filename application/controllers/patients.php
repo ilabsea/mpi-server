@@ -8,11 +8,9 @@ class Patients extends MpiController {
   }
 
   function index() {
-
-    $data = array();
     $services = Service::mapper();
     $params = $this->filter_params(array("serv_id", "master_id", "pat_gender",
-      "cur_page", "site_code", "external_code", "external_code2", "date_from",
+      "site_code", "external_code", "external_code2", "date_from",
       "date_to", "order_by", "order_direction"));
 
     $paginate_patients = Patient::paginate_filter($params);
@@ -23,7 +21,7 @@ class Patients extends MpiController {
   }
 
   function show($pat_id) {
-    $patient = Patient::find($pat_id);
+    $patient = Patient::find_by(array("pat_id" => $pat_id));
     $params = $this->filter_params(array("order_by", "order_direction"));
     $visits = Patient::visits(["'{$pat_id}'"], $params["order_by"], $params["order_direction"]);
 

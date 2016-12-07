@@ -5,7 +5,7 @@
     array("title" => "Reports", "image" => "reports_icon.png", "url" => "reports/reportmenu", "admin" => false),
 
     array("title" => "Users", "image" => "users.png", "url" => "users/index", "admin" => true),
-    array("title" => "Members", "image" => "doctor.png", "url" => "members/memberlist", "admin" => true),
+    array("title" => "Members", "image" => "doctor.png", "url" => "members/index", "admin" => true),
     array("title" => "CSV Export", "image" => "csv.png", "url" => "datas/csvexport", "admin" => true),
 
     array("title" => "Dynamic field", "image" => "api-dynamic-field.png", "url" => "fields/index", "admin" => true),
