@@ -404,9 +404,8 @@ class Imodel extends CI_Model {
 
     if($this->validation_rules() && $this->form_validation->run() == false){
       $this->_errors = $this->form_validation->errors();
-      return false;
     }
-    return true;
+    return count($this->_errors) == 0;
   }
 
   function save($validate = true){
@@ -420,5 +419,9 @@ class Imodel extends CI_Model {
         $result[$field] = $value;
     }
     return $result;
+  }
+
+  static function hex_digest($text){
+    return sha1($text);
   }
 }

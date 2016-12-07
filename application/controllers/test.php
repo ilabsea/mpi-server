@@ -2,6 +2,23 @@
 class Test extends MpiController {
   var $skip_before_action = "*";
 
+  function console(){
+
+    $attrs = array("member_login" => "yourins", "site_code" => "0202", "member_pwd" => "123456");
+    // $member = new Member($attrs);
+    // $member->save();
+    // ILog::debug_message("errors", $member->get_errors());
+
+    $member = Member::find(30);
+    $member = new Member($attrs);
+    $member->set_attributes($attrs);
+    $member->save();
+
+    // $member->update_attributes($attrs);
+
+    ILog::debug_message("errors", $member->get_errors(), 1, 1);
+  }
+
   function patients() {
     $ids = array( 3683,3684,3685,3686,3687 );
     $records = Patient::all(array("id" => $ids));

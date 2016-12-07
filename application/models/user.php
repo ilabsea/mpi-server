@@ -51,10 +51,6 @@ class User extends Imodel {
     return $this->grp_id == User::ADMIN;
   }
 
-  static function hex_digest($text){
-    return sha1($text);
-  }
-
   function before_create(){
     $this->user_pwd = User::hex_digest($this->user_pwd);
     $this->date_update = $this->current_time();

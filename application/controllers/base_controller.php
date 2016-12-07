@@ -28,6 +28,7 @@ class BaseController extends CI_Controller {
     require_once APPPATH.'libraries/api_oauth_helper.php';
     require_once APPPATH.'libraries/app_helper.php';
 
+    require_once APPPATH.'models/member.php';
     require_once APPPATH.'models/field.php';
     require_once APPPATH.'models/field_value.php';
     require_once APPPATH.'models/application.php';
