@@ -74,7 +74,7 @@ class Test extends MpiController {
     $field = new Field(array("type" => "DateTime"));
 
     $params = array(
-      "pat_id"=> "KH002100003273",
+      "pat_id"=> "KH002100000002",
 
       "pat_age"=> "80", "serv_id"=> "2", "visit_date"=> "2016-12-06",
       "site_code"=> "0202", "ext_code"=> "ex1", "ext_code_2"=> "ex2",
@@ -142,6 +142,85 @@ class Test extends MpiController {
       $result["visits"][] = (new VisitDetailSerializer($visit))->attributes();
     }
     return $this->render_json($result);
+  }
+
+  function search(){
+    $params = array(
+      "pat_age"=> 30, "serv_id"=> "2", "visit_date"=> "2016-12-06",
+      "site_code"=> "0202", "ext_code"=> "ex1", "ext_code_2"=> "ex2",
+      "refer_to_vcct"=> "2", "refer_to_oiart"=> "1", "refer_to_std"=> "",
+      "info"=> "positive", "vcctnumber"=> "1000", "vcctsite" => "V01-02",
+
+      "v_dynamic_field1" => "False",
+      "v_dynamic_field2" => "hello",
+      "v_dynamic_field3" => "12dfdsa",
+      "v_dynamic_field4" => "12.34",
+      "v_dynamic_field5" => "2016-09-10",
+      "v_dynamic_field6" => "2016-10-10 12:10:10",
+      "v_dynamic_field7" => "zzzzz",
+
+      "pat_register_site" => "0101",
+      "pat_age" => 60,
+      "pat_gender" => 1,
+      "is_referred" => false,
+
+      "p_is_referral" => "False",
+      "v_tb" => "1111",
+      "p_dynamic_field1" => "10",
+      "p_dynamic_field2" => "30",
+      "pat_id" => "KH002100003000",
+      "fingerprint_r1" => "r1",
+      "fingerprint_r2" => "r2",
+      "fingerprint_r3" => "r3"
+    );
+
+    PatientModule::search($params);
+  }
+
+  function  patient_where(){
+    $active_record = new Patient();
+    $criterias = array(
+      "pat_age"=> 30, "serv_id"=> "2", "visit_date"=> "2016-12-06",
+      "site_code"=> "0202", "ext_code"=> "ex1", "ext_code_2"=> "ex2",
+      "refer_to_vcct"=> "2", "refer_to_oiart"=> "1", "refer_to_std"=> "",
+      "info"=> "positive", "vcctnumber"=> "1000", "vcctsite" => "V01-02",
+
+      "v_dynamic_field1" => "False",
+      "v_dynamic_field2" => "hello",
+      "v_dynamic_field3" => "12dfdsa",
+      "v_dynamic_field4" => "12.34",
+      "v_dynamic_field5" => "2016-09-10",
+      "v_dynamic_field6" => "2016-10-10 12:10:10",
+      "v_dynamic_field7" => "zzzzz",
+
+      "pat_register_site" => "0101",
+      "pat_age" => 60,
+      "pat_gender" => 1,
+      "is_referred" => false,
+
+      "p_is_referral" => "False",
+      "v_tb" => "1111",
+      "p_dynamic_field1" => "10",
+      "p_dynamic_field2" => "30",
+      "pat_id" => "KH002100003000",
+      "fingerprint_r1" => "r1",
+      "fingerprint_r2" => "r2",
+      "fingerprint_r3" => "r3",
+      "site_code" => "sitecode1",
+      "date_from" => "2016-10-10",
+      "date_to" => "2016-10-16",
+      "fake_field" => "Fdafda"
+    );
+    $exclude_pat_ids = array("'p1'","'p2'","'p3'","'p4'","'p5'" );
+    ILog::debug_message("Array",$criterias);
+    Patient::where_filter($active_record, $criterias, $exclude_pat_ids);
+  }
+
+  function has_field(){
+    $patient = new Patient();
+    $visit = new Visit();
+    ILog::debug_message("result", $patient->is_field("pat_id"));
+    ILog::debug_message("result", Patient::has_field("pat_idfdsaf"));
   }
 
 }

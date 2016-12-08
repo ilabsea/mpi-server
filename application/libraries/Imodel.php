@@ -103,6 +103,10 @@ class Imodel extends CI_Model {
     return false;
   }
 
+  function is_field($field_name){
+    return property_exists($this, $field_name) && !$this->exclude_field($field_name);
+  }
+
   function exclude_field($field_name){
     $fields = array_merge($this->_not_sql_fields, static::virtual_fields());
     return in_array($field_name, $fields);

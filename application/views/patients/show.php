@@ -8,24 +8,35 @@
 <? require_once dirname(dirname(__FILE__)) ."/shared/helper.php"; ?>
 
 <table  class="table table-striped">
+
    <tr valign="middle">
-      <th data-field-id='serv_code' class="headerclickable">Service <?=pagination_direction("serv_code", $params)?></th>
-      <th data-field-id='site_code' class="headerclickable">Site <?=pagination_direction("site_code", $params)?></th>
-      <th data-field-id='site_name' class="headerclickable">Site Name <?=pagination_direction("site_name", $params)?></th>
-      <th data-field-id='visit_date' class="headerclickable">Visit Date <?=pagination_direction("visit_date", $params)?></th>
-      <th data-field-id='ext_code' class="headerclickable">External Code <?=pagination_direction("ext_code", $params)?></th>
-      <th data-field-id='ext_code_2' class="headerclickable">External Code 2 <?=pagination_direction("ext_code_2", $params)?></th>
-      <th data-field-id='info' class="headerclickable">Information <?=pagination_direction("info", $params)?></th>
+      <th>Service</th>
+      <th>Site</th>
+      <th>Site Name</th>
+      <th>Visit Date</th>
+      <th>External Code</th>
+      <th>External Code 2</th>
+      <th>Information</th>
+      <?php foreach($dynamic_fields as $dynamic_field):?>
+        <? if($dynamic_field->is_visit_field()): ?>
+          <th><?= $dynamic_field->name ?> </th>
+        <? endif; ?>
+      <?php endforeach;?>
    </tr>
-   <?php foreach($visits as $row) : ?>
-     <tr style="<?= strtolower($row->info) == "positive" ? "color: red" : "" ?>" >
-        <td align="center"><?=$row->serv_code?></td>
-        <td align="center"><?=$row->site_code?></td>
-        <td align="center"><?=$row->site_name?></td>
-        <td align="center"><?=date_mysql_to_html($row->visit_date)?></td>
-        <td align="center"><?=$row->ext_code?></td>
-        <td align="center"><?=$row->ext_code_2?></td>
-        <td><?=$row->info?></td>
+   <?php foreach($dynamic_visits as $row) : ?>
+     <tr style="<?= strtolower($row['info']) == "positive" ? "color: red" : "" ?>" >
+        <td align="center"><?=$row['serv_code']?></td>
+        <td align="center"><?=$row['site_code']?></td>
+        <td align="center"><?=$row['site_name']?></td>
+        <td align="center"><?=date_mysql_to_html($row['visit_date'])?></td>
+        <td align="center"><?=$row['ext_code']?></td>
+        <td align="center"><?=$row['ext_code_2']?></td>
+        <td><?=$row['info']?></td>
+        <?php foreach($dynamic_fields as $dynamic_field):?>
+          <? if($dynamic_field->is_visit_field()): ?>
+            <th><?= AppHelper::h_c($row, $dynamic_field->code) ?> </th>
+          <? endif; ?>
+        <?php endforeach;?>
      </tr>
    <?php endforeach;?>
 </table>

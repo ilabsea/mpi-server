@@ -46,59 +46,24 @@ class PatientModule {
 
   # params = {p_is_referral: 10, date_visit: '2015-10-10', fingerprint_r1: 'fpvalu1', sitecode: '0202', pat_gender: 1}
   static function patients($params, $exclude_patient_ids = array()) {
-    $conditions = array();
 
-    foreach($params as $name => $value) {
-      if(Patient::is_fingerprint_field($name))
-        continue;
-
-      if($name == 'pat_gender'){
-        $gender_key = "( pat_gender = " . intval($params['pat_gender']) . " OR " . " pat_gender is NULL ) ";
-        $conditions[$gender_key] = null;
-      }
-
-      else
-        $conditions[$name] = $value;
-    }
-
-    if(count($exclude_patient_ids) > 0) { //[1,2,4,3,10]
-      $pat_ids = implode(",", $exclude_patient_ids);  // "(1,2,4,3,'10')"
-      $key = "(pat_id NOT IN ({$pat_ids}))";
-      $conditions[$key] = null;
-    }
-
-    $patients = Patient::all($conditions);
-    return $patients;
   }
 
   # Filter site code to reduce number of patient
   static function search($params){
-    $fingerprint_name = PatientModule::fingerprint_name($params);
+    $fingerprint_name = PatientModule::fingerprint_name($patient_params);
     $fingerprint_value = $params[$fingerprint_name];
-    $fingerprint_sdk = GrFingerService::instance();
-    $fingerprint_sdk->prepare($fingerprint_value);
 
-    $patients = PatientModule::patients($params); //filter sitecode [1,2,3,4,100]
-    $result = PatientModule::identify_patients($patients);
-
-    if(count($result) >0)
-      return PatientModule::to_patient_json();
-    else // should filter without code and except patients list above. return empty for now
-      return array();
+    $patients = Patient::all_filter($params);
+    if($fingerprint_value)
+      return PatientModule::identify_patients($patients, $fingerprint_name, $fingerprint_value);
+    return $result;
   }
 
-  static function exclude_previous_patients($patients) {
-    $exclude_patient_ids = array();
-    foreach($patients as $patient){
-      $pat_id = $patient->id();
-      $exclude_patient_ids[] = "'{$pat_id}'";
-    }
-    return $exclude_patient_ids;
-  }
-
-  static function identify_patients($patients){
+  static function identify_patients($patients, $fingerprint_name, $fingerprint_value){
     $result = array();
     $fingerprint_sdk = GrFingerService::instance();
+    $fingerprint_sdk->prepare($fingerprint_value);
 
     foreach ($patients as $patient){
       if(!$patient->has_fingerprint($fingerprint_name))

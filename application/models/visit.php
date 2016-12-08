@@ -143,4 +143,9 @@ class Visit extends Imodel {
     }
     $trans->db->trans_complete();
   }
+
+  static function has_field($field_name){
+    $active_record = new Visit();
+    return $active_record->is_field($field_name);
+  }
 }

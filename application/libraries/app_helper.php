@@ -29,4 +29,18 @@ class AppHelper {
   static function request_type(){
     return $_SERVER['REQUEST_METHOD'];
   }
+
+  static function h($value){
+    if(isset($value))
+      return $value;
+    return "";
+  }
+
+  static function h_c($record, $key){
+    if(is_object($record) && property_exists($record, $key))
+      return $record->$key;
+    else if(is_array($record) && isset($record[$key]))
+      return $record[$key];
+    return "";
+  }
 }

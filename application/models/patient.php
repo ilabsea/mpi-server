@@ -27,6 +27,7 @@ class Patient extends Imodel {
   var $created_at = null;
   var $updated_at = null;
 
+  //virtual attributes
   var $province = null;
   var $dynamic_fields = array();
 
@@ -146,6 +147,11 @@ class Patient extends Imodel {
     return 'Patient';
   }
 
+  static function has_field($field_name){
+    $active_record = new Patient();
+    return $active_record->is_field($field_name);
+  }
+
   static function migrate_counter_cache() {
     $limit=100;
     $count = Patient::count(array("visits_count" => 0, "visit_positives_count" => 0));
@@ -196,82 +202,114 @@ class Patient extends Imodel {
     return $query;
   }
 
-  static function count_filter($criterias){
+  static function count_filter($criterias, $exclude_pat_ids){
     $active_record = new Patient();
-    $active_record->db->select("count(*)");
-    $active_record = Patient::where_filter($active_record, $criterias);
+    $active_record->db->from('mpi_patient');
+
+    $active_record = Patient::where_filter($active_record, $criterias, $exclude_pat_ids);
     $count = $active_record->db->count_all_results();
+
     return $count;
   }
 
-  static function all_filter($criterias){
+  static function all_filter($criterias, $exclude_pat_ids){
     $active_record = new Patient();
-    $active_record->db->select("p.pat_id, p.pat_gender, p.pat_age, p.pat_dob, p.date_create, p.pat_register_site, p.visits_count, p.visit_positives_count,p.new_pat_id");
-    $active_record = Patient::where_filter($active_record, $criterias);
+    $active_record->db->select("patient.pat_id, patient.pat_gender, patient.pat_age, patient.pat_dob,
+                                patient.date_create, patient.pat_register_site, patient.visits_count,
+                                patient.visit_positives_count,patient.new_pat_id");
 
-    if($criterias["order_direction"])
-      $active_record->db->order_by($criterias["order_by"], $criterias["order_direction"]);
+    // $query = $active_record->db->get();
+    // $active_record = null;
+    // ILog::debug_message("ddd", $query->result());
+    // return 1;
+
+    $active_record = Patient::where_filter($active_record, $criterias, $exclude_pat_ids);
+
+    // if($criterias["order_direction"])
+    //   $active_record->db->order_by($criterias["order_by"], $criterias["order_direction"]);
+
     $active_record->db->limit(Paginator::per_page());
     $active_record->db->offset(Paginator::offset());
     $query = $active_record->db->get();
+    $active_record = null;
     return $query->result();
   }
 
-  static function where_filter($active_record, $criterias){
-    $active_record->db->from('mpi_patient p');
+  static function where_filter($active_record, $criterias, $exclude_pat_ids = array()){
+    $conditions = array("patients" => array(), "visits" => array());
 
-    $patient_conditions = array();
-    $visit_conditions = array();
+    foreach($criterias as $field => $value ){
+      if(!$value)
+        continue;
 
-    if($criterias['pat_gender'])
-      $patient_conditions['p.pat_gender'] = $criterias['pat_gender'];
+      if($field == 'pat_gender'){
+        $gender_key = "( patient.pat_gender = " . intval($value) . " OR " . " patient.pat_gender is NULL ) ";
+        $conditions["patients"][$gender_key] = null;
+      }
 
-    if($criterias["master_id"])
-      $patient_conditions['p.pat_id LIKE'] = "%". $criterias["master_id"] . "%";
+      else if ($field == "master_id"){
+        $conditions["patients"]['patient.pat_id LIKE'] = "%". $value . "%";
+      }
 
-    if($criterias["date_from"]){
-      $patient_conditions["p.date_create >="] = Imodel::beginning_of_day($criterias["date_from"]);
-      $visit_conditions["v.visit_date >="] = $criterias["date_from"];
+      else if($field == "date_from"){
+        $conditions["patients"]["patient.date_create >="] = Imodel::beginning_of_day($value);
+        $conditions["visits"]["visit.visit_date >="] = $value;
+      }
+
+      else if($field == "date_to"){
+        $conditions["patients"]["patient.date_create <="] = Imodel::end_of_day($value);
+        $conditions["visits"]["visit.visit_date <="] = $value;
+      }
+      else if($field == "site_code"){
+        $conditions["patients"]['patient.pat_register_site'] = $value;
+        $conditions["visits"]['visit.site_code = '] = $value;
+      }
+
+      else if($field == "external_code")
+        $conditions["visits"]["visit.ext_code = "] = $value;
+
+      else if($field == "external_code2")
+        $conditions["visits"]["visit.ext_code_2 = "] = $value;
+
+      // else{
+      //   if(Patient::has_field($field) && !Patient::is_fingerprint_field($field))
+      //     $conditions["patients"]["patient.{$field} = "] = $value;
+      //   else if(Visit::has_field($field))
+      //     $conditions["visits"]["visit.{$field} = "] = $value;
+      // }
     }
 
-    if($criterias["date_to"]){
-      $patient_conditions["p.date_create <="] = Imodel::end_of_day($criterias["date_to"]);
-      $visit_conditions["v.visit_date <="] = $criterias["date_to"];
+    if(count($exclude_pat_ids) > 0) { //[1,2,4,3,10]
+      $wrap_pat_ids = array();
+      foreach($exclude_pat_ids as $pat_id) {
+        $wrap_pat_ids[] = "'{$pat_id}'";
+      }
+      $pat_ids = implode(",", $wrap_pat_ids);  // "(1,2,4,3,'10')"
+      $key = "(patient.pat_id NOT IN ({$pat_ids}))";
+      $conditions["patients"][$key] = null;
     }
 
-    if($criterias["site_code"]){
-      $patient_conditions['p.pat_register_site'] = $criterias["site_code"];
-      $visit_conditions['v.site_code = '] = $criterias["site_code"];
-    }
-
-    if($criterias["serv_id"])
-      $visit_conditions["v.serv_id = "] = $criterias["serv_id"];
-
-    if($criterias["external_code"])
-      $visit_conditions["v.ext_code = "] = $criterias["external_code"];
-
-    if($criterias["external_code2"])
-      $visit_conditions["v.ext_code_2 = "] = $criterias["external_code2"];
-
-    foreach($patient_conditions as $key => $value)
+    foreach($conditions["patients"] as $key => $value)
       $active_record->db->where($key, $value);
 
-    if(count($visit_conditions) >0 ){
+    if(count($conditions["visits"]) >0 ){
       $query_string = array();
-      foreach($visit_conditions as $key => $value)
-        $query_string[] = $key . "" . mysql_real_escape_string($value);
+      foreach($conditions["visits"] as $key => $value)
+        $query_string[] = $key . "=" . mysql_real_escape_string($value);
 
-      $where = implode(" AND ", $query_string);
-      $visit_query = "SELECT v.pat_id FROM mpi_visit v WHERE {$where} GROUP BY v.pat_id";
-      $active_record->db->where("p.pat_id IN ($visit_query) ");
+      $visit_condition_sql = implode(" AND ", $query_string);
+
+      $visit_query = "SELECT DISTINCT visit.pat_id FROM mpi_visit visit WHERE {$visit_condition_sql}";
+      $active_record->db->where("patient.pat_id IN ($visit_query) ");
     }
-
+    $active_record->db->from('mpi_patient patient');
     return $active_record;
   }
 
-  static function paginate_filter($criterias) {
-    $total_counts = Patient::count_filter($criterias);
-    $records = Patient::all_filter($criterias);
+  static function paginate_filter($criterias, $exclude_pat_ids=array()) {
+    $records = Patient::all_filter($criterias, $exclude_pat_ids);
+    $total_counts = Patient::count_filter($criterias, $exclude_pat_ids);
+
     $paginator = new Paginator($total_counts, $records);
     return $paginator;
   }
