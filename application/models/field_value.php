@@ -2,6 +2,7 @@
 class FieldValue extends Imodel {
   var $id = null;
   var $field_id = null;
+  var $field_code = null;
   var $field_type = null;
 
   var $field_owner_id = null;
@@ -15,7 +16,7 @@ class FieldValue extends Imodel {
   const PATIENT = "Patient";
   const VISIT = "Visit";
 
-  static function create_fields($params, $field_owner) {
+  static function create_or_update_fields($params, $field_owner) {
     $field_owner_id = $field_owner->id();
     $class_name = "Patient";
     $dynamic_fields = Field::dynamic_fields();
@@ -27,11 +28,10 @@ class FieldValue extends Imodel {
       $attrs = array( "field_owner_id" => $field_owner_id,
                       "field_owner_type" => $field_owner_type,
                       "field_id" => $dynamic_field->id(),
-                      "field_type" => $dynamic_field->type,
-                      "value" => $dynamic_field->cast_value($value)
+                      "field_type" => $dynamic_field->type
                     );
-
-      $field_value = new FieldValue($attrs);
+      $field_value = FieldValue::find_by_or_new($attrs);
+      $field_value->set_attributes(array("field_code" => $field_code ,"value" => $dynamic_field->cast_value($value)));
       $field_value->save();
     }
   }

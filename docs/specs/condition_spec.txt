@@ -42,13 +42,12 @@ Add one more field called referral_id(KH id code 10digits)
 search criterias depends on application(add one more field in scope display fields )
 
 - operation type (=)
-- visit embeded in patient(last visit)
+- visit embedded in patient(last visit)
 - visit datas displayed according to display fields in scope permission
 
 
 - find all patients with a criterias x, y,z
 - find a patient given x, y, z
 - Get list of visits of a patient given ID, ...
-
 
 Update applied to one patient (no collection)

@@ -49,22 +49,14 @@ class PatientModule {
     $conditions = array();
 
     foreach($params as $name => $value) {
-      $is_fingerprint_type = false;
-
-      foreach(Patient::fingerprint_fields() as $fingerprint_name){
-        if($fingerprint_name == $name) {
-           $is_fingerprint_type = true;
-           break;
-         }
-      }
-
-      if($is_fingerprint_type)
+      if(Patient::is_fingerprint_field($name))
         continue;
 
       if($name == 'pat_gender'){
         $gender_key = "( pat_gender = " . intval($params['pat_gender']) . " OR " . " pat_gender is NULL ) ";
         $conditions[$gender_key] = null;
       }
+
       else
         $conditions[$name] = $value;
     }

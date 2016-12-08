@@ -19,6 +19,24 @@ class Test extends MpiController {
     ILog::debug_message("errors", $member->get_errors(), 1, 1);
   }
 
+  //filter out pat_id not allow to update
+  function update_patient() {
+    $patient = Patient::find_by(array("pat_id" => "KH001100000001"));
+    $params = array(
+      "pat_register_site" => "0101",
+      "pat_age" => 60,
+      "pat_gender" => 1,
+      "is_referred" => false,
+
+      "p_is_referral" => "False",
+      "p_dynamic_field1" => "1000",
+      "p_dynamic_field2" => "70",
+      "p_Fdafdafdafds" => "300"
+    );
+    $patient->update_attributes($params);
+
+  }
+
   function patients() {
     $ids = array( 3683,3684,3685,3686,3687 );
     $records = Patient::all(array("id" => $ids));

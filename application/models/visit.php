@@ -22,14 +22,57 @@ class Visit extends Imodel {
   var $vcctnumber = null;
   var $dynamic_fields = array();
 
+  static function virtual_fields() {
+    return array("dynamic_fields", "vcctsite", "vcctnumber");
+  }
+
   function __construct($params = array()) {
     $visit_fields = Visit::field_params($params);
     $this->dynamic_fields = Visit::dynamic_field_params($params);
     parent::__construct($visit_fields);
   }
 
-  static function virtual_fields() {
-    return array("dynamic_fields", "vcctsite", "vcctnumber");
+  function before_create() {
+    if(!$this->date_create)
+      $this->set_attribute("date_create", Imodel::current_time());
+  }
+
+  function after_create(){
+    FieldValue::create_or_update_fields($this->dynamic_fields, $this);
+
+    $patient = Patient::find_by(array("pat_id" => $this->pat_id));
+    Visit::update_count_cache($patient);
+
+    if($this->pat_age) {
+      $patient = Patient::find_by(array("pat_id" => $this->pat_id));
+      $patient->update_attributes(array("pat_age" => $this->pat_age));
+    }
+
+    if($this->serv_id == 2 && $this->vcctsite && $this->vcctnumber) {
+      $vcct_oiart_attrs = array( "vcct_external_code" => $this->vcctnumber,
+                                 "vcct_site" => $this->vcctsite);
+
+      $vcct = VcctFromOIART::find_by_or_new($vcct_oiart_attrs);
+      if($vcct->new_record()){
+        $vcct->set_attribute("oiart_pat_id", $this->pat_id);
+        $vcct->save();
+      }
+    }
+  }
+
+  function after_update() {
+    $patient = Patient::find_by(array("pat_id" =>$this->pat_id));
+    $visit_positives_count = Visit::count(array("pat_id" => $patient->pat_id, "info"=> "positive"));
+
+    $patient->update_attributes(array("visit_positives_count" => $visit_positives_count ));
+  }
+
+  function update_attributes($params){
+    $visit_fields = Visit::field_params($params);
+    $this->dynamic_fields = Visit::dynamic_field_params($params);
+
+    parent::update_attributes($visit_fields);
+    FieldValue::create_or_update_fields($this->dynamic_fields, $this);
   }
 
   static function field_params($params){
@@ -44,9 +87,9 @@ class Visit extends Imodel {
   static function dynamic_field_params($params) {
     $result = array();
     $dynamic_fields = Field::dynamic_fields();
-    foreach($params as $field_name => $field_value) {
-      if(isset($dynamic_fields[$field_name]))
-        $result[$field_name] = $field_value;
+    foreach($params as $field_code => $field_value) {
+      if(isset($dynamic_fields[$field_code])  && $dynamic_fields[$field_code]->is_visit_field())
+        $result[$field_code] = $field_value;
     }
     return $result;
   }
@@ -77,40 +120,7 @@ class Visit extends Imodel {
                                       "visit_positives_count" => $visit_positives_count ));
   }
 
-  function before_create() {
-    if(!$this->date_create)
-      $this->set_attribute("date_create", Imodel::current_time());
-  }
 
-  function after_create(){
-    FieldValue::create_fields($this->dynamic_fields, $this);
-
-    $patient = Patient::find_by(array("pat_id" => $this->pat_id));
-    Visit::update_count_cache($patient);
-
-    if($this->pat_age) {
-      $patient = Patient::find_by(array("pat_id" => $this->pat_id));
-      $patient->update_attributes(array("pat_age" => $this->pat_age));
-    }
-
-    if($this->serv_id == 2 && $this->vcctsite && $this->vcctnumber) {
-      $vcct_oiart_attrs = array( "vcct_external_code" => $this->vcctnumber,
-                                 "vcct_site" => $this->vcctsite);
-
-      $vcct = VcctFromOIART::find_by_or_new($vcct_oiart_attrs);
-      if($vcct->new_record()){
-        $vcct->set_attribute("oiart_pat_id", $this->pat_id);
-        $vcct->save();
-      }
-    }
-  }
-
-  function after_update() {
-    $patient = Patient::find_by(array("pat_id" =>$this->pat_id));
-    $visit_positives_count = Visit::count(array("pat_id" => $patient->pat_id, "info"=> "positive"));
-
-    $patient->update_attributes(array("visit_positives_count" => $visit_positives_count ));
-  }
 
   function validation_rules(){
     $this->form_validation->set_rules('serv_id', 'Service ID', 'trim|required');

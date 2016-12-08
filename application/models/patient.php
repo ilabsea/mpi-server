@@ -34,14 +34,30 @@ class Patient extends Imodel {
     return array("province", 'dynamic_fields');
   }
 
+  public static function is_fingerprint_field($field_name){
+    foreach(Patient::fingerprint_fields() as $fingerprint_name){
+      if($fingerprint_name == $field_name)
+         return true;
+    }
+    return false;
+  }
+
   function __construct($params = array()) {
     $patient_fields = Patient::field_params($params);
     $this->dynamic_fields = Patient::dynamic_field_params($params);
     parent::__construct($patient_fields);
   }
 
+  function update_attributes($params){
+    $patient_fields = Patient::field_params($params);
+    $this->dynamic_fields = Patient::dynamic_field_params($params);
+
+    parent::update_attributes($patient_fields);
+    FieldValue::create_or_update_fields($this->dynamic_fields, $this);
+  }
+
   function after_create() {
-    FieldValue::create_fields($this->dynamic_fields, $this);
+    FieldValue::create_or_update_fields($this->dynamic_fields, $this);
     $this->province->update_attributes(array("pro_pat_seq" => $this->province->pro_pat_seq + 1 ));
   }
 
@@ -82,9 +98,9 @@ class Patient extends Imodel {
   static function dynamic_field_params($params) {
     $result = array();
     $dynamic_fields = Field::dynamic_fields();
-    foreach($params as $field_name => $field_value) {
-      if(isset($dynamic_fields[$field_name]))
-        $result[$field_name] = $field_value;
+    foreach($params as $field_code => $field_value) {
+      if(isset($dynamic_fields[$field_code]) && $dynamic_fields[$field_code]->is_patient_field())
+        $result[$field_code] = $field_value;
     }
     return $result;
   }
