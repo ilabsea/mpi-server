@@ -8,7 +8,11 @@ class ILog extends CI_Log {
     $this->_log_path .= "MPI_";
   }
 
-  static function debug_message($message, $var,$exit=false, $html_format = true){
+  static function d($message, $var, $exit=false, $html_format = true) {
+    ILog::debug_message($message, $var, $exit, $html_format);
+  }
+
+  static function debug_message($message, $var, $exit=false, $html_format = true){
     $html = <<<EOT
      <div style='text-align:left;border-top:1px solid #ccc;background-color:white;color:black;overflow:auto;' >
          <pre>

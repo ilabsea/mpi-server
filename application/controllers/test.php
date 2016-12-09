@@ -217,10 +217,12 @@ class Test extends MpiController {
   }
 
   function has_field(){
-    $patient = new Patient();
-    $visit = new Visit();
-    ILog::debug_message("result", $patient->is_field("pat_id"));
-    ILog::debug_message("result", Patient::has_field("pat_idfdsaf"));
+    // $patient = new Patient();
+    // ILog::debug_message("is a patient field", $patient->is_field("pat_id"));
+    // ILog::debug_message("is not patient field", Patient::has_field("pat_idfdsaf"));
+
+    ILog::debug_message("is visit field", Visit::has_field("pat_id"));
+    ILog::debug_message("is not a visit field", Visit::has_field("pat_idfdsaf"));
   }
 
 }
