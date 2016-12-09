@@ -11,6 +11,8 @@ class Field extends Imodel {
   var $created_at = null;
   var $updated_at = null;
 
+  static $cache_fields = null;
+
   const PATIENT = 'Patient';
   const VISIT = 'Visit';
 
@@ -71,8 +73,16 @@ class Field extends Imodel {
     return 'Field';
   }
 
+  static function cache_all(){
+    if(Field::$cache_fields)
+      return Field::$cache_fields;
+
+    Field::$cache_fields = Field::all();
+    return Field::$cache_fields;
+  }
+
   static function mapper() {
-    $fields = Field::all();
+    $fields = Field::cache_all();
     $result = [];
     foreach($fields as $field)
       $result[$field->id] = $field->code;
@@ -82,11 +92,25 @@ class Field extends Imodel {
     return $result;
   }
 
+  static function static_mapper() {
+    $fields = Field::cache_all();
+    $result = array();
+
+    foreach($fields as $field)
+      if($field->dynamic_field == 0)
+        $result[$field->id] = $field->code;
+
+    $result["visit.*"] = "visit.*";
+    $result["patient.*"] = "patient.*";
+    return $result;
+  }
+
   static function dynamic_fields() {
-    $fields = Field::all(array("dynamic_field" => 1));
+    $fields = Field::cache_all(); //dynamic_field
     $result = array();
     foreach($fields as $field)
-      $result[$field->code] = $field;
+      if($field->dynamic_field == 1)
+        $result[$field->code] = $field;
     return $result;
   }
 

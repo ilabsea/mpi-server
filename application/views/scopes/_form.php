@@ -17,7 +17,7 @@
     <p class='field-hint'>
       Only fields listed below can be read by this scope
     </p>
-    <?= form_dropdown('searchable_fields[]', $fields, $scope->searchable_fields,
+    <?= form_dropdown('searchable_fields[]', Field::static_mapper(), $scope->searchable_fields,
                       'multiple id="searchable_fields" class="tokenizer"' ) ?>
   </div>
 </div>
@@ -29,7 +29,7 @@
     <p class='field-hint'>
       Only fields listed below will be returned by this scope
     </p>
-    <?= form_dropdown('display_fields[]', $fields, $scope->display_fields,
+    <?= form_dropdown('display_fields[]', Field::mapper(), $scope->display_fields,
                       'multiple id="display_fields" class="tokenizer"' ) ?>
   </div>
 </div>
@@ -41,7 +41,7 @@
     <p class='field-hint'>
       Only fields listed below can be updated by this scope
     </p>
-    <?= form_dropdown('updatable_fields[]', $fields, $scope->updatable_fields,
+    <?= form_dropdown('updatable_fields[]', Field::mapper(), $scope->updatable_fields,
                       'multiple id="searchable_fields" class="tokenizer"' ) ?>
   </div>
 </div>

@@ -19,7 +19,7 @@ class Scopes extends MpiController {
 
   function add() {
     $scope = new Scope();
-    $this->set_view_variables(array( "scope" => $scope, "fields" => Field::mapper()));
+    $this->set_view_variables(array("scope" => $scope));
     $this->render_view();
   }
 
@@ -33,14 +33,14 @@ class Scopes extends MpiController {
       return;
     }
     else{
-      $this->set_view_variables(array( "scope" => $scope,   "fields" => Field::mapper()));
+      $this->set_view_variables(array("scope" => $scope));
       $this->render_view("add");
     }
   }
 
   function edit($id) {
     $scope = Scope::find($id);
-    $this->set_view_variables(array("scope" => $scope, "fields" => Field::mapper()));
+    $this->set_view_variables(array("scope" => $scope));
     $this->render_view();
   }
 
@@ -51,7 +51,7 @@ class Scopes extends MpiController {
       redirect(site_url("scopes/index"));
     }
     else{
-      $this->set_view_variables(array( "scope" => $scope,   "fields" => Field::mapper()));
+      $this->set_view_variables(array("scope" => $scope));
       $this->render_view("edit");
     }
   }
