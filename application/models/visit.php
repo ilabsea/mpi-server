@@ -22,28 +22,6 @@ class Visit extends Imodel {
   var $vcctnumber = null;
   var $dynamic_fields = array();
 
-  static function has_field($field_name){
-    $fields = array(
-      "visit_id" => "",
-      "pat_id" => "",
-      "serv_id" => "",
-      "site_code" => "",
-      "ext_code" => "",
-      "ext_code_2" => "",
-
-      "info" => "", //positive
-      "visit_date" => "",
-      "date_create" => "",
-      "pat_age" => "",
-      "refer_to_vcct" => 0,
-      "refer_to_oiart" => 0,
-      "refer_to_std" => 0,
-      "created_at" => "",
-      "updated_at" => "",
-    );
-    return isset($fields[$field_name]) === true ;
-  }
-
   static function virtual_fields() {
     return array("dynamic_fields", "vcctsite", "vcctnumber");
   }

@@ -11,7 +11,7 @@ class Patients extends MpiController {
     $services = Service::mapper();
     $params = $this->filter_params(array("serv_id", "master_id", "pat_gender",
       "site_code", "external_code", "external_code2", "date_from",
-      "date_to", "order_by", "order_direction"));
+      "date_to", "order_by", "order_direction", "pat_age", "info"));
 
     $exclude_pat_ids = array("KH002100000001","KH002100000002","KH002100000003","KH002100000004" );
 

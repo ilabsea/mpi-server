@@ -197,7 +197,7 @@ class Patient extends Imodel {
     return $query;
   }
 
-  static function count_filter($criterias, $exclude_pat_ids){
+  static function count_filter($criterias, $exclude_pat_ids = array()){
     $active_record = new Patient();
 
     $active_record = Patient::where_filter($active_record, $criterias, $exclude_pat_ids);
@@ -205,7 +205,7 @@ class Patient extends Imodel {
     return $count;
   }
 
-  static function all_filter($criterias, $exclude_pat_ids){
+  static function all_filter($criterias, $exclude_pat_ids = array(), $order_by = null, $order_direction = null){
     $active_record = new Patient();
     $active_record->db->select("patient.pat_id, patient.pat_gender, patient.pat_age, patient.pat_dob,
                                 patient.date_create, patient.pat_register_site, patient.visits_count,
@@ -214,7 +214,7 @@ class Patient extends Imodel {
 
     $active_record = Patient::where_filter($active_record, $criterias, $exclude_pat_ids);
 
-    if($criterias["order_direction"])
+    if($order_by && $order_direction )
       $active_record->db->order_by($criterias["order_by"], $criterias["order_direction"]);
 
     $active_record->db->limit(Paginator::per_page());
@@ -222,6 +222,21 @@ class Patient extends Imodel {
     $query = $active_record->db->get();
     $active_record = null;
     return $query->result();
+  }
+
+  // view tecnical and developer spec in docs/spec point 1
+  static function allow_query_fields($params){
+    $custom_fields = array("master_id", "date_from", "date_to", "site_code", "external_code", "ext_code_2");
+    $allow_fields = array();
+
+    $visit = new Visit();
+    $patient = new Patient();
+
+    foreach($params as $key => $value) {
+      if(in_array($key, $custom_fields) || $patient->is_field($key) || $visit->is_field($key))
+        $allow_fields[$key] = $value;
+    }
+    return $allow_fields;
   }
 
   static function where_filter($active_record, $criterias, $exclude_pat_ids = array()){
@@ -263,8 +278,11 @@ class Patient extends Imodel {
       else{
         if($active_record->is_field($field) && !Patient::is_fingerprint_field($field))
           $conditions["patients"]["patient.{$field} = "] = $value;
-        else if(Visit::has_field($field))
+        else{
+          // assumtion to be visit fields because we allow only custom field, patient and visit fields
+          // view tecnical and developer spec in docs/spec point 1
           $conditions["visits"]["visit.{$field} = "] = $value;
+        }
       }
     }
 
@@ -284,7 +302,7 @@ class Patient extends Imodel {
     if(count($conditions["visits"]) >0 ){
       $query_string = array();
       foreach($conditions["visits"] as $key => $value)
-        $query_string[] = $key ." ". mysql_real_escape_string($value);
+        $query_string[] = $key . "'" . mysql_real_escape_string($value) . "'";
 
       $visit_condition_sql = implode(" AND ", $query_string);
 
@@ -296,8 +314,12 @@ class Patient extends Imodel {
   }
 
   static function paginate_filter($criterias, $exclude_pat_ids=array()) {
+    $order_direction = $criterias["order_by"];
+    $order_by = $criterias["order_by"];
+
+    $criterias = Patient::allow_query_fields($criterias);
     $total_counts = Patient::count_filter($criterias, $exclude_pat_ids);
-    $records = Patient::all_filter($criterias, $exclude_pat_ids);
+    $records = Patient::all_filter($criterias, $exclude_pat_ids, $order_by, $order_direction);
     $paginator = new Paginator($total_counts, $records);
     return $paginator;
   }
