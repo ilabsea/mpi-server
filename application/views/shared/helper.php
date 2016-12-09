@@ -1,9 +1,7 @@
 <?php
 function pagination_direction($field, $params) {
-  if ($field == $params["order_by"]){
-    $image_url = $params["order_direction"] == "DESC" ? base_url("img/down.png") : base_url("img/up.png");
-    return "<img src='{$image_url}' />";
-  }
+  if ($field == $params["order_by"])
+    return $params["order_direction"] == "DESC" ? "<i class='icon icon-chevron-down'>" : "<i class='icon icon-chevron-up'>";
   return "";
 }
 ?>

@@ -35,6 +35,67 @@ class Site extends Imodel {
     return $query->row_array();
   }
 
+
+  static function paginate_filter($criterias) {
+    $total_counts = Site::count_filter($criterias);
+    $records = Site::all_filter($criterias);
+    $paginator = new Paginator($total_counts, $records);
+    return $paginator;
+  }
+
+  static function all_filter($criterias){
+    $active_record = new Site();
+    $active_record->db->select("site.site_id,site.site_code,site.site_name,site.pro_code,site.serv_id,site.od_name,
+                                province.pro_name, service.serv_code");
+
+    $active_record = Site::where_filter($active_record, $criterias);
+
+    if($criterias["order_direction"])
+      $active_record->db->order_by($criterias["order_by"], $criterias["order_direction"]);
+    $active_record->db->limit(Paginator::per_page());
+    $active_record->db->offset(Paginator::offset());
+    $query = $active_record->db->get();
+    return $query->result();
+  }
+
+  static function count_filter($criterias){
+    $active_record = new Site();
+    $active_record = Site::where_filter($active_record, $criterias);
+    $count = $active_record->db->count_all_results();
+    return $count;
+  }
+
+  static function where_filter($active_record, $criterias){
+    $active_record->db->from('mpi_site site');
+    $active_record->db->join("mpi_province province", "site.pro_code = province.pro_code", "left");
+    $active_record->db->join("mpi_service service", "service.serv_id = site.serv_id", "left");
+
+    $conditions = array();
+
+    if ($criterias["serv_id"] != "")
+      $conditions["service.serv_id"] = $criterias["serv_id"];
+
+    if ($criterias["site_code"] != "")
+      $conditions["site.site_code LIKE "] =  "%".$criterias["site_code"]."%";
+
+    if ($criterias["pro_code"] != "")
+        $conditions["province.pro_code"] = $criterias["pro_code"];
+
+    foreach($conditions as $key => $value)
+      $active_record->db->where($key, $value);
+
+    return $active_record;
+  }
+
+
+
+
+
+
+
+
+
+
   function getSites($criteria, $start, $rows) {
     $sql = "SELECT s.site_id,
                   s.site_code,

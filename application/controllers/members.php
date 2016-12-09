@@ -2,11 +2,10 @@
 
 class Members extends MpiController {
   function index() {
-    $services = Service::mapper();
     $params = $this->filter_params(array("serv_id", "site_code", "member_login"  ,"order_by", "order_direction"));
 
     $paginate_members = Member::paginate_filter($params);
-    $this->set_view_variables(array("params" => $params, "services" => $services, "paginate_members" => $paginate_members));
+    $this->set_view_variables(array("params" => $params, "paginate_members" => $paginate_members));
     $this->render_view();
   }
 

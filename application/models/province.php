@@ -22,4 +22,12 @@ class Province extends Imodel {
   static function class_name(){
     return 'Province';
   }
+
+  static function mapper(){
+    $provinces = Province::all();
+    $result = [];
+    foreach($provinces as $province)
+      $result[$province->pro_code] = $province->pro_name;
+    return $result;
+  }
 }

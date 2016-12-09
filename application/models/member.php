@@ -240,7 +240,6 @@ class Member extends Imodel {
 
   static function count_filter($criterias){
     $active_record = new Member();
-    $active_record->db->select("count(*)");
     $active_record = Member::where_filter($active_record, $criterias);
     $count = $active_record->db->count_all_results();
     return $count;
