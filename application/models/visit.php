@@ -22,6 +22,10 @@ class Visit extends Imodel {
   var $vcctnumber = null;
   var $dynamic_fields = array();
 
+  const VCCT = 1;
+  const OI_ART = 2;
+  const STD = 3;
+
   static function virtual_fields() {
     return array("dynamic_fields", "vcctsite", "vcctnumber");
   }
@@ -120,7 +124,17 @@ class Visit extends Imodel {
                                       "visit_positives_count" => $visit_positives_count ));
   }
 
+  function is_vcct(){
+    return $this->serviceid == Visit::VCCT;
+  }
 
+  function is_oiart() {
+    return $this->seviceid == Visit::OI_ART;
+  }
+
+  function is_std() {
+    return $this->serviceid == Visit::STD;
+  }
 
   function validation_rules(){
     $this->form_validation->set_rules('serv_id', 'Service ID', 'trim|required');

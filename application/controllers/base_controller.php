@@ -27,6 +27,7 @@ class BaseController extends CI_Controller {
     require_once APPPATH.'libraries/Imodel.php';
     require_once APPPATH.'libraries/api_oauth_helper.php';
     require_once APPPATH.'libraries/app_helper.php';
+    require_once APPPATH.'libraries/paginator.php';
 
     require_once APPPATH.'models/member.php';
     require_once APPPATH.'models/field.php';
@@ -41,10 +42,13 @@ class BaseController extends CI_Controller {
     require_once APPPATH.'models/dynamic_value.php';
     require_once APPPATH.'models/api_access_log.php';
     require_once APPPATH.'models/vcct_from_oiart.php';
+    require_once APPPATH.'models/fingerprint_matcher.php';
 
     require_once APPPATH.'models/serializer.php';
     require_once APPPATH.'models/visit_detail_serializer.php';
     require_once APPPATH.'models/patient_detail_serializer.php';
+
+
 
     require_once APPPATH.'models/rollback_exception.php';
 

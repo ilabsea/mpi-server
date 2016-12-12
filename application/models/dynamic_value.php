@@ -9,6 +9,7 @@ class DynamicValue {
 
   function result($records, $type='patient') {
 
+    // ILog::d("records", $records);
     if(count($records) == 0)
       return $records;
 
@@ -28,7 +29,7 @@ class DynamicValue {
 
   private function id_value($record) {
     $id = ($this->type == "patient" ? "id" : "visit_id");
-    return $record->$id;
+    return  is_object($record) ? $record->$id : $record[$id];
   }
 
   private function merge_values($record, $dynamic_values) {
@@ -45,6 +46,7 @@ class DynamicValue {
     return $merged_result;
   }
 
+  //array("pat1"=> array(fieldvalueobje1, fieldvalueobje2), "pat2" => array(fieldval3, fieldvalobj4))
   private function map_field_values_by_record() {
     $ids = array();
 
@@ -52,16 +54,19 @@ class DynamicValue {
       $ids[] = $this->id_value($record);
     }
 
-    $field_values = FieldValue::all(array("field_owner_id" => $ids));
 
+    $ids = implode(",", $ids);
+
+    $field_values = FieldValue::all(array("field_owner_id IN ({$ids}) " => null));
     $result = array();
-    foreach($field_values as $field_value) {
-      $record_id = $field_value->field_owner_id;
 
-      if(isset($result[$record_id]))
-        $result[$record_id][] = $field_value;
+    foreach($field_values as $field_value_object) {
+      $field_owner_id = $field_value_object->field_owner_id;
+
+      if(isset($result[$field_owner_id]))
+        $result[$field_owner_id][] = $field_value_object;
       else
-        $result[$record_id] = array($field_value);
+        $result[$field_owner_id] = array($field_value_object);
     }
 
     return $result;

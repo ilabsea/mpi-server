@@ -1,94 +1,80 @@
 <?php
 class PatientModule {
-  static function fingerprint_name($params){
-    foreach(Patient::fingerprint_fields() as $fingerprint_name){
-      if(isset($params[$fingerprint_name]))
-        return $fingerprint_name;
-    }
-    return null;
-  }
-  static function patient_visits($patient_ids) {
-    $patient_ids = is_array($patient_ids) ? $patient_ids : array($patient_ids);
+  static function patient_visits($pat_ids) {
+    $pat_ids = is_array($pat_ids) ? $pat_ids : array($pat_ids);
+    $pat_ids = implode(",", $pat_ids);
     $patient = new Patient();
-
-    $patient->db->select("visit.visit_id AS visitid,
-                          visit.pat_id AS patientid,
-                          visit.serv_id AS serviceid,
-                          visit.site_code AS sitecode,
-                          visit.ext_code AS externalcode,
-                          visit.ext_code_2 AS externalcode2,
-                          visit.visit_date AS visitdate,
+    $patient->db->select("visit.visit_id,
+                          visit.pat_id,
+                          visit.serv_id,
+                          visit.site_code,
+                          visit.ext_code,
+                          visit.ext_code_2,
+                          visit.visit_date,
                           visit.info,
                           visit.date_create,
-                          visit.pat_age AS age,
+                          visit.pat_age,
                           visit.refer_to_vcct,
                           visit.refer_to_oiart,
                           visit.refer_to_std,
                           service.serv_code,
-                          site.site_name as sitename");
+                          site.site_name");
 
     $patient->db->from("mpi_visit visit");
     $patient->db->join('mpi_service as service ', 'service.serv_id = visit.serv_id', 'LEFT');
     $patient->db->join('mpi_site as site ', 'site.site_code = visit.site_code', 'LEFT');
-    $patient->db->where_in('visit.pat_id', $patient_ids);
+    $patient->db->where("visit.pat_id IN ({$pat_ids})", null );
     $query = $patient->db->get();
-    $rows = array();
 
-    foreach($query->result() as $obj) {
-      $patient_id = $obj->patientid;
-      if(isset($rows[$patient_id]))
-        $rows[$patient_id][] = $obj;
+    $query_results = $query->result();
+    $dynamic_value = new DynamicValue();
+    $dynamic_results = $dynamic_value->result($query_results, 'visit');
+
+    $rows = array();
+    foreach($dynamic_results as $dynamic_result) {
+      $pat_id = $dynamic_result['pat_id'];
+      if(isset($rows[$pat_id]))
+        $rows[$pat_id][] = $dynamic_result;
       else
-        $rows[$patient_id] = array($obj);
+        $rows[$pat_id] = array($dynamic_result);
     }
     return $rows;
   }
-
-  # params = {p_is_referral: 10, date_visit: '2015-10-10', fingerprint_r1: 'fpvalu1', sitecode: '0202', pat_gender: 1}
-  static function patients($params, $exclude_patient_ids = array()) {
-
-  }
-
   # Filter site code to reduce number of patient
-  static function search($params){
-    $fingerprint_name = PatientModule::fingerprint_name($patient_params);
-    $fingerprint_value = $params[$fingerprint_name];
-
-    $patients = Patient::all_filter($params);
-    if($fingerprint_value)
-      return PatientModule::identify_patients($patients, $fingerprint_name, $fingerprint_value);
-    return $result;
-  }
-
-  static function identify_patients($patients, $fingerprint_name, $fingerprint_value){
-    $result = array();
-    $fingerprint_sdk = GrFingerService::instance();
-    $fingerprint_sdk->prepare($fingerprint_value);
-
-    foreach ($patients as $patient){
-      if(!$patient->has_fingerprint($fingerprint_name))
-        continue;
-      if($fingerprint_sdk->identify($patient->$fingerprint_name))
-        $result[] =$patient;
+  static function search($params, $exclude_patient_ids = array()){
+    $fingerprint_options = array();
+    foreach($params as $field_name => $field_value) {
+      if(Patient::is_fingerprint_field($field_name)){
+        $fingerprint_options = array("name" => $field_name, "value" => $field_value);
+        break;
+      }
     }
-    return $result;
+    $patients = Patient::all_filter($params, $exclude_patient_ids);
+    if(count($fingerprint_options) > 0)
+      $patients = FingerprintMatcher::patients($fingerprint_options, $patients);
+
+    $dynamic_value = new DynamicValue();
+    $dynamic_results = $dynamic_value->result($patients, "patient");
+
+    $patient_jsons = PatientModule::to_patient_json($dynamic_results);
+    return $patient_jsons;
   }
 
   static function set_patient_last_test(&$patient_json) {
     $last_test_date = "";
     $last_test_result = "";
-    foreach($patient_json["visits"] as $visit) {
-      if($visit->serviceid != 1)
-        continue;
 
-      if($last_test_date == ""){
-        $last_test_date = $visit->visitdate;
-        $last_test_result = $visit->info;
+    foreach($patient_json["visits"] as $visit) {
+      $is_vcct = $visit["serv_id"] == Visit::VCCT;
+
+      if($is_vcct && $last_test_date == ""){
+        $last_test_date = $visit["visit_date"];
+        $last_test_result = $visit["info"];
       }
 
-      else if(strcmp($last_test_date, $visit->visitdate) < 0){
-        $last_test_date = $visit->visitdate;
-        $last_test_result = $visit->info;
+      else if($is_vcct && strcmp($last_test_date, $visit["visit_date"]) < 0){
+        $last_test_date = $visit["visit_date"];
+        $last_test_result = $visit["info"];
       }
     }
     $patient_json["lastvcctdate"] = $last_test_date;
@@ -96,26 +82,41 @@ class PatientModule {
   }
 
   static function to_patient_json($matched_patients) {
-    $patient_ids = array();
+    $pat_ids = array();
     foreach($matched_patients as $patient) {
-      $patient_ids[] = $patient->id();
+      $pat_id = $patient['pat_id'];
+      $pat_ids[] = "'{$pat_id}'";
     }
 
-    $patient_visits = PatientModule::patient_visits($patient_ids);
+    $patient_visits = PatientModule::patient_visits($pat_ids);
+
     $results = array();
     foreach($matched_patients as $patient) {
-      $patient_id = $patient->id();
-      $patient_json = $patient->to_json();
-      $patient_json['visits'] = $patient_visits[$patient_id];
+      $pat_id = $patient['pat_id'];
+
+      $patient_json = $patient; //PatientModule::to_json($patient);
+
+      $patient_json['visits'] = isset($patient_visits[$pat_id]) ? $patient_visits[$pat_id] : array();
       PatientModule::set_patient_last_test($patient_json);
       $results[] = $patient_json;
     }
     return $results;
   }
 
+  static function to_json($patient){
+    return array(
+      "patientid" => $patient->pat_id,
+      "gender" => $patient->pat_gender,
+      "birthdate" => $patient->pat_dob,
+      "sitecode" => $patient->pat_register_site,
+      "createdate" => $patient->date_create,
+      "age" => $patient->pat_age
+    );
+  }
+
   static function enroll($params){
-    $params["date_create"] = isset($params["date_create"]) ? $params["date_create"] : Imodel::current_time();
-    $params["pat_register_site"] = isset($params["pat_register_site"]) ? $params["pat_register_site"] : "0201";
+    $params["date_create"] = $params["date_create"] ? $params["date_create"] : Imodel::current_time();
+    $params["pat_register_site"] = $params["pat_register_site"] ? $params["pat_register_site"] : "0201";
     $patient = new Patient($params);
 
     if($patient->save())

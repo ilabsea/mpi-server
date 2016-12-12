@@ -114,14 +114,18 @@ class Patient extends Imodel {
   static function fingerprint_fields(){
     return array(
       "fingerprint_r1",
-      "fingerprint_r2",
-      "fingerprint_r3",
-      "fingerprint_r4",
-      "fingerprint_r5",
       "fingerprint_l1",
+
+      "fingerprint_r2",
       "fingerprint_l2",
+
+      "fingerprint_r3",
       "fingerprint_l3",
+
+      "fingerprint_r4",
       "fingerprint_l4",
+
+      "fingerprint_r5",
       "fingerprint_l5"
     );
   }
@@ -207,7 +211,7 @@ class Patient extends Imodel {
 
   static function all_filter($criterias, $exclude_pat_ids = array(), $order_by = null, $order_direction = null){
     $active_record = new Patient();
-    $active_record->db->select("patient.pat_id, patient.pat_gender, patient.pat_age, patient.pat_dob,
+    $active_record->db->select("patient.id, patient.pat_id, patient.pat_gender, patient.pat_age, patient.pat_dob,
                                 patient.date_create, patient.pat_register_site, patient.visits_count,
                                 patient.visit_positives_count,patient.new_pat_id");
 
