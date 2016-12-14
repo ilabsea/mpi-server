@@ -42,22 +42,17 @@ class PatientModule {
   }
   # Filter site code to reduce number of patient
   static function search($params, $exclude_patient_ids = array()){
-    $fingerprint_options = array();
-    foreach($params as $field_name => $field_value) {
-      if(Patient::is_fingerprint_field($field_name)){
-        $fingerprint_options = array("name" => $field_name, "value" => $field_value);
-        break;
-      }
-    }
     $patients = Patient::all_filter($params, $exclude_patient_ids);
-    if(count($fingerprint_options) > 0)
-      $patients = FingerprintMatcher::patients($fingerprint_options, $patients);
+    $patients = FingerprintMatcher::match_fingerprints_with_patients(Patient::fingerprint_params(), $patients);
 
+    return PatientModule::embeded_dynamic_fields($patients);
+  }
+
+  static function embeded_dynamic_fields($patients) {
     $dynamic_value = new DynamicValue();
     $dynamic_results = $dynamic_value->result($patients, "patient");
-
-    $patient_jsons = PatientModule::to_patient_json($dynamic_results);
-    return $patient_jsons;
+    $patients_json = PatientModule::to_patient_json($dynamic_results);
+    return $patients_json;
   }
 
   static function set_patient_last_test(&$patient_json) {
@@ -125,4 +120,56 @@ class PatientModule {
       return null;
   }
 
+  //array("pat_gender", "pat_age", "pat_dob", "pat_register_site", "date_create", "finger...", "visits" => array())
+  function synchronize($patient_params) {
+    $data = array();
+    $fingerprint_params = Patient::fingerprint_params($patient_params);
+
+    $patient = Patient::find_by(array("pat_id" => $patient_params["pat_id"]));
+    if($patient)
+      return true;
+
+    $sdk = GrFingerService::get_instance();
+    $conditions = array("pat_gender" => $patient_params["pat_gender"],
+                        "pat_register_site" => $patient_params["$patient_params"]);
+
+    foreach($fingerprint_params as $fingerprint_name => $fingerprint_value)
+      $conditions[$fingerprint_name] = $fingerprint_value;
+
+    $patients = Patient::all_filter($conditions);
+    $patients = FingerprintMatcher::match_fingerprints_with_patients(Patient::fingerprint_params(), $patients);
+
+    if (count($patients) == 0){
+      $patient = new Patient($patient_params);
+      $patient->save();
+      $patients = array($patients);
+    }
+
+    elseif(count($patients) == 1)
+      $patient = $patients[0];
+
+    // array("serv_id", "site_code", "ext_code", "pat_age", "ext_code_2", "info", "refer_to_vcct", "refer_to_oiart", "refer_to_std", "date_create", "visit_date")
+    foreach($patient_params["visits"] as $visit_params){
+      $visit_params["pat_id"] = $patient->pat_id;
+      $visit = new Visit($visit_params);
+      $visit->save();
+    }
+    $patients_json =  PatientModule::embeded_dynamic_fields($patients);
+    return $patients_json;
+  }
+
+  //array("pat_id", "visits" => array())
+  static function synchronize_update($patient_params) {
+    $patient = Patient::find_by(array("pat_id" => $patient_params["pat_id"]));
+    if(!$patient)
+      return false;
+
+    foreach($patient_params["visits"] as $visit_params){
+      $visit_params["pat_id"] = $patient->pat_id;
+      $visit = new Visit($visit_params);
+      $visit->save();
+    }
+    $patients_json =  PatientModule::embeded_dynamic_fields($patients);
+    return $patients_json;
+  }
 }
