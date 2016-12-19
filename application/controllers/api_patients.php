@@ -13,6 +13,7 @@ class Api_patients extends ApiAccessController{
     $this->render_json($patients);
   }
 
+  //api/patients/create
   function create(){
     $params = $this->patient_params();
     $patient = PatientModule::enroll($params);
@@ -25,7 +26,8 @@ class Api_patients extends ApiAccessController{
 
   function patient_params() {
     $param_list = array_merge(Patient::fingerprint_fields(),
-                              array( "pat_gender", "pat_dob", "pat_age", "date_create", "pat_register_site","new_pat_id", "pat_version"));
+                              array( "pat_gender", "pat_dob", "pat_age", "date_create",
+                                     "pat_register_site","new_pat_id", "pat_version"));
     return $this->filter_params($param_list);
   }
 }

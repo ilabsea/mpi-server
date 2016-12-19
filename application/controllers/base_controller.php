@@ -29,6 +29,11 @@ class BaseController extends CI_Controller {
     require_once APPPATH.'libraries/app_helper.php';
     require_once APPPATH.'libraries/paginator.php';
 
+    require_once APPPATH.'models/site.php';
+    require_once APPPATH.'models/province.php';
+    require_once APPPATH.'models/visit.php';
+    require_once APPPATH.'models/patient.php';
+
     require_once APPPATH.'models/member.php';
     require_once APPPATH.'models/field.php';
     require_once APPPATH.'models/field_value.php';
@@ -36,8 +41,7 @@ class BaseController extends CI_Controller {
     require_once APPPATH.'models/application_token.php';
     require_once APPPATH.'models/scope.php';
     require_once APPPATH.'models/service.php';
-    require_once APPPATH.'models/visit.php';
-    require_once APPPATH.'models/patient.php';
+
     require_once APPPATH.'models/patient_module.php';
     require_once APPPATH.'models/dynamic_value.php';
     require_once APPPATH.'models/api_access_log.php';

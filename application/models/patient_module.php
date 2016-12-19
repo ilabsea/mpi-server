@@ -43,7 +43,7 @@ class PatientModule {
   # Filter site code to reduce number of patient
   static function search($params, $exclude_patient_ids = array()){
     $patients = Patient::all_filter($params, $exclude_patient_ids);
-    $patients = FingerprintMatcher::match_fingerprints_with_patients(Patient::fingerprint_params(), $patients);
+    $patients = FingerprintMatcher::match_fingerprints_with_patients(Patient::fingerprint_params($params), $patients);
 
     return PatientModule::embeded_dynamic_fields($patients);
   }
