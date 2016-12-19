@@ -369,7 +369,7 @@ class Imodel extends CI_Model {
     $this->db->update(static::table_name(), $this->change_attributes());
 
     if($this->db->affected_rows() == 0)
-      return null;
+      return true;
     else{
       $this->after_save();
       $this->after_update();

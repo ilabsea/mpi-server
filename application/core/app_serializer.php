@@ -1,5 +1,5 @@
 <?php
-class Serializer {
+class AppSerializer {
   var $fields = array();
   var $object = null;
 

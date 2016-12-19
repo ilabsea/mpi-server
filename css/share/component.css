@@ -87,3 +87,8 @@ label-inline {
 .title-items{
   float: right;
 }
+
+.scroll-container {
+  width:100%;
+  overflow: scroll;
+}

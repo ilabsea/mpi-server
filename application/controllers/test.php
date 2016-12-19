@@ -21,20 +21,37 @@ class Test extends MpiController {
 
   //filter out pat_id not allow to update
   function update_patient() {
-    $patient = Patient::find_by(array("pat_id" => "KH001100000001"));
     $params = array(
-      "pat_register_site" => "0101",
-      "pat_age" => 60,
-      "pat_gender" => 1,
-      "is_referred" => false,
+      "p_pat_register_site" => "0101",
+      "p_pat_age" => 60,
+      "p_pat_gender" => 1,
+      "p_is_referred" => false,
 
       "p_is_referral" => "False",
       "p_dynamic_field1" => "1000",
       "p_dynamic_field2" => "70",
       "p_Fdafdafdafds" => "300"
     );
-    $patient->update_attributes($params);
 
+    $pat_id = "KH001100000001" ;
+    $patient = Patient::find_by(array("pat_id" => $pat_id));
+
+    if(!$patient)
+      throw new RecordNotFoundException("Invalid patient number: {$pat_id}");
+
+    $filter_patients = FieldTransformer::apply_to_patient($params);
+
+    $patient->update_attributes($filter_patients);
+
+    $params = $this->filter_params(array("order_by", "order_direction"));
+    $visits = Patient::visits(["'{$pat_id}'"], $params["order_by"], $params["order_direction"]);
+
+    $dynamic_value = new DynamicValue();
+    $patient_json = array();
+    $patient_json["patient"] = $dynamic_value->result(array($patient));
+    $patient_json["patient"]["visits"] =  $dynamic_value->result($visits, null);
+
+    $this->render_json($patient_json);
   }
 
   function patients() {
@@ -68,7 +85,6 @@ class Test extends MpiController {
     $patient = PatientModule::enroll($params);
     ILog::debug_message("Patient", $patient);
   }
-
 
   function enroll_visit() {
     $field = new Field(array("type" => "DateTime"));
@@ -263,6 +279,58 @@ class Test extends MpiController {
     ILog::debug_message("is visit field", Visit::has_field("pat_id"));
     ILog::debug_message("is not a visit field", Visit::has_field("pat_idfdsaf"));
     ILog::debug_message("must be a visit field", Patient::$visit->is_field("pat_id"));
+  }
+
+  function transform_params(){
+    $patient_params = array(
+      "p_pat_register_site" => "0101",
+      "p_pat_age" => 60,
+      "p_pat_gender" => 1,
+      "is_referred" => false,
+      "p_pat_dob" => "2014-10-10",
+
+      "p_is_referral" => "False",
+      "v_tb" => "1111",
+      "p_dynamic_field1" => "10",
+      "p_dynamic_field2" => "30",
+      "pat_id" => "KH002100003000", //override
+    );
+
+    $visit_params = array(
+      "v_visit_id" => "0101",
+      "v_pat_id" => 60,
+      "v_serv_id" => 1,
+      "v_site_code" => 60,
+
+      "p_is_referral" => "False",
+      "v_tb" => "1111",
+      "p_dynamic_field1" => "10",
+      "p_dynamic_field2" => "30",
+      "pat_id" => "KH002100003000",
+      "v_dynamic_field1" => "f1",
+      "v_dynamic_field2" => "f2",
+      "v_dynamic_field3" => "f3",
+      "v_dynamic_field4" => "f4",
+    );
+
+    $transforms = FieldTransformer::apply_to_patient($patient_params);
+    ILog::d("patients: ", $transforms);
+
+    $transforms = FieldTransformer::apply_to_visit($visit_params);
+    ILog::d("visits: ", $transforms);
+  }
+
+  function runner(){
+    $this->console();
+    $this->update_patient();
+    $this->patients();
+    $this->enroll_patient();
+    $this->enroll_visit();
+    $this->sync_update();
+    $this->search();
+    $this->patient_where();
+    $this->allow_query_field_patients();
+    $this->has_field();
   }
 
 }

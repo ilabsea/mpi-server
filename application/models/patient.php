@@ -31,6 +31,8 @@ class Patient extends Imodel {
   var $province = null;
   var $dynamic_fields = array();
 
+  const PREFIX_DYNAMIC = 'p_';
+
   public static function virtual_fields() {
     return array("province", 'dynamic_fields');
   }
@@ -172,7 +174,7 @@ class Patient extends Imodel {
     }
   }
 
-  static function visits($patient_ids, $order_by, $order_direction) {
+  static function visits($patient_ids, $order_by=null, $order_direction=null, $limit=10) {
     $active_record = new Patient();
     $ids = implode(",", $patient_ids);
     $order_by = $order_by == "" ? "visit_date" : $order_by;
@@ -192,7 +194,14 @@ class Patient extends Imodel {
               FROM mpi_visit ps
               LEFT JOIN mpi_service s ON (s.serv_id = ps.serv_id)
               LEFT JOIN mpi_site site ON (site.site_code = ps.site_code)
-              WHERE pat_id IN ({$ids}) ORDER BY {$order_by} {$order_direction} ";
+              WHERE pat_id IN ({$ids}) ";
+
+    if($order_by && $order_direction)
+      $sql .= " ORDER BY {$order_by} {$order_direction} ";
+    else
+      $sql .= " ORDER BY visit_id DESC ";
+
+    $sql .= " LIMIT  {$limit}";
 
     $query = $active_record->db->query($sql);
     return $query->result();

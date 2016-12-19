@@ -7,7 +7,7 @@ function mysql_to_date($postgres_date) {
 	if ($postgres_date == NULL || $postgres_date == "") {
 		return NULL;
 	}
-	
+
 	$arr = explode("-", $postgres_date);
 	$result =  new DateTime();
 	$result->setDate($arr[0], $arr[1], $arr[2]);
@@ -25,14 +25,14 @@ function mysql_datetime_to_date($postgres_datetime = "") {
 	if (count($arr) > 1) :
 		$datetime_arr = explode(".", $arr[1]);
 		$datetime = $datetime_arr[0];
-	endif; 
+	endif;
 	$arr = explode("-", $postgres_date);
 	$arr2 = explode(":", $datetime);
 	$result =  new DateTime();
 	$result->setDate($arr[0], $arr[1], $arr[2]);
 	$result->setTime($arr2[0], $arr2[1], $arr2[2]);
 	return $result;
-	
+
 }
 
 /**
@@ -41,7 +41,7 @@ function mysql_datetime_to_date($postgres_datetime = "") {
  * @param $format
  */
 function date_to_date_format($php_date, $format=Iconstant::APP_DATE_FORMAT) {
-	$formats = array("Y-M-D", 
+	$formats = array("Y-M-D",
 	                 "M/D/Y",
 	                 "D/M/Y"
 	           );
@@ -62,7 +62,7 @@ function date_to_date_format($php_date, $format=Iconstant::APP_DATE_FORMAT) {
 }
 
 function date_to_date_format_hide_year($php_date, $format=Iconstant::APP_DATE_FORMAT) {
-	$formats = array("Y-M-D", 
+	$formats = array("Y-M-D",
 	                 "M/D/Y",
 	                 "D/M/Y"
 	           );
@@ -104,7 +104,7 @@ function datetime_mysql_to_html($postgres_datetime, $format=Iconstant::APP_DATE_
 	if (count($arr) > 1) :
 		$datetime_arr = explode(".", $arr[1]);
 		$datetime = $datetime_arr[0];
-	endif; 
+	endif;
 	$php_date = mysql_to_date($postgres_date);
 	return date_to_date_format($php_date, $format)." ".$datetime;
 }
@@ -115,7 +115,7 @@ function datetime_mysql_to_html($postgres_datetime, $format=Iconstant::APP_DATE_
  * @param unknown_type $format
  */
 function gparse_date($str_date, $format=Iconstant::APP_DATE_FORMAT) {
-	$formats = array("Y-M-D", 
+	$formats = array("Y-M-D",
 	                 "M/D/Y",
 	                 "D/M/Y"
 	           );
@@ -154,7 +154,7 @@ function gparse_date($str_date, $format=Iconstant::APP_DATE_FORMAT) {
 		$result->setTime(0, 0, 0);
 		return $result;
 	} else {
-	    return NULL;	
+	    return NULL;
 	}
 }
 
@@ -163,7 +163,7 @@ function datetime_html_to_php($str_date, $time, $format=Iconstantt::APP_DATE_FOR
     $arr = explode(":", $time);
     $h = $arr[0];
     $m = $arr[1];
-    $s = count($arr) > 2 ? $arr[2] : 0; 
+    $s = count($arr) > 2 ? $arr[2] : 0;
     $php_date->setTime($h, $m, $s);
     return $php_date;
 }
@@ -186,7 +186,7 @@ function date_html_to_php($html_date, $format=Iconstant::APP_DATE_FORMAT) {
 
 /**
  * Detech if the input is an interger
- * @param $input 
+ * @param $input
  */
 function is_nint($input){
   return preg_match('@^[0-9]+$@',$input) === 1;
@@ -196,8 +196,8 @@ function is_nnumeric($input) {
 	return (bool)preg_match( '/^[\-+]?[0-9]*\.?[0-9]+$/', $input);
 }
 
-function getBrowser() { 
-    $u_agent = $_SERVER['HTTP_USER_AGENT']; 
+function getBrowser() {
+    $u_agent = $_SERVER['HTTP_USER_AGENT'];
     $bname = 'Unknown';
     $platform = 'Unknown';
     $version= "";
@@ -210,27 +210,27 @@ function getBrowser() {
     } elseif (preg_match('/windows|win32/i', $u_agent)) {
         $platform = 'windows';
     }
-    
+
     // Next get the name of the useragent yes seperately and for good reason
-    if(preg_match('/MSIE/i',$u_agent) && !preg_match('/Opera/i',$u_agent)) { 
-        $bname = 'Internet Explorer'; 
-        $ub = "MSIE"; 
-    } elseif(preg_match('/Firefox/i',$u_agent)) { 
-        $bname = 'Mozilla Firefox'; 
-        $ub = "Firefox"; 
-    } elseif(preg_match('/Chrome/i',$u_agent)) { 
-        $bname = 'Google Chrome'; 
-        $ub = "Chrome"; 
-    } elseif(preg_match('/Safari/i',$u_agent)) { 
-        $bname = 'Apple Safari'; 
-        $ub = "Safari"; 
-    } elseif(preg_match('/Opera/i',$u_agent)) { 
-        $bname = 'Opera'; 
-        $ub = "Opera"; 
-    } elseif(preg_match('/Netscape/i',$u_agent)) { 
-        $bname = 'Netscape'; 
-        $ub = "Netscape"; 
-    } 
+    if(preg_match('/MSIE/i',$u_agent) && !preg_match('/Opera/i',$u_agent)) {
+        $bname = 'Internet Explorer';
+        $ub = "MSIE";
+    } elseif(preg_match('/Firefox/i',$u_agent)) {
+        $bname = 'Mozilla Firefox';
+        $ub = "Firefox";
+    } elseif(preg_match('/Chrome/i',$u_agent)) {
+        $bname = 'Google Chrome';
+        $ub = "Chrome";
+    } elseif(preg_match('/Safari/i',$u_agent)) {
+        $bname = 'Apple Safari';
+        $ub = "Safari";
+    } elseif(preg_match('/Opera/i',$u_agent)) {
+        $bname = 'Opera';
+        $ub = "Opera";
+    } elseif(preg_match('/Netscape/i',$u_agent)) {
+        $bname = 'Netscape';
+        $ub = "Netscape";
+    }
 
     // finally get the correct version number
     $known = array('Version', $ub, 'other');
@@ -238,7 +238,7 @@ function getBrowser() {
     if (!preg_match_all($pattern, $u_agent, $matches)) {
         // we have no matching number just continue
     }
-    
+
     // see how many we have
     $i = count($matches['browser']);
 
@@ -270,7 +270,7 @@ function getBrowser() {
 
 function karm_error($error, $normal=false) {
     if (isset($error) && $error != "") {
-    	if ($normal==false) { 
+    	if ($normal==false) {
     		echo "<fieldset style=\"width:800px\">";
       	    echo "<b>".k_lang("common_error_header").":</b>";
             echo "<ul class=\"error_message\">".$error."</ul>";
@@ -315,7 +315,7 @@ function generateOrder ($cur_field, $pre_order) {
 	        $marray["direction"] = "ASC";
 	    }
 	}
-    return Kencryption::encrypt(serialize($marray));    
+    return Kencryption::encrypt(serialize($marray));
 }
 
 function generateOrderImage($cur_field, $pre_order) {
@@ -382,7 +382,7 @@ function cur_page_url() {
 
 /**
  * @param string $a
- * @param string $b 
+ * @param string $b
  */
 function addSpecial($a, $b) {
     if (is_null($a)) :

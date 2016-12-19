@@ -5,6 +5,7 @@ class BaseController extends CI_Controller {
   function __construct() {
     parent::__construct();
     $CI =& get_instance();
+
     define("CHAR_SET", $CI->config->item("charset"));
 
     require_once APPPATH.'libraries/http_status_code.php';
@@ -13,7 +14,14 @@ class BaseController extends CI_Controller {
 
     $this->init();
     $this->callback();
+
+    set_exception_handler(array($this, 'catch_exception'));
   }
+
+  public function catch_exception($exception) {
+    ILog::d("Application raise exception with: ", $exception);
+  }
+
 
   //to init you class, lib
   function init() {
@@ -24,39 +32,20 @@ class BaseController extends CI_Controller {
 
     require_once BASEPATH.'core/model.php';
 
-    require_once APPPATH.'libraries/Imodel.php';
-    require_once APPPATH.'libraries/api_oauth_helper.php';
-    require_once APPPATH.'libraries/app_helper.php';
-    require_once APPPATH.'libraries/paginator.php';
+    $this->load_dir(APPPATH."core");
+    $this->load_dir(APPPATH."helpers");
+    $this->load_dir(APPPATH."libraries");
+    $this->load_dir(APPPATH."models");
+    $this->load_dir(APPPATH."exceptions");
+  }
 
-    require_once APPPATH.'models/site.php';
-    require_once APPPATH.'models/province.php';
-    require_once APPPATH.'models/visit.php';
-    require_once APPPATH.'models/patient.php';
-
-    require_once APPPATH.'models/member.php';
-    require_once APPPATH.'models/field.php';
-    require_once APPPATH.'models/field_value.php';
-    require_once APPPATH.'models/application.php';
-    require_once APPPATH.'models/application_token.php';
-    require_once APPPATH.'models/scope.php';
-    require_once APPPATH.'models/service.php';
-
-    require_once APPPATH.'models/patient_module.php';
-    require_once APPPATH.'models/dynamic_value.php';
-    require_once APPPATH.'models/api_access_log.php';
-    require_once APPPATH.'models/vcct_from_oiart.php';
-    require_once APPPATH.'models/fingerprint_matcher.php';
-
-    require_once APPPATH.'models/serializer.php';
-    require_once APPPATH.'models/visit_detail_serializer.php';
-    require_once APPPATH.'models/patient_detail_serializer.php';
-
-
-
-    require_once APPPATH.'models/rollback_exception.php';
-
-
+  function load_dir($path, $except='') {
+    $files = scandir($path);
+    foreach($files as $file){
+      if(substr($file, -4, 4) == '.php' && $file != $except){
+        require_once "{$path}/{$file}";
+      }
+    }
   }
 
   //override this in your controller
@@ -77,11 +66,18 @@ class BaseController extends CI_Controller {
     }
   }
 
-  function filter_params($keys){
+  function filter_params($keys, $type=''){
     $result = array();
+    $params = $_REQUEST;
+
+    if($type == 'get')
+      $params = $_GET;
+    else if ($type == 'post')
+      $params = $_POST;
+
     foreach($keys as $key){
-      if(isset($_REQUEST[$key]))
-        $result[$key] = $_REQUEST[$key];
+      if(isset($params[$key]))
+        $result[$key] = $params[$key];
       else
         $result[$key] = null;
     }

@@ -68,7 +68,7 @@ class Seeds extends MpiController {
   }
 
   private function create_fields($table_fields, $table_type){
-    $prefix = $table_type == "Visit" ? 'v_' : 'p_';
+    $prefix = $table_type == "Visit" ? Visit::PREFIX_DYNAMIC : Patient::PREFIX_DYNAMIC;
     foreach($table_fields as $field_attrs) {
       $code = $field_attrs['code'];
       $field_attrs['dynamic_field'] = 0;

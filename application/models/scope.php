@@ -39,11 +39,7 @@ class Scope extends Imodel {
   }
 
   function has_read_access($params){
-
-    $keys = array_keys($params);
-    $keys[] = -1;
-    $fields = Field::all(array("code" => $keys));
-
+    $fields = Field::all();
     $readable_fields = $this->readable_fields();
 
     foreach($fields as $field) {
@@ -79,9 +75,7 @@ class Scope extends Imodel {
   }
 
   function has_write_access($params){
-    $keys = array_keys($params);
-    $fields = Field::all(array("code" => $keys));
-
+    $fields = Field::all();
     $writeable_fields = $this->writeable_fields();
 
     foreach($fields as $field) {
@@ -95,7 +89,6 @@ class Scope extends Imodel {
         continue;
       return false;
     }
-
     return true;
   }
 

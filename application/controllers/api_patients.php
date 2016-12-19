@@ -20,8 +20,36 @@ class Api_patients extends ApiAccessController{
     $this->render_json($patient);
   }
 
-  function update($id){
-    $this->authorize_read_access();
+  function update($pat_id){
+    $params = $_POST;
+    $patient = Patient::find_by(array("pat_id" => $pat_id));
+
+    if(!$patient)
+      throw new RecordNotFoundException("Invalid patient number: {$pat_id}");
+
+    $filter_patients = FieldTransformer::apply_to_patient($params);
+    $patient->update_attributes($filter_patients);
+
+    $visits = Patient::visits(array("'{$pat_id}'"));
+
+    $dynamic_value = new DynamicValue();
+
+    $dynamic_patients = $dynamic_value->result(array($patient));
+    $dynamic_visits =  $dynamic_value->result($visits, null);
+    $dynamic_fields = Field::dynamic_fields();
+
+    $patient_json = array();
+    $patient_json['patient'] = $dynamic_patients[0];
+    $patient_json['patient']["visit_lists"] = $dynamic_visits;
+
+    return $this->render_json($patient_json);
+  }
+
+  function catch_exception($exception) {
+    $type = get_class($exception);
+    if($type == 'RecordNotFoundException')
+      return $this->render_bad_request(array("error"=>404,
+                                             "error_description" => $exception->getMessage()));
   }
 
   function patient_params() {

@@ -22,38 +22,6 @@ class MpiController extends BaseController {
 
   function init(){
     parent::init();
-    $this->load->helper("html");
-    $this->load->helper('url');
-    $this->load->helper('form');
-    $this->load->library('form_validation');
-
-    require_once BASEPATH.'core/model.php';
-    require_once APPPATH.'libraries/Imodel.php';
-    require_once APPPATH.'libraries/Isession.php';
-    require_once APPPATH.'libraries/Iencryption.php';
-    require_once APPPATH.'libraries/Iconstant.php';
-    require_once APPPATH.'libraries/ILog.php';
-    require_once APPPATH.'libraries/mpi_auth_helper.php';
-    require_once APPPATH.'libraries/params_helper.php';
-    require_once APPPATH.'libraries/app_helper.php';
-    require_once APPPATH.'libraries/paginator.php';
-    require_once APPPATH.'helpers/mpi_helper.php';
-
-    require_once APPPATH.'models/user.php';
-    require_once APPPATH.'models/api_access_log.php';
-    require_once APPPATH.'models/scope.php';
-    require_once APPPATH.'models/field.php';
-    require_once APPPATH.'models/field_value.php';
-    require_once APPPATH.'models/application.php';
-    require_once APPPATH.'models/patient.php';
-    require_once APPPATH.'models/patient.php';
-    require_once APPPATH.'models/visit.php';
-    require_once APPPATH.'models/site.php';
-    require_once APPPATH.'models/province.php';
-    require_once APPPATH.'models/patient_module.php';
-    require_once APPPATH.'models/dynamic_value.php';
-    require_once APPPATH.'models/vcct_from_oiart.php';
-
     ILog::getInstance();
     $session_status = Isession::initializeSession();
 
