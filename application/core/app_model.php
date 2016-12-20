@@ -1,5 +1,5 @@
 <?php
-class Imodel extends CI_Model {
+class AppModel extends CI_Model {
   protected $_errors = array();
   protected $_changes = array();
   protected $_not_sql_fields = array('_errors', '_changes', '_not_sql_fields');
@@ -231,6 +231,21 @@ class Imodel extends CI_Model {
       $active_record = new $class_name($attrs);
       return $active_record;
     }
+  }
+
+  static function ensure_find_by($conditions) {
+    $active_record = static::find_by($conditions);
+    if($active_record)
+      return $active_record;
+
+    $errors = array();
+    foreach($conditions as $key=>$value)
+      $errors[] = "{$key}={$value}";
+
+
+    $error_param = implode("&", $errors);
+
+    throw new RecordNotFoundException("Record not found. Invalid params: {$error_param}");
   }
 
   static function find_by($conditions){

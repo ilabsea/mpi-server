@@ -33,14 +33,11 @@ class FieldTransformer {
     return FieldTransformer::apply_to($params, $visit);
   }
 
-  public function apply_to_all($params){
+  public function apply_to_all($params, $merged=false){
     $transform_patients = FieldTransformer::apply_to_patient($params);
     $transform_visits = FieldTransformer::apply_to_visit($params);
 
-    return array(
-      "patients" => $transform_patients,
-      "visits" => $transform_visits
-    );
+    return $merged ? AppHelper::merge_array($transform_visits, $transform_patients) : array("patients" => $transform_patients, "visits" => $transform_visits);
   }
 
 }

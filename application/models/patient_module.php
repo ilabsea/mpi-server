@@ -1,10 +1,23 @@
 <?php
 class PatientModule {
-  static function patient_visits($pat_ids) {
+  static function search_by_pat_id($pat_id){
+    $patient = Patient::ensure_find_by(array("pat_id" => $pat_id));
+    $visits = Patient::visits(["'{$pat_id}'"], "visit_id", "DESC");
+
+    $dynamic_value = new DynamicValue();
+    $dynamic_patients = $dynamic_value->result(array($patient));
+    $dynamic_visits =  $dynamic_value->result($visits, null);
+
+    $patient_json = array("patient" => $dynamic_patients[0]);
+    $patient_json["patient"]["list_visits"] = $dynamic_visits;
+    return $patient_json;
+  }
+  static function patient_visits($pat_ids, $conditions = array()) {
     $pat_ids = is_array($pat_ids) ? $pat_ids : array($pat_ids);
     $pat_ids = implode(",", $pat_ids);
-    $patient = new Patient();
-    $patient->db->select("visit.visit_id,
+    $active_record = new AppModel();
+
+    $active_record->db->select("visit.visit_id,
                           visit.pat_id,
                           visit.serv_id,
                           visit.site_code,
@@ -20,11 +33,19 @@ class PatientModule {
                           service.serv_code,
                           site.site_name");
 
-    $patient->db->from("mpi_visit visit");
-    $patient->db->join('mpi_service as service ', 'service.serv_id = visit.serv_id', 'LEFT');
-    $patient->db->join('mpi_site as site ', 'site.site_code = visit.site_code', 'LEFT');
-    $patient->db->where("visit.pat_id IN ({$pat_ids})", null );
-    $query = $patient->db->get();
+    $active_record->db->from("mpi_visit visit");
+    $active_record->db->join('mpi_service as service ', 'service.serv_id = visit.serv_id', 'LEFT');
+    $active_record->db->join('mpi_site as site ', 'site.site_code = visit.site_code', 'LEFT');
+    $active_record->db->where("visit.pat_id IN ({$pat_ids})", null );
+
+    foreach($conditions as $key => $value)
+      $active_record->db->where($key, $value);
+
+    $active_record->db->order_by("visit.visit_id", "DESC");
+    $active_record->db->limit(10);
+
+
+    $query = $active_record->db->get();
 
     $query_results = $query->result();
     $dynamic_value = new DynamicValue();
@@ -41,17 +62,24 @@ class PatientModule {
     return $rows;
   }
   # Filter site code to reduce number of patient
-  static function search($params, $exclude_patient_ids = array()){
-    $patients = Patient::all_filter($params, $exclude_patient_ids);
+  static function search($params, $exclude_pat_ids = array()){
+    $params = Patient::allow_query_fields($params);
+
+    $total_counts = Patient::count_filter($params, $exclude_pat_ids);
+    $patients = Patient::all_filter($params, $exclude_pat_ids);
     $patients = FingerprintMatcher::match_fingerprints_with_patients(Patient::fingerprint_params($params), $patients);
 
-    return PatientModule::embeded_dynamic_fields($patients);
+    $visit_conditions = Patient::$conditions["visits"];
+    $patients = PatientModule::embeded_dynamic_fields($patients, $visit_conditions);
+
+    $paginator = new Paginator($total_counts, $patients);
+    return $paginator;
   }
 
-  static function embeded_dynamic_fields($patients) {
+  static function embeded_dynamic_fields($patients, $visit_conditions=array()) {
     $dynamic_value = new DynamicValue();
     $dynamic_results = $dynamic_value->result($patients, "patient");
-    $patients_json = PatientModule::to_patient_json($dynamic_results);
+    $patients_json = PatientModule::to_patient_json($dynamic_results, $visit_conditions);
     return $patients_json;
   }
 
@@ -59,7 +87,7 @@ class PatientModule {
     $last_test_date = "";
     $last_test_result = "";
 
-    foreach($patient_json["visits"] as $visit) {
+    foreach($patient_json["list_visits"] as $visit) {
       $is_vcct = $visit["serv_id"] == Visit::VCCT;
 
       if($is_vcct && $last_test_date == ""){
@@ -76,14 +104,14 @@ class PatientModule {
     $patient_json["lastvcctresult"] = $last_test_result;
   }
 
-  static function to_patient_json($matched_patients) {
+  static function to_patient_json($matched_patients, $visit_conditions=array()) {
     $pat_ids = array();
     foreach($matched_patients as $patient) {
       $pat_id = $patient['pat_id'];
       $pat_ids[] = "'{$pat_id}'";
     }
 
-    $patient_visits = PatientModule::patient_visits($pat_ids);
+    $patient_visits = count($pat_ids) ? PatientModule::patient_visits($pat_ids, $visit_conditions) : array();
 
     $results = array();
     foreach($matched_patients as $patient) {
@@ -91,7 +119,7 @@ class PatientModule {
 
       $patient_json = $patient; //PatientModule::to_json($patient);
 
-      $patient_json['visits'] = isset($patient_visits[$pat_id]) ? $patient_visits[$pat_id] : array();
+      $patient_json['list_visits'] = isset($patient_visits[$pat_id]) ? $patient_visits[$pat_id] : array();
       PatientModule::set_patient_last_test($patient_json);
       $results[] = $patient_json;
     }

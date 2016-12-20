@@ -28,6 +28,7 @@ class Patient extends Imodel {
   var $updated_at = null;
 
   //virtual attributes
+  static $conditions = array();
   var $province = null;
   var $dynamic_fields = array();
 
@@ -216,7 +217,8 @@ class Patient extends Imodel {
   }
 
   static function where_filter($active_record, $criterias, $exclude_pat_ids = array()){
-    $conditions = array("patients" => array(), "visits" => array());
+    // ILog::d("p", $criterias,1,1);
+    Patient::$conditions = array("patients" => array(), "visits" => array());
 
     foreach($criterias as $field => $value ){
       if(!$value)
@@ -224,46 +226,47 @@ class Patient extends Imodel {
 
       if($field == 'pat_gender'){
         $gender_key = "( patient.pat_gender = " . intval($value) . " OR " . " patient.pat_gender is NULL ) ";
-        $conditions["patients"][$gender_key] = null;
+        Patient::$conditions["patients"][$gender_key] = null;
       }
 
       else if ($field == "master_id"){
-        $conditions["patients"]['patient.pat_id LIKE'] = "%". $value . "%";
+        Patient::$conditions["patients"]['patient.pat_id LIKE'] = "%". $value . "%";
       }
 
       else if($field == "date_from"){
-        $conditions["patients"]["patient.date_create >="] = Imodel::beginning_of_day($value);
-        $conditions["visits"]["visit.visit_date >="] = $value;
+        Patient::$conditions["patients"]["patient.date_create >="] = Imodel::beginning_of_day($value);
+        Patient::$conditions["visits"]["visit.visit_date >="] = $value;
       }
 
       else if($field == "date_to"){
-        $conditions["patients"]["patient.date_create <="] = Imodel::end_of_day($value);
-        $conditions["visits"]["visit.visit_date <="] = $value;
+        Patient::$conditions["patients"]["patient.date_create <="] = Imodel::end_of_day($value);
+        Patient::$conditions["visits"]["visit.visit_date <="] = $value;
       }
       else if($field == "site_code"){
-        $conditions["patients"]['patient.pat_register_site'] = $value;
-        $conditions["visits"]['visit.site_code = '] = $value;
+        Patient::$conditions["patients"]['patient.pat_register_site'] = $value;
+        Patient::$conditions["visits"]['visit.site_code = '] = $value;
       }
 
       else if($field == "external_code")
-        $conditions["visits"]["visit.ext_code = "] = $value;
+        Patient::$conditions["visits"]["visit.ext_code = "] = $value;
 
       else if($field == "external_code2")
-        $conditions["visits"]["visit.ext_code_2 = "] = $value;
+        Patient::$conditions["visits"]["visit.ext_code_2 = "] = $value;
 
       else if (Patient::is_fingerprint_field($field))
-        $conditions["patients"]["patient.{$field} IS NOT NULL "] = null;
+        Patient::$conditions["patients"]["patient.{$field} IS NOT NULL "] = null;
 
       else{
         if($active_record->is_field($field))
-          $conditions["patients"]["patient.{$field} = "] = $value;
+          Patient::$conditions["patients"]["patient.{$field} = "] = $value;
         else{
           // assumtion to be visit fields because we allow only custom field, patient and visit fields
           // view tecnical and developer spec in docs/spec point 1
-          $conditions["visits"]["visit.{$field} = "] = $value;
+          Patient::$conditions["visits"]["visit.{$field} = "] = $value;
         }
       }
     }
+    // ILog::d("conditions", Patient::$conditions);
 
     if(count($exclude_pat_ids) > 0) { //[1,2,4,3,10]
       $wrap_pat_ids = array();
@@ -272,15 +275,15 @@ class Patient extends Imodel {
       }
       $pat_ids = implode(",", $wrap_pat_ids);  // "(1,2,4,3,'10')"
       $key = "(patient.pat_id NOT IN ({$pat_ids}))";
-      $conditions["patients"][$key] = null;
+      Patient::$conditions["patients"][$key] = null;
     }
 
-    foreach($conditions["patients"] as $key => $value)
+    foreach(Patient::$conditions["patients"] as $key => $value)
       $active_record->db->where($key, $value);
 
-    if(count($conditions["visits"]) >0 ){
+    if(count(Patient::$conditions["visits"]) >0 ){
       $query_string = array();
-      foreach($conditions["visits"] as $key => $value)
+      foreach(Patient::$conditions["visits"] as $key => $value)
         $query_string[] = $key . "'" . mysql_real_escape_string($value) . "'";
 
       $visit_condition_sql = implode(" AND ", $query_string);

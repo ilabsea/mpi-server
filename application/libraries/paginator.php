@@ -1,13 +1,15 @@
 <?php
   class Paginator{
     static $per_page = 10;
-    var $total_counts = 0;
-    var $records = array();
+    var $total_counts;
+    var $records_per_page;
+    var $records;
 
     function __construct($total_counts, $records){
       $this->total_counts = $total_counts;
       $this->records = $records;
-      $this->total_page = ceil($this->total_counts/Paginator::$per_page);
+      $this->records_per_page = Paginator::$per_page;
+      $this->total_pages = ceil($this->total_counts/Paginator::$per_page);
     }
 
     static function per_page(){
@@ -41,7 +43,7 @@
       $upper  = intval($current_page + $range/2);
 
       $min = $offset >= 1 ? $offset : 1;
-      $max = $min + $range <= $this->total_page ? $min + $range : $this->total_page;
+      $max = $min + $range <= $this->total_pages ? $min + $range : $this->total_pages;
 
       for ($i=$min; $i<= $max; $i++) {
         if($i == $current_page)
@@ -50,11 +52,13 @@
           $items[] = $this->link($i, $i);;
       }
 
-      if($current_page < $this->total_page)
-        $items[] = $this->link(">>", $this->total_page, "next");
+      if($current_page < $this->total_pages)
+        $items[] = $this->link(">>", $this->total_pages, "next");
+
+      $items[] = "<li class='active'><span> Total: {$this->total_counts}</span></li>";
 
       $paging_str = implode(" ", $items);
-      return "<div class='pagination'> <ul> {$paging_str}</ul> </div>";
+      return "<div class='pagination'><ul> {$paging_str}</ul> </div>";
     }
 
     function link($text, $page, $class=''){

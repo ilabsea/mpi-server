@@ -32,11 +32,21 @@ class DynamicValue {
     return  is_object($record) ? $record->$id : $record[$id];
   }
 
+  private function is_virutal_field($field_name) {
+    $virtuals = $this->type == "patient" ? Patient::virtual_fields() : Visit::virtual_fields();
+    foreach($virtuals as $virtual_field_name){
+      if($virtual_field_name == $field_name)
+        return true;
+    }
+    return false;
+  }
+
   private function merge_values($record, $dynamic_values) {
     $merged_result = array();
 
-    foreach($record as $key => $value) {
-      $merged_result[$key] = $value;
+    foreach($record as $field_name => $value) {
+      if(!$this->is_virutal_field($field_name))
+        $merged_result[$field_name] = $value;
     }
 
     foreach($dynamic_values as $dynamic_value) {
