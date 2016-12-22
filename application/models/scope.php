@@ -38,75 +38,56 @@ class Scope extends Imodel {
     return $result;
   }
 
-  function has_read_access($params){
-    $fields = Field::all();
-    $readable_fields = $this->readable_fields();
+  //  params = array("v_visit"=> "100", "v_visit_id" => "200");
+  //  $allow_fields = array(field_id1, field_id2)
+  function has_fields_access($params, $allow_fields){
+    $field_mappers = Field::map_by_code();
 
-    foreach($fields as $field) {
-      if(isset($readable_fields[$field->id]))
+    foreach($params as $param_field_code => $value){
+      $param_field = $field_mappers[$param_field_code];
+      if(in_array($param_field->id(), $allow_fields))
         continue;
 
-      if($field->is_patient_field() && isset($readable_fields['patient.*']) )
+      if($param_field->is_patient_field() && isset($allow_fields['patient.*']) )
         continue;
 
-      if($field->is_visit_field() && isset($readable_fields['visit.*']))
+      if($param_field->is_visit_field() && isset($allow_fields['visit.*']))
         continue;
+
       return false;
     }
 
     return true;
   }
 
-  function readable_fields_code(){
-    $fields = Field::all(array("id" => $this->searchable_fields));
+  function display_field_codes(){
+    $field_mappers = Field::mapper();
     $result = array();
-    foreach($fields as $field)
-      $result[] = $field->code;
-    return $result;
-  }
 
-  function writeable_fields_code(){
-    $fields = Field::all(array("id" => $this->updatable_fields));
-
-    $result = array();
-    foreach($fields as $field)
-      $result[] = $field->code;
-    return $result;
-  }
-
-  function has_write_access($params){
-    $fields = Field::all();
-    $writeable_fields = $this->writeable_fields();
-
-    foreach($fields as $field) {
-      if(isset($writeable_fields[$field->id]))
-        continue;
-
-      if($field->is_patient_field() && isset($writeable_fields['patient.*']) )
-        continue;
-
-      if($field->is_visit_field() && isset($writeable_fields['visit.*']))
-        continue;
-      return false;
+    foreach($this->display_fields as $field_id){
+      $field_code = $field_mappers[$field_id];
+      $result[$field_code] = $field_code;
     }
-    return true;
-  }
 
-  function readable_fields(){
-    $result = array();
-    foreach($this->searchable_fields as $field){
-      $result[$field] = $field;
-    }
     return $result;
   }
 
-  function writeable_fields(){
-    $result = array();
-    foreach($this->updatable_fields as $field){
-      $result[$field] = $field;
-    }
-    return $result;
+  function has_searchable_access($params){
+    return $this->has_fields_access($params, $this->searchable_fields);
   }
+
+  function has_updatable_access($params){
+    return $this->has_fields_access($params, $this->updatable_fields);
+  }
+
+  function searchable_fields_code_message(){
+    return implode(", ", Field::map_file_codes($this->searchable_fields));
+  }
+
+  function updatable_fields_code_message(){
+    return implode(", ", Field::map_file_codes($this->updatable_fields));
+  }
+
 
   function validation_rules(){
     $code_uniqueness = $this->uniqueness_field('name');

@@ -32,6 +32,10 @@ class Visit extends Imodel {
     return array("dynamic_fields", "vcctsite", "vcctnumber");
   }
 
+  static function dynamic_with_field($field_name) {
+    return Visit::PREFIX_DYNAMIC.$field_name;
+  }
+
   function __construct($params = array()) {
     $visit_fields = Visit::field_params($params);
     $this->dynamic_fields = Visit::dynamic_field_params($params);

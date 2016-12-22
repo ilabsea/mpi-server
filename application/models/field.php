@@ -58,6 +58,27 @@ class Field extends Imodel {
     return Field::$cache_fields;
   }
 
+  static function map_file_codes($field_ids) {
+    $fields = Field::cache_all();
+    $result = [];
+
+    foreach($fields as $field)
+      if(in_array($field->id(), $field_ids))
+        $result[$field->id] = $field->code;
+
+    return $result;
+
+  }
+
+  static function map_by_code(){
+    $fields = Field::cache_all();
+    $result = [];
+    foreach($fields as $field)
+      $result[$field->code] = $field;
+
+    return $result;
+  }
+
   static function mapper() {
     $fields = Field::cache_all();
     $result = [];

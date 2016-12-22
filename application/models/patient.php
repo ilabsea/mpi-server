@@ -38,6 +38,10 @@ class Patient extends Imodel {
     return array("province", 'dynamic_fields');
   }
 
+  static function dynamic_with_field($field_name) {
+    return Patient::PREFIX_DYNAMIC.$field_name;
+  }
+
   public static function is_fingerprint_field($field_name){
     foreach(Patient::fingerprint_fields() as $fingerprint_name){
       if($fingerprint_name == $field_name)

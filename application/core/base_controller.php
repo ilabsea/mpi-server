@@ -70,9 +70,12 @@ class BaseController extends CI_Controller {
     $result = array();
     $params = $_REQUEST;
 
-    if($type == 'get')
+    if(is_array($type))
+      $params = $type;
+
+    else if(strtolower($type) == 'get')
       $params = $_GET;
-    else if ($type == 'post')
+    else if (strtolower($type) == 'post')
       $params = $_POST;
 
     foreach($keys as $key){

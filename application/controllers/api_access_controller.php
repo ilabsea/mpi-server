@@ -4,8 +4,10 @@ class ApiAccessController extends ApiController {
   function before_action() {
     parent::before_action();
 
-    if($this->skip_authenticate())
+    if($this->skip_authenticate()){
+      $this->restrict_field_access();
       return true;
+    }
 
     $access_token = $this->access_token();
     if(!$this->oauth->authenticate_token($access_token)) {
@@ -13,6 +15,26 @@ class ApiAccessController extends ApiController {
       return $this->render_unauthorized($this->oauth->errors);
       exit;
     }
+    $this->restrict_field_access();
+  }
+
+  function restrict_field_access(){
+    if($this->skip_restrict_field_access())
+      return;
+
+    // $this->oauth->scope = Scope::find(2);
+
+    $action = strtolower($this->router->fetch_method());
+    if($action == "index" || $action == "show")
+      $this->authorize_searchable_access();
+    else if ($action == "udpate" || $action == "create")
+      $this->authorize_updatable_access();
+
+  }
+
+
+  function skip_restrict_field_access() {
+    return false;
   }
 
   function skip_authenticate(){
@@ -50,10 +72,10 @@ class ApiAccessController extends ApiController {
     return isset($_SERVER["HTTP_TOKEN"]) ? $_SERVER["HTTP_TOKEN"] : null;
   }
 
-  function authorize_write_access(){
+  function authorize_updatable_access(){
     $params = $_POST;
-    if(!$this->oauth->scope->has_write_access($params)){
-      $allow_fields = implode(", ", $this->oauth->scope->writeable_fields_code());
+    if(!$this->oauth->scope->has_updatable_access($params)){
+      $allow_fields = $this->oauth->scope->updatable_fields_code_message();
       $errors = array(
         "error" => 'Unauthorized',
         "error_description" => "You can only access these fields: ({$allow_fields})"
@@ -64,10 +86,10 @@ class ApiAccessController extends ApiController {
     return true;
   }
 
-  function authorize_read_access(){
+  function authorize_searchable_access(){
     $params = $_GET;
-    if(!$this->oauth->scope->has_read_access($params)){
-      $allow_fields = implode(", ", $this->oauth->scope->readable_fields_code());
+    if(!$this->oauth->scope->has_searchable_access($params)){
+      $allow_fields = $this->oauth->scope->searchable_fields_code_message();
       $errors = array(
         "error" => 'Unauthorized',
         "error_description" => "You can only access these fields: ({$allow_fields})"
