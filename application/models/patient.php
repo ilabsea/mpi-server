@@ -137,6 +137,12 @@ class Patient extends Imodel {
     return $gender;
   }
 
+  function dynamic_value(){
+    $dynamic_value = new DynamicValue();
+    $dynamic_patients = $dynamic_value->result(array($this), "patient");
+    return $dynamic_patients[0];
+  }
+
   static function timestampable() {
     return true;
   }
@@ -175,11 +181,12 @@ class Patient extends Imodel {
     }
   }
 
-  static function visits($patient_ids, $order_by=null, $order_direction=null, $limit=10) {
+  static function visits($patient_ids, $order_by=null, $limit=10) {
     $active_record = new Patient();
     $ids = implode(",", $patient_ids);
-    $order_by = $order_by == "" ? "visit_date" : $order_by;
-    $order_direction = $order_direction == "" ? "DESC" : $order_direction;
+
+    if($order_by == null || trim($order_by) == "")
+      $order_by = "visit_date DESC";
 
     $sql = "SELECT ps.visit_id,
                    ps.pat_id,
@@ -197,13 +204,8 @@ class Patient extends Imodel {
               LEFT JOIN mpi_site site ON (site.site_code = ps.site_code)
               WHERE pat_id IN ({$ids}) ";
 
-    if($order_by && $order_direction)
-      $sql .= " ORDER BY {$order_by} {$order_direction} ";
-    else
-      $sql .= " ORDER BY visit_id DESC ";
-
+    $sql .= " ORDER BY {$order_by}";
     $sql .= " LIMIT  {$limit}";
-
     $query = $active_record->db->query($sql);
     return $query->result();
   }

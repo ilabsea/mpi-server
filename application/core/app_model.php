@@ -47,6 +47,10 @@ class AppModel extends CI_Model {
     return $this->_errors;
   }
 
+  function has_error(){
+    return count($this->_errors) > 0 ;
+  }
+
   function get_changes() {
     return $this->_changes();
   }
@@ -188,6 +192,16 @@ class AppModel extends CI_Model {
     $paginator = new Paginator($total_counts, $records );
 
     return $paginator;
+  }
+
+  static function update_all($conditions, $update_attrs) {
+    $class_name = static::class_name();
+    $active_record = new $class_name;
+
+    foreach($conditions as $key => $value)
+      $active_record->db->where($key, $value);
+
+    $active_record->db->update(static::table_name(), $update_attrs);
   }
 
   static function all($conditions=array(), $order_by=null, $offset=null, $limit=null){
@@ -333,6 +347,7 @@ class AppModel extends CI_Model {
     }
   }
 
+
   function update($validate=true) {
     $class_name = static::class_name();
     if(static::timestampable())
@@ -383,13 +398,9 @@ class AppModel extends CI_Model {
     $this->db->where($this->primary_key(), $this->id());
     $this->db->update(static::table_name(), $this->change_attributes());
 
-    if($this->db->affected_rows() == 0)
-      return true;
-    else{
-      $this->after_save();
-      $this->after_update();
-      return $this;
-    }
+    $this->after_save();
+    $this->after_update();
+    return true;
   }
 
   function change_attributes() {

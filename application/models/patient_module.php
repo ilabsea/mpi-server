@@ -1,17 +1,16 @@
 <?php
 class PatientModule {
-  static function search_by_pat_id($pat_id){
-    $patient = Patient::ensure_find_by(array("pat_id" => $pat_id));
-    $visits = Patient::visits(["'{$pat_id}'"], "visit_id", "DESC");
+  static function embed_dynamic_value($patient){
+    $visits = Patient::visits(["'{$patient->pat_id}'"], "visit_id DESC");
 
     $dynamic_value = new DynamicValue();
-    $dynamic_patients = $dynamic_value->result(array($patient));
-    $dynamic_visits =  $dynamic_value->result($visits, null);
+    $dynamic_visits =  $dynamic_value->result($visits, "visit");
 
-    $patient_json = array("patient" => $dynamic_patients[0]);
+    $patient_json = array("patient" => $patient->dynamic_value());
     $patient_json["patient"]["list_visits"] = $dynamic_visits;
     return $patient_json;
   }
+
   static function patient_visits($pat_ids, $conditions = array()) {
     $pat_ids = is_array($pat_ids) ? $pat_ids : array($pat_ids);
     $pat_ids = implode(",", $pat_ids);
@@ -138,14 +137,14 @@ class PatientModule {
   }
 
   static function enroll($params){
-    $params["date_create"] = $params["date_create"] ? $params["date_create"] : Imodel::current_time();
-    $params["pat_register_site"] = $params["pat_register_site"] ? $params["pat_register_site"] : "0201";
-    $patient = new Patient($params);
+    if(!AppHelper::present($params, "date_create"))
+      $params["date_create"] = Imodel::current_time();
+    if(!AppHelper::present($params, "pat_register_site"))
+      $params["pat_register_site"] = "0201";
 
-    if($patient->save())
-      return $patient;
-    else
-      return null;
+    $patient = new Patient($params);
+    $patient->save();
+    return $patient;
   }
 
   //array("pat_gender", "pat_age", "pat_dob", "pat_register_site", "date_create", "finger...", "visits" => array())

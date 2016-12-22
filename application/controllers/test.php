@@ -44,7 +44,8 @@ class Test extends MpiController {
     $patient->update_attributes($filter_patients);
 
     $params = $this->filter_params(array("order_by", "order_direction"));
-    $visits = Patient::visits(["'{$pat_id}'"], $params["order_by"], $params["order_direction"]);
+    $order_by = $params["order_by"] . " " . $params["order_direction"];
+    $visits = Patient::visits(["'{$pat_id}'"], $order_by);
 
     $dynamic_value = new DynamicValue();
     $patient_json = array();
@@ -87,8 +88,6 @@ class Test extends MpiController {
   }
 
   function enroll_visit() {
-    $field = new Field(array("type" => "DateTime"));
-
     $params = array(
       "pat_id"=> "KH002100000002",
 
@@ -331,6 +330,25 @@ class Test extends MpiController {
     $this->patient_where();
     $this->allow_query_field_patients();
     $this->has_field();
+  }
+
+  function field_encryption(){
+    ILog::d("generate: ", FieldEncryption::generate_key());
+    ILog::d("secret_key", FieldEncryption::secret_key());
+
+    $value = "Hello world!";
+    $encrypted_value = FieldEncryption::encrypt($value);
+    ILog::d("encrypted value of {$value} :", $encrypted_value);
+
+    $decryped_value = FieldEncryption::decrypt($encrypted_value);
+    ILog::d("decrypted value of {$encrypted_value}: ", $decryped_value);
+  }
+
+  function model_update_all(){
+    $conditions = array("id > 77" => null);
+    $update_attrs = array("is_encrypted" => 0);
+
+    FieldValue::update_all($conditions, $update_attrs);
   }
 
 }

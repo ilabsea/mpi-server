@@ -28,12 +28,16 @@ class DynamicValue {
   }
 
   private function id_value($record) {
-    $id = ($this->type == "patient" ? "id" : "visit_id");
+    $id = $this->is_patient_type() ? "id" : "visit_id";
     return  is_object($record) ? $record->$id : $record[$id];
   }
 
+  private function is_patient_type(){
+    return strtolower($this->type) == "patient";
+  }
+
   private function is_virutal_field($field_name) {
-    $virtuals = $this->type == "patient" ? Patient::virtual_fields() : Visit::virtual_fields();
+    $virtuals = $this->is_patient_type() ? Patient::virtual_fields() : Visit::virtual_fields();
     foreach($virtuals as $virtual_field_name){
       if($virtual_field_name == $field_name)
         return true;
@@ -51,7 +55,7 @@ class DynamicValue {
 
     foreach($dynamic_values as $dynamic_value) {
       $field_code = $this->field_mappers[$dynamic_value->field_id];
-      $merged_result[$field_code] = $dynamic_value->value;
+      $merged_result[$field_code] = $dynamic_value->get_value();
     }
     return $merged_result;
   }

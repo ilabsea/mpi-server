@@ -23,29 +23,6 @@ class Field extends Imodel {
     );
   }
 
-  function cast_value($value) {
-    if($this->type == "Boolean")
-      return strtolower($value) == 'true' ? true: false;
-
-    if($this->type == "Integer")
-      return intval($value);
-
-    if($this->type == "Float")
-      return floatval($value);
-
-    if($this->type == "Date") {
-      $format = '%Y-%m-%d';
-      return strptime($value, $format) ? $value : '';
-    }
-
-    if($this->type == 'DateTime') {
-      $format = '%Y-%m-%d %H:%M:%S';
-      return strptime($value, $format) ? $value : '' ;
-    }
-
-    return $value;
-  }
-
   static function types() {
     return array(
       "Boolean" => "Boolean",
@@ -120,6 +97,14 @@ class Field extends Imodel {
     $code = str_replace(' ', '', $this->code);
     $code = preg_replace('/[^A-Za-z0-9]/', '_', $code);
     $this->set_attribute("code", $code);
+  }
+
+  function after_save(){
+    $conditions = array("field_id" => $this->id());
+    $update_attrs = array("field_code" => $this->code,
+                          "field_type" => $this->type,
+                          "is_encrypted" => $this->is_encrypted);
+    FieldValue::update_all($conditions, $update_attrs);
   }
 
   function validation_rules(){

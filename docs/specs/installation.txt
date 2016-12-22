@@ -1,0 +1,4 @@
+1- create application/config/database.php see example database.php.example
+2- change value of $config['secret_key'] in application/config/config.php
+3- create database and run each migration in db/migrations/*.sql
+4- run data migration in seeds controller

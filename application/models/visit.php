@@ -43,6 +43,12 @@ class Visit extends Imodel {
       $this->set_attribute("date_create", Imodel::current_time());
   }
 
+  function dynamic_value(){
+    $embedder = new DynamicValue();
+    $dynamic_visits = $embedder->result(array($this), "visit");
+    return $dynamic_visits[0];
+  }
+
   function after_create(){
     FieldValue::create_or_update_fields($this->dynamic_fields, $this);
 

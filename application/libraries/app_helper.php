@@ -8,6 +8,10 @@ class AppHelper {
     return $url;
   }
 
+  static function present($params, $key){
+    return isset($params[$key]) && $params[$key];
+  }
+
   static function merge_array($array1, $array2) {
     $result = $array1;
     foreach($array2 as $key =>$value)

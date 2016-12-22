@@ -13,8 +13,6 @@ class Patients extends MpiController {
       "site_code", "external_code", "external_code2", "date_from",
       "date_to", "order_by", "order_direction", "pat_age", "info"));
 
-    $exclude_pat_ids = array("KH002100000001","KH002100000002","KH002100000003","KH002100000004" );
-
     $paginate_patients = Patient::paginate_filter($params);
     $this->set_view_variables(array("services" => $services,
                                     "params" => $params,
@@ -25,7 +23,9 @@ class Patients extends MpiController {
   function show($pat_id) {
     $patient = Patient::find_by(array("pat_id" => $pat_id));
     $params = $this->filter_params(array("order_by", "order_direction"));
-    $visits = Patient::visits(["'{$pat_id}'"], $params["order_by"], $params["order_direction"]);
+    $order_by = $params["order_by"] ?  $params["order_by"] . " " . $params["order_direction"] : null;
+
+    $visits = Patient::visits(["'{$pat_id}'"], $order_by);
 
     $dynamic_value = new DynamicValue();
     $dynamic_patients = $dynamic_value->result(array($patient));

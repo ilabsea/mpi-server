@@ -16,7 +16,7 @@ class ApiAccessController extends ApiController {
   }
 
   function skip_authenticate(){
-    return false;
+    return true;
   }
 
   function after_action($status){

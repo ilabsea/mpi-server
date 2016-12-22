@@ -3,11 +3,13 @@
     static $per_page = 10;
     var $total_counts;
     var $records_per_page;
+    var $current_page;
     var $records;
 
     function __construct($total_counts, $records){
       $this->total_counts = $total_counts;
       $this->records = $records;
+      $this->current_page = Paginator::page();
       $this->records_per_page = Paginator::$per_page;
       $this->total_pages = ceil($this->total_counts/Paginator::$per_page);
     }
@@ -16,10 +18,10 @@
       return Paginator::$per_page;
     }
     static function offset() {
-      return (Paginator::current_page()-1) * Paginator::$per_page;
+      return (Paginator::page()-1) * Paginator::$per_page;
     }
 
-    static function current_page(){
+    static function page(){
       $page = isset($_GET['page']) && intval($_GET['page']) > 1 ? intval($_GET['page']) : 1 ;
       return $page;
     }
@@ -34,25 +36,25 @@
 
       $items = array();
       $range = 6;
-      $current_page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 
-      if($current_page > 1)
+
+      if($this->current_page > 1)
         $items[] = $this->link("<<", 1, "prev");
 
-      $offset = intval($current_page - $range/2);
-      $upper  = intval($current_page + $range/2);
+      $offset = intval($this->current_page - $range/2);
+      $upper  = intval($this->current_page + $range/2);
 
       $min = $offset >= 1 ? $offset : 1;
       $max = $min + $range <= $this->total_pages ? $min + $range : $this->total_pages;
 
       for ($i=$min; $i<= $max; $i++) {
-        if($i == $current_page)
-          $items[] = "<li class='active'><span> {$current_page}</span></li>";
+        if($i == $this->current_page)
+          $items[] = "<li class='active'><span> {$this->current_page}</span></li>";
         else
           $items[] = $this->link($i, $i);;
       }
 
-      if($current_page < $this->total_pages)
+      if($this->current_page < $this->total_pages)
         $items[] = $this->link(">>", $this->total_pages, "next");
 
       $items[] = "<li class='active'><span> Total: {$this->total_counts}</span></li>";

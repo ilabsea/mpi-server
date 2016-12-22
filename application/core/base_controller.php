@@ -84,13 +84,30 @@ class BaseController extends CI_Controller {
     return $result;
   }
 
+  function ensure_field_exist($params, $field_name){
+    if(!isset($params[$field_name]) || !$params[$field_name]){
+      $errors = array(
+        "error" => "Bad request",
+        "error_description" => "You must provide {$field_name} in your request"
+      );
+      return $this->render_bad_request($errors);
+    }
+  }
+
   function render_json($object, $status=200) {
-    header('Content-Type: application/json');
+    header('Content-Type: application/json;  charset=UTF-8');
+    // Content-type: application/json; charset=utf-8
     $this->http_response_code($status);
-    $json_content = json_encode($object);
+    $json_content = json_encode($object, JSON_UNESCAPED_UNICODE);
     $this->after_action($status);
     echo $json_content;
     exit;
+  }
+
+  function render_record_errors($active_record) {
+    $errors = array("error" => "Validation errors",
+                    "error_description" => $active_record->get_errors());
+    $this->render_bad_request($errors);
   }
 
   function render_error($errors, $status) {
