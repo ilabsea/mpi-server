@@ -41,35 +41,26 @@ class Scope extends Imodel {
   //  params = array("v_visit"=> "100", "v_visit_id" => "200");
   //  $allow_fields = array(field_id1, field_id2)
   function has_fields_access($params, $allow_fields){
+
     $field_mappers = Field::map_by_code();
+    // ILog::d("params", $params);
+    // ILog::d("mapper", $field_mappers,1,1);
 
     foreach($params as $param_field_code => $value){
       $param_field = $field_mappers[$param_field_code];
       if(in_array($param_field->id(), $allow_fields))
         continue;
 
-      if($param_field->is_patient_field() && isset($allow_fields['patient.*']) )
+      if($param_field->is_patient_field() && isset($allow_fields[Patient::ALL_FIELD]) )
         continue;
 
-      if($param_field->is_visit_field() && isset($allow_fields['visit.*']))
+      if($param_field->is_visit_field() && isset($allow_fields[Visit::ALL_FIELD]))
         continue;
 
       return false;
     }
 
     return true;
-  }
-
-  function display_field_codes(){
-    $field_mappers = Field::mapper();
-    $result = array();
-
-    foreach($this->display_fields as $field_id){
-      $field_code = $field_mappers[$field_id];
-      $result[$field_code] = $field_code;
-    }
-
-    return $result;
   }
 
   function has_searchable_access($params){
@@ -81,11 +72,11 @@ class Scope extends Imodel {
   }
 
   function searchable_fields_code_message(){
-    return implode(", ", Field::map_file_codes($this->searchable_fields));
+    return implode(", ", Field::map_field_codes($this->searchable_fields));
   }
 
   function updatable_fields_code_message(){
-    return implode(", ", Field::map_file_codes($this->updatable_fields));
+    return implode(", ", Field::map_field_codes($this->updatable_fields));
   }
 
 

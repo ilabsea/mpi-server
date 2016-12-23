@@ -33,6 +33,7 @@ class Patient extends Imodel {
   var $dynamic_fields = array();
 
   const PREFIX_DYNAMIC = 'p_';
+  const ALL_FIELD = 'patient.*';
 
   public static function virtual_fields() {
     return array("province", 'dynamic_fields');

@@ -1,43 +1,58 @@
 <?php
 //name should be ApiPatients but can not find a way to map this to CI router
 class Api_patients extends ApiAccessController{
+  var $display_value;
+
+  function before_action(){
+    parent::before_action();
+    $this->display_value = new DisplayValue($this->oauth->scope);
+  }
+
+
   function index() {
     $params = $_GET;
     $filter_patients = FieldTransformer::apply_to_all($params, true);
-    $patients = PatientModule::search($filter_patients);
-    $this->render_json($patients);
+    $paginate_patients = PatientModule::search($filter_patients);
+
+    $paginate_patients->records = $this->display_value->patients($paginate_patients->records);
+    $this->render_json($paginate_patients);
   }
 
   //api/patients/create
   function create(){
     $params = $_POST;
     //mock
-    $params = array(
-      "p_pat_register_site" => "0101",
-      "p_pat_age" => 60,
-      "p_pat_gender" => 1,
-      "p_is_referred" => false,
-      "p_pat_dob" => "2012-10-10",
-
-      "dyn_full_name_p" => "Nisay",
-      "p_is_referral" => "False",
-      "v_tb" => "1111",
-      "p_dynamic_field1" => "10",
-      "p_dynamic_field2" => "30",
-      "p_pat_id" => "KH002100003000", //override
-    );
+    // $params = array(
+    //   "p_pat_register_site" => "0101",
+    //   "p_pat_age" => 60,
+    //   "p_pat_gender" => 1,
+    //   "p_is_referred" => false,
+    //   "p_pat_dob" => "2012-10-10",
+    //
+    //   "dyn_full_name_p" => "Nisay",
+    //   "p_is_referral" => "False",
+    //   "v_tb" => "1111",
+    //   "p_dynamic_field1" => "10",
+    //   "p_dynamic_field2" => "30",
+    //   "p_pat_id" => "KH002100003000", //override
+    // );
 
     $filter_patients = FieldTransformer::apply_to_patient($params);
     $patient = PatientModule::enroll($filter_patients);
+
     if($patient->has_error())
       $this->render_record_errors($patient);
-    else
-      $this->render_json($patient->dynamic_value());
+    else{
+      $patient_json = $patient->dynamic_value();
+      $this->render_json($patient_json);
+    }
+
   }
 
   function show($pat_id){
     $patient = Patient::ensure_find_by(array("pat_id" => $pat_id));
     $patient_json = PatientModule::embed_dynamic_value($patient);
+    $patient_json["patient"] = $this->display_value->patient($patient_json["patient"]);
     $this->render_json($patient_json);
   }
 
@@ -65,6 +80,7 @@ class Api_patients extends ApiAccessController{
     $patient->update_attributes($filter_patients);
 
     $patient_json = PatientModule::embed_dynamic_value($patient);
+    $patient_json["patient"] = $this->display_value->patient($patient_json["patient"]);
     return $this->render_json($patient_json);
   }
 

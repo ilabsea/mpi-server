@@ -12,6 +12,14 @@ class AppHelper {
     return isset($params[$key]) && $params[$key];
   }
 
+  static function slice_array($vars, $keys) {
+    $result = array();
+    foreach($keys as $key)
+      $result[$key] = isset($vars[$key]) ? $vars[$key] : null;
+
+    return $result;
+  }
+
   static function merge_array($array1, $array2) {
     $result = $array1;
     foreach($array2 as $key =>$value)

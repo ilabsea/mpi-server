@@ -1,15 +1,20 @@
 <?php
 //name should be ApiVisits but can not find a way to map this to CI router
 class Api_visits extends ApiAccessController{
+  function before_action(){
+    parent::before_action();
+    $this->display_value = new DisplayValue($this->oauth->scope);
+  }
 
   //GET api/visits/index?pat_id=xxx
   function index() {
     $params = $_GET;
-    $this->ensure_field_exist($params, "pat_id");
+    $this->ensure_field_exist($params, "p_pat_id");
 
-    $paginator = Visit::paginate(array("pat_id" => $params["pat_id"]), "visit_id DESC");
+    $paginator = Visit::paginate(array("pat_id" => $params["p_pat_id"]), "visit_id DESC");
     $dynamic_values = new DynamicValue();
     $paginator->records = $dynamic_values->result($paginator->records, "visit");
+    $paginator->records = $this->display_value->visits($paginator->records);
     $this->render_json($paginator);
   }
 
@@ -58,7 +63,9 @@ class Api_visits extends ApiAccessController{
   //GET api/visits/show/visit_id_xxx
   function show($visit_id) {
     $visit = Visit::ensure_find_by(array("visit_id" => $visit_id));
-    $this->render_json($visit->dynamic_value());
+    $visit_json = $visit->dynamic_value();
+    $visit_json = $this->display_value->visit($visit_json);
+    $this->render_json($visit_json);
   }
 
   //PUT api/visits/show/visit_id
@@ -78,7 +85,10 @@ class Api_visits extends ApiAccessController{
     // if(isset($filter_visits["pat_id"]))
     //   unset($filter_visits["pat_id"])
     $visit->update_attributes($filter_visits);
-    $this->render_json($visit->dynamic_value());
+    
+    $visit_json = $visit->dynamic_value();
+    $visit_json = $this->display_value->visit($visit_json);
+    $this->render_json($visit_json);
 
   }
 }

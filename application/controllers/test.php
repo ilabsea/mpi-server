@@ -351,4 +351,12 @@ class Test extends MpiController {
     FieldValue::update_all($conditions, $update_attrs);
   }
 
+  function display_fields(){
+    // ILog::d("test: ", substr("yesterday once more!", 5), 1,1);
+    $scope = Scope::find(2);
+    $display = new DisplayValue($scope);
+
+    ILog::d("fields", $display->allow_field_names,1,1);
+  }
+
 }

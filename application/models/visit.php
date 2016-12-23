@@ -27,6 +27,7 @@ class Visit extends Imodel {
   const STD = 3;
 
   const PREFIX_DYNAMIC = 'v_';
+  const ALL_FIELD = 'visit.*';
 
   static function virtual_fields() {
     return array("dynamic_fields", "vcctsite", "vcctnumber");

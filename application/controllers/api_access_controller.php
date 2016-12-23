@@ -22,7 +22,7 @@ class ApiAccessController extends ApiController {
     if($this->skip_restrict_field_access())
       return;
 
-    // $this->oauth->scope = Scope::find(2);
+    //$this->oauth->scope = Scope::find(2);
 
     $action = strtolower($this->router->fetch_method());
     if($action == "index" || $action == "show")

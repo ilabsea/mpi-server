@@ -23,6 +23,15 @@ class Field extends Imodel {
     );
   }
 
+  function internal_code(){
+    if($this->dynamic_field)
+      return $this->code;
+    if($this->is_patient_field())
+      return substr($this->code, strlen(Patient::PREFIX_DYNAMIC));
+    else
+      return substr($this->code, strlen(Visit::PREFIX_DYNAMIC));
+  }
+
   static function types() {
     return array(
       "Boolean" => "Boolean",
@@ -58,7 +67,7 @@ class Field extends Imodel {
     return Field::$cache_fields;
   }
 
-  static function map_file_codes($field_ids) {
+  static function map_field_codes($field_ids) {
     $fields = Field::cache_all();
     $result = [];
 
@@ -85,8 +94,8 @@ class Field extends Imodel {
     foreach($fields as $field)
       $result[$field->id] = $field->code;
 
-    $result["visit.*"] = "visit.*";
-    $result["patient.*"] = "patient.*";
+    $result[Visit::ALL_FIELD] = Visit::ALL_FIELD;
+    $result[Patient::ALL_FIELD] = Patient::ALL_FIELD;
     return $result;
   }
 
@@ -98,8 +107,8 @@ class Field extends Imodel {
       if($field->dynamic_field == 0)
         $result[$field->id] = $field->code;
 
-    $result["visit.*"] = "visit.*";
-    $result["patient.*"] = "patient.*";
+    $result[Visit::ALL_FIELD] = Visit::ALL_FIELD;
+    $result[Patient::ALL_FIELD] = Patient::ALL_FIELD;
     return $result;
   }
 
