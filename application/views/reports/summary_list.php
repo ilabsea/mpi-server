@@ -1,28 +1,28 @@
 <script type="text/javascript">
 $(document).ready(function() {
-	$("#form_patient_detail" ).dialog({
-		 height:400,
-		 width: 800,
-		 modal: true,
-		 autoOpen: false,
-		 closeOnEscape: true,
-		 position: { my: "center", at: "center", of: window },
-		 resizable: true
-		 
-	});
+  $("#form_patient_detail" ).dialog({
+     height:400,
+     width: 800,
+     modal: true,
+     autoOpen: false,
+     closeOnEscape: true,
+     position: { my: "center", at: "center", of: window },
+     resizable: true
+
+  });
 });
 
 function link_detail_patient_click(v_pat_id) {
-	v_url = '<?=site_url("reports/patient_detail")?>' + '/' + v_pat_id;
-	$.ajax({
-		url: v_url,
-		cache: false
-	}).done(function( html ) {
-		//alert(html);
-		$("#form_patient_detail").html(html);
-		$("#form_patient_detail" ).dialog("open");
-	});
-	
+  v_url = '<?=site_url("reports/patient_detail")?>' + '/' + v_pat_id;
+  $.ajax({
+    url: v_url,
+    cache: false
+  }).done(function( html ) {
+    //alert(html);
+    $("#form_patient_detail").html(html);
+    $("#form_patient_detail" ).dialog("open");
+  });
+
 }
 </script>
 
@@ -40,15 +40,15 @@ VCCT Patients shown at OI/ART
       <th>Age</th>
       <th>Nb. visits</th>
    </tr>
-   
+
    <?php
-      $row_nb = 0; 
+      $row_nb = 0;
       foreach($patients as $sitecode => $row) :
-      	$row_nb++;
+        $row_nb++;
    ?>
    <tr <?=(($row_nb % 2)?"":"class=\"even_row\"")?>>
       <td align="center">
-      	<a href="#" onclick="link_detail_patient_click('<?=$row["pat_id"]?>')"><?=htmlspecialchars($row["pat_id"])?></a>
+        <a href="#" onclick="link_detail_patient_click('<?=$row["pat_id"]?>')"><?=htmlspecialchars($row["pat_id"])?></a>
       </td>
       <td align="center"><?=htmlspecialchars($row["pat_register_site"])?></td>
       <td align="center"><?=($row["pat_gender"] == 1 ? "Male" : "Female")?></td>

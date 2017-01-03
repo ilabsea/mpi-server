@@ -42,7 +42,7 @@
     <div class="span2">Visit Date</div>
     <div class="span9">
       <span>From</span>
-      <?=form_input(array("name" => "from", "id" => "from", "class" => "short date-picker", "value" =>$params["date_from"] )) ?>
+      <?=form_input(array("name" => "date_from", "id" => "from", "class" => "short date-picker", "value" =>$params["date_from"] )) ?>
 
       <span style="margin-left: 20px;">To </span>
       <?=form_input(array("name" => "date_to", "id" => "to","class" => "short date-picker", "value" => $params["date_to"] )) ?>

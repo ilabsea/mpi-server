@@ -4,34 +4,34 @@
  * @param $mysql_date
  */
 function mysql_to_date($postgres_date) {
-	if ($postgres_date == NULL || $postgres_date == "") {
-		return NULL;
-	}
+  if ($postgres_date == NULL || $postgres_date == "") {
+    return NULL;
+  }
 
-	$arr = explode("-", $postgres_date);
-	$result =  new DateTime();
-	$result->setDate($arr[0], $arr[1], $arr[2]);
-	return $result;
+  $arr = explode("-", $postgres_date);
+  $result =  new DateTime();
+  $result->setDate($arr[0], $arr[1], $arr[2]);
+  return $result;
 }
 
 
 function mysql_datetime_to_date($postgres_datetime = "") {
     if ($postgres_datetime == NULL || $postgres_datetime == "") {
-		return NULL;
-	}
-	$arr = explode(" ", $postgres_datetime);
-	$postgres_date = $arr[0];
-	$datetime = "00:00:00";
-	if (count($arr) > 1) :
-		$datetime_arr = explode(".", $arr[1]);
-		$datetime = $datetime_arr[0];
-	endif;
-	$arr = explode("-", $postgres_date);
-	$arr2 = explode(":", $datetime);
-	$result =  new DateTime();
-	$result->setDate($arr[0], $arr[1], $arr[2]);
-	$result->setTime($arr2[0], $arr2[1], $arr2[2]);
-	return $result;
+    return NULL;
+  }
+  $arr = explode(" ", $postgres_datetime);
+  $postgres_date = $arr[0];
+  $datetime = "00:00:00";
+  if (count($arr) > 1) :
+    $datetime_arr = explode(".", $arr[1]);
+    $datetime = $datetime_arr[0];
+  endif;
+  $arr = explode("-", $postgres_date);
+  $arr2 = explode(":", $datetime);
+  $result =  new DateTime();
+  $result->setDate($arr[0], $arr[1], $arr[2]);
+  $result->setTime($arr2[0], $arr2[1], $arr2[2]);
+  return $result;
 
 }
 
@@ -41,44 +41,44 @@ function mysql_datetime_to_date($postgres_datetime = "") {
  * @param $format
  */
 function date_to_date_format($php_date, $format=Iconstant::APP_DATE_FORMAT) {
-	$formats = array("Y-M-D",
-	                 "M/D/Y",
-	                 "D/M/Y"
-	           );
-	$format = strtoupper($format);
-	if ($php_date == NULL || !in_array($format, $formats)) {
-		return NULL;
-	}
+  $formats = array("Y-M-D",
+                   "M/D/Y",
+                   "D/M/Y"
+             );
+  $format = strtoupper($format);
+  if ($php_date == NULL || !in_array($format, $formats)) {
+    return NULL;
+  }
 
     if ($format == "Y-M-D") {
-    	return $php_date->format("Y-m-d");
+      return $php_date->format("Y-m-d");
     } else if ($format == "D/M/Y") {
-    	return $php_date->format("d/m/Y");
+      return $php_date->format("d/m/Y");
     } else if ($format == "M/D/Y") {
-    	return $php_date->format("m/d/Y");
+      return $php_date->format("m/d/Y");
     } else {
-    	return NULL;
+      return NULL;
     }
 }
 
 function date_to_date_format_hide_year($php_date, $format=Iconstant::APP_DATE_FORMAT) {
-	$formats = array("Y-M-D",
-	                 "M/D/Y",
-	                 "D/M/Y"
-	           );
-	$format = strtoupper($format);
-	if ($php_date == NULL || !in_array($format, $formats)) {
-		return NULL;
-	}
+  $formats = array("Y-M-D",
+                   "M/D/Y",
+                   "D/M/Y"
+             );
+  $format = strtoupper($format);
+  if ($php_date == NULL || !in_array($format, $formats)) {
+    return NULL;
+  }
 
     if ($format == "Y-M-D") {
-    	return $php_date->format("m-d");
+      return $php_date->format("m-d");
     } else if ($format == "D/M/Y") {
-    	return $php_date->format("d/m");
+      return $php_date->format("d/m");
     } else if ($format == "M/D/Y") {
-    	return $php_date->format("m/d");
+      return $php_date->format("m/d");
     } else {
-    	return NULL;
+      return NULL;
     }
 }
 
@@ -88,84 +88,101 @@ function date_to_date_format_hide_year($php_date, $format=Iconstant::APP_DATE_FO
  * @param $format
  */
 function date_mysql_to_html($postg_date, $format=Iconstant::APP_DATE_FORMAT) {
-	$arr = explode(" ", $postg_date);
-	$postgres_date = $arr[0];
-	$php_date = mysql_to_date($postgres_date);
-	return date_to_date_format($php_date, $format);
+  $arr = explode(" ", $postg_date);
+  $postgres_date = $arr[0];
+  $php_date = mysql_to_date($postgres_date);
+  return date_to_date_format($php_date, $format);
 }
 
 function datetime_mysql_to_html($postgres_datetime, $format=Iconstant::APP_DATE_FORMAT) {
-	if ($postgres_datetime == NULL || $postgres_datetime == "") {
-		return NULL;
-	}
-	$arr = explode(" ", $postgres_datetime);
-	$postgres_date = $arr[0];
-	$datetime = "00:00:00";
-	if (count($arr) > 1) :
-		$datetime_arr = explode(".", $arr[1]);
-		$datetime = $datetime_arr[0];
-	endif;
-	$php_date = mysql_to_date($postgres_date);
-	return date_to_date_format($php_date, $format)." ".$datetime;
+  if ($postgres_datetime == NULL || $postgres_datetime == "") {
+    return NULL;
+  }
+  $arr = explode(" ", $postgres_datetime);
+  $postgres_date = $arr[0];
+  $datetime = "00:00:00";
+  if (count($arr) > 1) :
+    $datetime_arr = explode(".", $arr[1]);
+    $datetime = $datetime_arr[0];
+  endif;
+  $php_date = mysql_to_date($postgres_date);
+  return date_to_date_format($php_date, $format)." ".$datetime;
 }
 
-/**
- * Parse a string with the specific format
- * @param unknown_type $str_date
- * @param unknown_type $format
- */
+function date_from_str($str_date, $format){
+  $parses = strptime($str_date, $format);
+  if($parses){
+    $year = 1900 + $parses['tm_year'];
+    $month = 1 + $parses['tm_mon'];
+    $day = $parses['tm_mday'];
+    $date = "{$year}-${month}-{$day}";
+    return $date;
+  }
+  return NULL;
+}
+
 function gparse_date($str_date, $format=Iconstant::APP_DATE_FORMAT) {
-	$formats = array("Y-M-D",
-	                 "M/D/Y",
-	                 "D/M/Y"
-	           );
-	$format = strtoupper($format);
-	if ($str_date ==NULL || $str_date=="" || !in_array($format, $formats)) {
-		return NULL;
-	}
+  $formats = array('%d/%m/%Y', '%Y-%m-%d', '%m/%d/%Y' );
+  $date =  date_from_str($str_date, $format);
+  if($date)
+    return $date;
 
-	if ($format == "Y-M-D") {
-		$arr = explode("-", $str_date);
-		if (count($arr) != 3) { return NULL;}
-		$d = $arr[2];
-		$m = $arr[1];
-		$y = $arr[0];
-	} else if ($format == "D/M/Y") {
-		$arr = explode("/", $str_date);
-		if (count($arr) != 3) { return NULL;}
-		$d = $arr[0];
-		$m = $arr[1];
-		$y = $arr[2];
-	} else if ($format =="M/D/Y") {
-		$arr = explode("/", $str_date);
-		if (count($arr) != 3) { return NULL;}
-		$d = $arr[1];
-		$m = $arr[0];
-		$y = $arr[2];
-	} else {
-		return NULL;
-	}
+  foreach($formats as $format){
+    $date = date_from_str($str_date, $format);
+    if($date)
+      return $date;
+  }
 
-	if (!is_nint($m) || !is_nint($d) || !is_nint($y)) return NULL;
+  return NULL;
 
-	if (checkdate($m, $d, $y)) {
-		$result = new DateTime();
-		$result->setDate($y, $m, $d);
-		$result->setTime(0, 0, 0);
-		return $result;
-	} else {
-	    return NULL;
-	}
+  // $format = strtoupper($format);
+  // if ($str_date ==NULL || $str_date=="" || !in_array($format, $formats)) {
+  //   return NULL;
+  // }
+  //
+  // if ($format == "Y-M-D") {
+  //   $arr = explode("-", $str_date);
+  //   if (count($arr) != 3) { return NULL;}
+  //   $d = $arr[2];
+  //   $m = $arr[1];
+  //   $y = $arr[0];
+  // } else if ($format == "D/M/Y") {
+  //   $arr = explode("/", $str_date);
+  //   if (count($arr) != 3) { return NULL;}
+  //   $d = $arr[0];
+  //   $m = $arr[1];
+  //   $y = $arr[2];
+  // } else if ($format =="M/D/Y") {
+  //   $arr = explode("/", $str_date);
+  //   if (count($arr) != 3) { return NULL;}
+  //   $d = $arr[1];
+  //   $m = $arr[0];
+  //   $y = $arr[2];
+  // } else {
+  //   return NULL;
+  // }
+  //
+  // if (!is_nint($m) || !is_nint($d) || !is_nint($y)) return NULL;
+  //
+  // if (checkdate($m, $d, $y)) {
+  //   $result = new DateTime();
+  //   $result->setDate($y, $m, $d);
+  //   $result->setTime(0, 0, 0);
+  //   return $result;
+  // } else {
+  //     return NULL;
+  // }
 }
 
 function datetime_html_to_php($str_date, $time, $format=Iconstantt::APP_DATE_FORMAT) {
-    $php_date = gparse_date($str_date, $format);
-    $arr = explode(":", $time);
-    $h = $arr[0];
-    $m = $arr[1];
-    $s = count($arr) > 2 ? $arr[2] : 0;
-    $php_date->setTime($h, $m, $s);
-    return $php_date;
+    // $php_date = gparse_date($str_date, $format);
+    // $arr = explode(":", $time);
+    // $h = $arr[0];
+    // $m = $arr[1];
+    // $s = count($arr) > 2 ? $arr[2] : 0;
+    // $php_date->setTime($h, $m, $s);
+    // return $php_date;
+    gparse_date($str_date, $format)." ".$time;
 }
 
 
@@ -175,8 +192,9 @@ function datetime_html_to_php($str_date, $time, $format=Iconstantt::APP_DATE_FOR
  * @param $format
  */
 function date_html_to_mysql($html_date, $format=Iconstant::APP_DATE_FORMAT) {
-	$php_date = gparse_date($html_date, $format);
-	return $php_date==NULL ? NULL :  $php_date->format("Y-m-d");
+  // $php_date = gparse_date($html_date, $format);
+  // return $php_date==NULL ? NULL :  $php_date->format("Y-m-d");
+  return gparse_date($html_date, $format);
 }
 
 function date_html_to_php($html_date, $format=Iconstant::APP_DATE_FORMAT) {
@@ -193,7 +211,7 @@ function is_nint($input){
 }
 
 function is_nnumeric($input) {
-	return (bool)preg_match( '/^[\-+]?[0-9]*\.?[0-9]+$/', $input);
+  return (bool)preg_match( '/^[\-+]?[0-9]*\.?[0-9]+$/', $input);
 }
 
 function getBrowser() {
@@ -270,14 +288,14 @@ function getBrowser() {
 
 function karm_error($error, $normal=false) {
     if (isset($error) && $error != "") {
-    	if ($normal==false) {
-    		echo "<fieldset style=\"width:800px\">";
-      	    echo "<b>".k_lang("common_error_header").":</b>";
+      if ($normal==false) {
+        echo "<fieldset style=\"width:800px\">";
+            echo "<b>".k_lang("common_error_header").":</b>";
             echo "<ul class=\"error_message\">".$error."</ul>";
             echo "</fieldset>";
-    	} else {
-    	    echo "<span class=\"error_message\">".$error."</span>";
-    	}
+      } else {
+          echo "<span class=\"error_message\">".$error."</span>";
+      }
     }
 }
 
@@ -301,53 +319,53 @@ function k_end_with($haystack, $needle)
 }
 
 function generateOrder ($cur_field, $pre_order) {
-	if (empty($pre_order)) {
-		return Kencryption::encrypt(serialize(array("order"=> $cur_field, "direction"=>"ASC")));
-	}
-	if ($cur_field != $pre_order["order"]) {
-	    $marray = array("order" => $cur_field, "direction" => "ASC");
-	} else {
-		$marray = array();
-		$marray["order"] = $cur_field;
-	    if ($pre_order["direction"] == "ASC") {
-	    	$marray["direction"] = "DESC";
-	    } else {
-	        $marray["direction"] = "ASC";
-	    }
-	}
+  if (empty($pre_order)) {
+    return Kencryption::encrypt(serialize(array("order"=> $cur_field, "direction"=>"ASC")));
+  }
+  if ($cur_field != $pre_order["order"]) {
+      $marray = array("order" => $cur_field, "direction" => "ASC");
+  } else {
+    $marray = array();
+    $marray["order"] = $cur_field;
+      if ($pre_order["direction"] == "ASC") {
+        $marray["direction"] = "DESC";
+      } else {
+          $marray["direction"] = "ASC";
+      }
+  }
     return Kencryption::encrypt(serialize($marray));
 }
 
 function generateOrderImage($cur_field, $pre_order) {
     if (empty($pre_order)) {
-		return "";
-	}
+    return "";
+  }
 
-	$image = "";
+  $image = "";
     if ($cur_field != $pre_order["order"]) {
-	    return "&nbsp;&nbsp;";
-	} else {
-	    if ($pre_order["direction"] == "ASC") {
-	    	$image = "<img src=\"".base_url("images/arrow_up.png")."\" width=\"15px\" border=\"0\"/>";
-	    } else {
-	        $image = "<img src=\"".base_url("images/arrow_down.png")."\" width=\"15px\" border=\"0\"/>";
-	    }
-	}
-	return $image;
+      return "&nbsp;&nbsp;";
+  } else {
+      if ($pre_order["direction"] == "ASC") {
+        $image = "<img src=\"".base_url("images/arrow_up.png")."\" width=\"15px\" border=\"0\"/>";
+      } else {
+          $image = "<img src=\"".base_url("images/arrow_down.png")."\" width=\"15px\" border=\"0\"/>";
+      }
+  }
+  return $image;
 }
 
 function k_lang($line, $escapehtml=true, $id = '') {
-	$CI =& get_instance();
-	$line = $CI->lang->line($line);
+  $CI =& get_instance();
+  $line = $CI->lang->line($line);
 
-	if ($escapehtml) {
-	    $line = htmlspecialchars($line);
-	}
+  if ($escapehtml) {
+      $line = htmlspecialchars($line);
+  }
 
-	if ($id != '') {
-		$line = '<label for="'.$id.'">'.$line."</label>";
-	}
-	return $line;
+  if ($id != '') {
+    $line = '<label for="'.$id.'">'.$line."</label>";
+  }
+  return $line;
 }
 
 function k_decimal_format($number) {
@@ -358,9 +376,9 @@ function k_decimal_format($number) {
 }
 
 function ktime_format($time) {
-	if ($time == null) {
-		return null;
-	}
+  if ($time == null) {
+    return null;
+  }
    $arr = explode(":", $time);
    return $arr[0].":".$arr[1];
 }

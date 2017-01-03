@@ -33,7 +33,7 @@
   <script src="<?=base_url("js/shared/form-delete.js")?>"></script>
   <script src="<?=base_url("js/shared/tokenizer.init.js")?>"></script>
   <script src="<?=base_url("js/shared/content-hidden.js")?>"></script>
-  <script src="<?=base_url("js/shared/init.js")?>"></script>
+  <script src="<?=base_url("js/shared/date-init.js")?>"></script>
   <script src="<?=base_url("js/shared/sortable-table.js")?>"></script>
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
