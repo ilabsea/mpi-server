@@ -110,11 +110,11 @@ function datetime_mysql_to_html($postgres_datetime, $format=Iconstant::APP_DATE_
 }
 
 function date_from_str($str_date, $format){
-  $parses = strptime($str_date, $format);
+  $parses = date_parse_from_format($format, $str_date);
   if($parses){
-    $year = 1900 + $parses['tm_year'];
-    $month = 1 + $parses['tm_mon'];
-    $day = $parses['tm_mday'];
+    $year = $parses['year'];
+    $month = $parses['month'];
+    $day = $parses['day'];
     $date = "{$year}-${month}-{$day}";
     return $date;
   }
@@ -122,7 +122,7 @@ function date_from_str($str_date, $format){
 }
 
 function gparse_date($str_date, $format=Iconstant::APP_DATE_FORMAT) {
-  $formats = array('%d/%m/%Y', '%Y-%m-%d', '%m/%d/%Y' );
+  $formats = array('d/m/Y', 'Y-m-d', 'm/d/Y' );
   $date =  date_from_str($str_date, $format);
   if($date)
     return $date;
