@@ -63,13 +63,13 @@ class PatientModule {
   # Filter site code to reduce number of patient
   static function search($params, $exclude_pat_ids = array()){
     $params = Patient::allow_query_fields($params);
-
-    $total_counts = Patient::count_filter($params, $exclude_pat_ids);
     $patients = Patient::all_filter($params, $exclude_pat_ids);
     $patients = FingerprintMatcher::match_fingerprints_with_patients(Patient::fingerprint_params($params), $patients);
+    $total_counts = count($patients);
 
     $visit_conditions = Patient::$conditions["visits"];
     $patients = PatientModule::embeded_dynamic_fields($patients, $visit_conditions);
+
 
     $paginator = new Paginator($total_counts, $patients);
     return $paginator;
@@ -149,8 +149,12 @@ class PatientModule {
 
   //array("pat_gender", "pat_age", "pat_dob", "pat_register_site", "date_create", "finger...", "visits" => array())
   function synchronize($patient_params) {
+    $patient_params = FieldTransformer::apply_to_patient($patient_params);
     $data = array();
     $fingerprint_params = Patient::fingerprint_params($patient_params);
+
+    if(!AppHelper::present($patient_params, "pat_register_site"))
+      $patient_params["pat_register_site"] = "0201";
 
     $patient = Patient::find_by(array("pat_id" => $patient_params["pat_id"]));
     if($patient)
@@ -164,7 +168,7 @@ class PatientModule {
       $conditions[$fingerprint_name] = $fingerprint_value;
 
     $patients = Patient::all_filter($conditions);
-    $patients = FingerprintMatcher::match_fingerprints_with_patients(Patient::fingerprint_params(), $patients);
+    $patients = FingerprintMatcher::match_fingerprints_with_patients(Patient::fingerprint_params($patient_params), $patients);
 
     if (count($patients) == 0){
       $patient = new Patient($patient_params);
@@ -176,11 +180,11 @@ class PatientModule {
       $patient = $patients[0];
 
     // array("serv_id", "site_code", "ext_code", "pat_age", "ext_code_2", "info", "refer_to_vcct", "refer_to_oiart", "refer_to_std", "date_create", "visit_date")
-    foreach($patient_params["visits"] as $visit_params){
-      $visit_params["pat_id"] = $patient->pat_id;
-      $visit = new Visit($visit_params);
-      $visit->save();
-    }
+    // foreach($patient_params["visits"] as $visit_params){
+    //   $visit_params["pat_id"] = $patient->pat_id;
+    //   $visit = new Visit($visit_params);
+    //   $visit->save();
+    // }
     $patients_json =  PatientModule::embeded_dynamic_fields($patients);
     return $patients_json;
   }

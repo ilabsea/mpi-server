@@ -38,7 +38,7 @@ class ApiAccessController extends ApiController {
   }
 
   function skip_authenticate(){
-    return true;
+    return false;
   }
 
   function after_action($status){
@@ -69,6 +69,8 @@ class ApiAccessController extends ApiController {
   }
 
   function access_token(){
+    log_message("info", "Token is: " . $_SERVER['HTTP_TOKEN'] );
+    // log_message("info", "Server params: " . json_encode($_SERVER));
     return isset($_SERVER["HTTP_TOKEN"]) ? $_SERVER["HTTP_TOKEN"] : null;
   }
 
@@ -78,7 +80,7 @@ class ApiAccessController extends ApiController {
       $allow_fields = $this->oauth->scope->updatable_fields_code_message();
       $errors = array(
         "error" => 'Unauthorized',
-        "error_description" => "You can only access these fields: ({$allow_fields})"
+        "error_description" => "POST request error: You can only access these fields: ({$allow_fields})"
       );
       return $this->render_unauthorized($errors);
       exit;
@@ -92,7 +94,7 @@ class ApiAccessController extends ApiController {
       $allow_fields = $this->oauth->scope->searchable_fields_code_message();
       $errors = array(
         "error" => 'Unauthorized',
-        "error_description" => "You can only access these fields: ({$allow_fields})"
+        "error_description" => "GET request error: You can only access these fields: ({$allow_fields})"
       );
       return $this->render_unauthorized($errors);
       exit;

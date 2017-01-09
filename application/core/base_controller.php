@@ -1,5 +1,6 @@
 <?php
 class BaseController extends CI_Controller {
+  var $response_content = "";
   var $skip_before_action = array();
 
   function __construct() {
@@ -22,6 +23,34 @@ class BaseController extends CI_Controller {
     ILog::d("Application raise exception with: ", $exception);
   }
 
+  function log_request(){
+    if(!$this->allow_log_request())
+      return;
+
+    $params = $_REQUEST;
+    $message = json_encode($params);
+    $request_type = $_SERVER['REQUEST_METHOD'];
+    $url =  $this->router->fetch_class(). "/".$this->router->fetch_method();
+
+    log_message('info', "REQUEST $request_type $url \n Params: $message");
+  }
+
+  function log_response(){
+    if(!$this->allow_log_response())
+      return false;
+
+    log_message("info", "RESPONSE: " . $this->response_content);
+
+
+  }
+
+  function allow_log_request(){
+    return true;
+  }
+
+  function allow_log_response(){
+    return true;
+  }
 
   //to init you class, lib
   function init() {
@@ -49,8 +78,14 @@ class BaseController extends CI_Controller {
   }
 
   //override this in your controller
-  function before_action(){}
-  function after_action(){}
+  function before_action(){
+    ob_start();
+    $this->log_request();
+  }
+  function after_action(){
+    $this->log_response();
+    ob_end_flush();
+  }
 
   function callback() {
 
@@ -101,9 +136,9 @@ class BaseController extends CI_Controller {
     header('Content-Type: application/json;  charset=UTF-8');
     // Content-type: application/json; charset=utf-8
     $this->http_response_code($status);
-    $json_content = json_encode($object, JSON_UNESCAPED_UNICODE);
+    $this->response_content = json_encode($object, JSON_UNESCAPED_UNICODE);
     $this->after_action($status);
-    echo $json_content;
+    echo $this->response_content;
     exit;
   }
 

@@ -8,7 +8,7 @@ class GrFingerService {
 
   static $instance = null;
 
-  static function instance() {
+  static function get_instance() {
     if(GrFingerService::$instance)
       return GrFingerService::$instance;
 

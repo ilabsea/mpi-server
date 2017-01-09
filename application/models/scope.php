@@ -51,10 +51,10 @@ class Scope extends Imodel {
       if(in_array($param_field->id(), $allow_fields))
         continue;
 
-      if($param_field->is_patient_field() && isset($allow_fields[Patient::ALL_FIELD]) )
+      if($param_field->is_patient_field() && in_array(Patient::ALL_FIELD, $allow_fields) )
         continue;
 
-      if($param_field->is_visit_field() && isset($allow_fields[Visit::ALL_FIELD]))
+      if($param_field->is_visit_field() && in_array(Visit::ALL_FIELD, $allow_fields))
         continue;
 
       return false;

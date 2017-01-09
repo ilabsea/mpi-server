@@ -46,7 +46,20 @@ class Api_patients extends ApiAccessController{
       $patient_json = $patient->dynamic_value();
       $this->render_json($patient_json);
     }
+  }
 
+  function sync(){
+    $params = $_POST;
+    
+    $filter_patients = FieldTransformer::apply_to_patient($params);
+    $patient = PatientModule::synchronize($filter_patients);
+
+    if($patient->has_error())
+      $this->render_record_errors($patient);
+    else{
+      $patient_json = $patient->dynamic_value();
+      $this->render_json($patient_json);
+    }
   }
 
   function show($pat_id){
