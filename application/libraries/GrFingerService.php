@@ -50,7 +50,7 @@ class GrFingerService {
   function identify($value) {
     $score = 0;
     $result = $this->GrFingerX->IdentifyBase64($value, $score, $this->GR_DEFAULT_CONTEXT);
-    return $result  == $this->GR_OK;
+    return $result  == $this->GR_MATCH;
   }
 
   public function finalize() {

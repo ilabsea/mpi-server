@@ -29,6 +29,8 @@ class Patient extends Imodel {
 
   //virtual attributes
   static $conditions = array();
+  static $exclude_conditions = array();
+  static $select_fields = "";
   var $province = null;
   var $dynamic_fields = array();
 
@@ -108,11 +110,13 @@ class Patient extends Imodel {
     return false;
   }
 
-  static function fingerprint_params($params){
+  static function fingerprint_params($params, $restrict_only_value = false){
     $result = array();
     foreach($params as $key => $value){
       foreach(Patient::fingerprint_fields() as $fingerprint_name)
-        if($key == $fingerprint_name)
+        if($key == $fingerprint_name && !$restrict_only_value)
+          $result[$key] = $value;
+        else if ($key == $fingerprint_name && $restrict_only_value && trim($value) != "" )
           $result[$key] = $value;
     }
     return $result;
@@ -215,16 +219,19 @@ class Patient extends Imodel {
     return $query->result();
   }
 
-  static function count_filter($criterias, $exclude_pat_ids = array()){
+  static function count_filter($criterias){
     $active_record = new Patient();
-
-    $active_record = Patient::where_filter($active_record, $criterias, $exclude_pat_ids);
+    Patient::build_conditions($criterias, $active_record);
+    $active_record = Patient::where_filter($active_record);
     $count = $active_record->db->count_all_results();
     return $count;
   }
 
-  static function where_filter($active_record, $criterias, $exclude_pat_ids = array()){
-    // ILog::d("p", $criterias,1,1);
+  static function build_excludes_conditions($criterias){
+    Patient::$exclude_conditions =  $criterias;
+  }
+
+  static function build_conditions($criterias, $active_record){
     Patient::$conditions = array("patients" => array(), "visits" => array());
 
     foreach($criterias as $field => $value ){
@@ -249,6 +256,7 @@ class Patient extends Imodel {
         Patient::$conditions["patients"]["patient.date_create <="] = Imodel::end_of_day($value);
         Patient::$conditions["visits"]["visit.visit_date <="] = $value;
       }
+
       else if($field == "site_code"){
         Patient::$conditions["patients"]['patient.pat_register_site'] = $value;
         Patient::$conditions["visits"]['visit.site_code = '] = $value;
@@ -273,20 +281,22 @@ class Patient extends Imodel {
         }
       }
     }
-    // ILog::d("conditions", Patient::$conditions);
+    return Patient::$conditions;
+  }
 
-    if(count($exclude_pat_ids) > 0) { //[1,2,4,3,10]
-      $wrap_pat_ids = array();
-      foreach($exclude_pat_ids as $pat_id) {
-        $wrap_pat_ids[] = "'{$pat_id}'";
-      }
-      $pat_ids = implode(",", $wrap_pat_ids);  // "(1,2,4,3,'10')"
-      $key = "(patient.pat_id NOT IN ({$pat_ids}))";
-      Patient::$conditions["patients"][$key] = null;
-    }
+  static function select_fields($fields){
+    Patient::$select_fields = $fields;
+  }
+
+  static function where_filter($active_record){
+    if(count(Patient::$conditions ) == 0)
+      Patient::$conditions = array("patients" => array(), "visits" => array());
 
     foreach(Patient::$conditions["patients"] as $key => $value)
       $active_record->db->where($key, $value);
+
+    foreach(Patient::$exclude_conditions as $key => $value)
+      $active_record->db->where_not_in($key, array($value));
 
     if(count(Patient::$conditions["visits"]) >0 ){
       $query_string = array();
@@ -302,28 +312,29 @@ class Patient extends Imodel {
     return $active_record;
   }
 
-  static function paginate_filter($criterias, $exclude_pat_ids=array()) {
+  static function paginate_filter($criterias) {
     $order_direction = $criterias["order_by"];
     $order_by = $criterias["order_by"];
 
     $criterias = Patient::allow_query_fields($criterias);
-    $total_counts = Patient::count_filter($criterias, $exclude_pat_ids);
-    $records = Patient::all_filter($criterias, $exclude_pat_ids, $order_by, $order_direction);
+    $total_counts = Patient::count_filter($criterias);
+    Patient::$select_fields = "patient.id, patient.pat_id, patient.pat_gender, patient.pat_age, patient.pat_dob,
+                                patient.date_create, patient.pat_register_site, patient.visits_count,
+                                patient.visit_positives_count,patient.new_pat_id";
+    $records = Patient::all_filter($criterias, $order_by, $order_direction);
     $paginator = new Paginator($total_counts, $records);
     return $paginator;
   }
 
-  static function all_filter($criterias, $exclude_pat_ids = array(), $order_by = null, $order_direction = null){
+  static function all_filter($criterias, $order_by = null, $order_direction = null){
     $active_record = new Patient();
-    $active_record->db->select("patient.id, patient.pat_id, patient.pat_gender, patient.pat_age, patient.pat_dob,
-                                patient.date_create, patient.pat_register_site, patient.visits_count,
-                                patient.visit_positives_count,patient.new_pat_id");
+    $active_record->db->select(Patient::$select_fields);
 
-
-    $active_record = Patient::where_filter($active_record, $criterias, $exclude_pat_ids);
+    Patient::build_conditions($criterias, $active_record);
+    $active_record = Patient::where_filter($active_record);
 
     if($order_by && $order_direction )
-      $active_record->db->order_by($criterias["order_by"], $criterias["order_direction"]);
+      $active_record->db->order_by($order_by, $order_direction);
 
     $active_record->db->limit(Paginator::per_page());
     $active_record->db->offset(Paginator::offset());

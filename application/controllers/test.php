@@ -226,9 +226,9 @@ class Test extends MpiController {
       "date_to" => "2016-10-16",
       "fake_field" => "Fdafda"
     );
-    $exclude_pat_ids = array("'p1'","'p2'","'p3'","'p4'","'p5'" );
     ILog::debug_message("Array",$criterias);
-    Patient::where_filter($active_record, $criterias, $exclude_pat_ids);
+    Patient::build_conditions($criterias, $active_record);
+    Patient::where_filter($active_record);
   }
 
   function allow_query_field_patients(){

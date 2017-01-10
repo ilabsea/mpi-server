@@ -10,10 +10,11 @@ class DisplayValue {
   }
 
   /*
-  [patients] => Array ( [0] => pat_id, [1] => p_dynamic_field2 )
-  [visits] => Array ( [0] => visit_id,[1] => pat_id,[2] => v_dynamic_field6 )
+  [patients] => array (pat_id,.., p_dynamic_field2 )
+  [visits] => Array ( visit_id, pat_id,  v_dynamic_field6 )
   */
   function set_allow_fields(){
+
     $patient_fields = array();
     $visit_fields = array();
 
@@ -36,6 +37,7 @@ class DisplayValue {
     $this->allow_field_names =  array("patients" => $patient_fields , "visits" => $visit_fields);
   }
 
+  //array(fieldid1, ..., fieldidn)
   function allow_all_patient_fields(){
     return in_array(Patient::ALL_FIELD, $this->scope->display_fields);
   }
@@ -57,6 +59,8 @@ class DisplayValue {
       $patient_field_names = $this->allow_field_names["patients"];
       $result_patient = AppHelper::slice_array($patient, $patient_field_names);
     }
+    else
+      $result_patient = $patient;
 
     if(!isset($patient["list_visits"]))
       return $result_patient;

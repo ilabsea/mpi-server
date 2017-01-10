@@ -20,13 +20,13 @@ class FingerprintMatcher {
       return false;
 
     foreach($patients as $patient) {
-      if(get_class($patient) != "Patient"){
-        $patient_ar = new Patient();
-        $patient = $patient_ar->copy_object($patient);
-      }
+      $fp_patient = is_array($patient) ? $patient[$fingerprint_name] : $patient->$fingerprint_name;
 
-      if($patient->has_fingerprint($fingerprint_name) && $sdk->identify($patient->$fingerprint_name))
-        $result[$patient->pat_id] = $patient;
+      if(trim($fp_patient) !="" && $sdk->identify($fp_patient)){
+        $pat_id = is_array($patient) ?  $patient["pat_id"] : $patient->pat_id;
+        $result[$pat_id] = $patient;
+      }
     }
   }
+
 }
