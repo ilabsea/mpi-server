@@ -47,7 +47,12 @@ class Scope extends Imodel {
     // ILog::d("mapper", $field_mappers,1,1);
 
     foreach($params as $param_field_code => $value){
+      //virtual field we dont care because FieldTransformer will take care of it.
+      if(!isset($field_mappers[$param_field_code]))
+         continue;
+
       $param_field = $field_mappers[$param_field_code];
+
       if(in_array($param_field->id(), $allow_fields))
         continue;
 

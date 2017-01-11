@@ -11,7 +11,7 @@ class Api_patients extends ApiAccessController{
   function index() {
     $params = $_GET;
     $filter_patients = FieldTransformer::apply_to_all($params, true);
-    $filter_patients['pat_register_site'] = '0101';
+    //$filter_patients['pat_register_site'] = '0101';
 
     $paginate_patients = PatientModule::search_registersite_priority($filter_patients);
     $paginate_patients->records = $this->display_value->patients($paginate_patients->records);
@@ -47,11 +47,10 @@ class Api_patients extends ApiAccessController{
     }
   }
 
+  //POST api/patients/sync one patient per time
   function sync(){
     $params = $_POST;
-
-    $filter_patients = FieldTransformer::apply_to_patient($params);
-    $patient = PatientModule::synchronize($filter_patients);
+    $patient = PatientModule::synchronize($params);
 
     if($patient->has_error())
       $this->render_record_errors($patient);
@@ -94,6 +93,21 @@ class Api_patients extends ApiAccessController{
     $patient_json = PatientModule::embed_dynamic_value($patient);
     $patient_json["patient"] = $this->display_value->patient($patient_json["patient"]);
     return $this->render_json($patient_json);
+  }
+
+  function catch_exception($exception) {
+    parent::catch_exception();
+
+    $type = get_class($exception);
+    if($type == "RecordNotFoundException"){
+      $errors = array("error" => "not found", "error_description" > " Pat_id is not found");
+      return render_record_not_found($errors);
+    }
+    else if ($type == "FingerPrintRequireException"){
+      $errors = array("error" => "bad request", "error_description" => "Fingerprint params values required");
+      return render_bad_request($errors);
+    }
+
   }
 
 }

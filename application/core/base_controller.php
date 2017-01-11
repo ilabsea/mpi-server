@@ -160,6 +160,10 @@ class BaseController extends CI_Controller {
     $this->render_error($errors, 401);
   }
 
+  function render_record_not_found($errors) {
+    $this->render_error($errors, 404);
+  }
+
   function http_response_code($status){
     $status_code_description = $this->status_code_description($status);
     header("HTTP/1.1 {$status_code_description}", true, $status);

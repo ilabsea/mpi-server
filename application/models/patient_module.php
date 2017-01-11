@@ -1,5 +1,7 @@
 <?php
 class PatientModule {
+  static $errors = null;
+
   static function embed_dynamic_value($patient){
     $visits = Patient::visits(["'{$patient->pat_id}'"], "visit_id DESC");
 
@@ -64,7 +66,7 @@ class PatientModule {
   static function search_registersite_priority($params){
 
     $search_with_site_code = $params;
-    $site_code = $params['pat_register_site'];
+    $site_code = isset($params['pat_register_site']) ? $params['pat_register_site'] : '0202';
 
     $paginate_patients = PatientModule::search($search_with_site_code);
     if(count($paginate_patients->records) == 0) {
@@ -181,7 +183,8 @@ class PatientModule {
   }
 
   //array("pat_gender", "pat_age", "pat_dob", "pat_register_site", "date_create", "finger...", "visits" => array())
-  function synchronize($patient_params) {
+  function synchronize($params) {
+    $patient_params = FieldTransformer::apply_to_patient($params);
     $data = array();
     $fingerprint_params = Patient::fingerprint_params($patient_params);
 
@@ -200,23 +203,36 @@ class PatientModule {
       $conditions[$fingerprint_name] = $fingerprint_value;
 
     $patients = Patient::all_filter($conditions);
-    $patients = FingerprintMatcher::match_fingerprints_with_patients(Patient::fingerprint_params($patient_params), $patients);
+    $fingerprint_options = Patient::fingerprint_params($patient_params);
 
-    if (count($patients) == 0){
+    $patient = false;
+    $patient = FingerprintMatcher::first_match_fingerprints_with_patients($fingerprint_options , $patients);
+
+    //$active_record = new Patient();
+    //$active_record->db->trans_begin();
+
+    if (!$patient){
       $patient = new Patient($patient_params);
-      $patient->save();
-      $patients = array($patients);
+      if(!$patient->save()){
+        PatientModule::$errors = $patient->get_errors();
+        return false;
+      }
     }
 
-    elseif(count($patients) == 1)
-      $patient = $patients[0];
-
-    // array("serv_id", "site_code", "ext_code", "pat_age", "ext_code_2", "info", "refer_to_vcct", "refer_to_oiart", "refer_to_std", "date_create", "visit_date")
-    // foreach($patient_params["visits"] as $visit_params){
-    //   $visit_params["pat_id"] = $patient->pat_id;
-    //   $visit = new Visit($visit_params);
-    //   $visit->save();
-    // }
+    if(isset($params['visits'])){
+      // array("serv_id", "site_code", "ext_code", "pat_age", "ext_code_2", "info", "refer_to_vcct", "refer_to_oiart", "refer_to_std", "date_create", "visit_date")
+      foreach($params["visits"] as $visit_params){
+        $filter_visit_params  =  FieldTransformer::apply_to_visit($visit_params);
+        $visit_params["pat_id"] = $patient->pat_id;
+        $visit = new Visit($visit_params);
+        if(!$visit->save()){
+          PatientModule::$errors = $patient->get_errors();
+          //$active_record->db->trans_rollback();
+          return false;
+        }
+      }
+    }
+    //$active_record->db->trans_commit();
     return $patient;
   }
 
