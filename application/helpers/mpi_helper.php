@@ -3,6 +3,16 @@
  * Convert a postgres date to php date
  * @param $mysql_date
  */
+function content_hidden($content){
+  $hide = str_repeat("&#x2022;", strlen($content));
+  $content = <<<EOT
+  <span class='content-hidden' data-hidden-content="{$content}">
+    $hide
+  </span>
+EOT;
+  echo $content;
+}
+
 function mysql_to_date($postgres_date) {
   if ($postgres_date == NULL || $postgres_date == "") {
     return NULL;

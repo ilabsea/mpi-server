@@ -2,6 +2,7 @@
 
 class Member extends Imodel {
   var $member_id = null;
+  var $member_code = null;
   var $member_login = null;
   var $member_pwd = null;
   var $site_code = null;
@@ -32,7 +33,12 @@ class Member extends Imodel {
   function before_create(){
     $this->member_pwd = Member::hex_digest($this->member_pwd);
     if(!$this->date_create)
-      $this->date_create = $this->current_time();
+      $this->set_attribute('date_create',  $this->current_time());
+
+    if(!$this->member_code){
+      $secure_random = openssl_random_pseudo_bytes (30);
+      $this->set_attribute('member_code', $secure_random);
+    }
   }
 
   function before_save(){
@@ -44,7 +50,6 @@ class Member extends Imodel {
     $site = Site::find_by(array("site_code" => $this->site_code));
     if(!$site)
       $this->_errors["site_code"] = "Site with code ". $this->site_code ." does not exist";
-
   }
 
   function uniqueness_by_site_code_and_login(){
@@ -225,7 +230,7 @@ class Member extends Imodel {
 
   static function all_filter($criterias){
     $active_record = new Member();
-    $active_record->db->select("member.member_id, member.member_login, member.date_create, site.site_id, site.site_code, site.site_name,
+    $active_record->db->select("member.member_id, member.member_code, member.member_login, member.date_create, site.site_id, site.site_code, site.site_name,
                                site.pro_code, site.serv_id, province.pro_name, service.serv_code");
 
     $active_record = Member::where_filter($active_record, $criterias);

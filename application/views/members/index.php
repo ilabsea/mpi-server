@@ -10,6 +10,7 @@
 <table class="table table-striped" cellspacing="0" cellpadding="0" width="100%">
   <tr valign="middle">
     <th data-field-id='member_login' class="headerclickable">Login <?=pagination_direction("member_login",$params)?></th>
+    <th data-field-id='member_code' class="headerclickable">Code <?=pagination_direction("member_code",$params)?></th>
     <th data-field-id='site_code' class="headerclickable">Site Code <?=pagination_direction("site_code",$params)?></th>
     <th data-field-id='site_name' class="headerclickable">Site Name <?=pagination_direction("site_name",$params)?></th>
     <th data-field-id='serv_code' class="headerclickable">Service <?=pagination_direction("serv_code",$params)?></th>
@@ -28,6 +29,7 @@
   <?php foreach($paginate_members->records as $record) : ?>
     <tr>
       <td align="center"><?=$record->member_login?></td>
+      <td align="center"> <?=content_hidden($record->member_code) ?> </td>
       <td align="center"><?=$record->site_code?></td>
       <td><?=$record->site_name?></td>
       <td align="center"><?=$record->serv_code?></td>
