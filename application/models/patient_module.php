@@ -101,7 +101,9 @@ class PatientModule {
     $active_record = null;
     $patients = $query->result();
 
-    $patients = FingerprintMatcher::match_fingerprints_with_patients($fingerprint_params, $patients);
+    if(count($fingerprint_params) > 0)
+      $patients = FingerprintMatcher::match_fingerprints_with_patients($fingerprint_params, $patients);
+
     $total_counts = count($patients);
 
     $visit_conditions = Patient::$conditions["visits"];
@@ -109,6 +111,8 @@ class PatientModule {
     $paginator = new Paginator($total_counts, $patients);
     return $paginator;
   }
+
+
 
   static function embeded_dynamic_fields($patients, $visit_conditions=array()) {
     $dynamic_value = new DynamicValue();
@@ -192,21 +196,21 @@ class PatientModule {
       $patient_params["pat_register_site"] = "0201";
 
     $patient = Patient::find_by(array("pat_id" => $patient_params["pat_id"]));
-    if($patient)
-      return true;
 
-    $sdk = GrFingerService::get_instance();
-    $conditions = array("pat_gender" => $patient_params["pat_gender"],
-                        "pat_register_site" => $patient_params["pat_register_site"]);
+    if(!$patient) {
+      // find patient from fingerprint
+      $sdk = GrFingerService::get_instance();
+      $conditions = array("pat_gender" => $patient_params["pat_gender"],
+                          "pat_register_site" => $patient_params["pat_register_site"]);
 
-    foreach($fingerprint_params as $fingerprint_name => $fingerprint_value)
-      $conditions[$fingerprint_name] = $fingerprint_value;
+      foreach($fingerprint_params as $fingerprint_name => $fingerprint_value)
+        $conditions[$fingerprint_name] = $fingerprint_value;
 
-    $patients = Patient::all_filter($conditions);
-    $fingerprint_options = Patient::fingerprint_params($patient_params);
+      $patients = Patient::all_filter($conditions);
+      $fingerprint_options = Patient::fingerprint_params($patient_params);
 
-    $patient = false;
-    $patient = FingerprintMatcher::first_match_fingerprints_with_patients($fingerprint_options , $patients);
+      $patient = FingerprintMatcher::first_match_fingerprints_with_patients($fingerprint_options , $patients);
+    }
 
     //$active_record = new Patient();
     //$active_record->db->trans_begin();
@@ -219,19 +223,21 @@ class PatientModule {
       }
     }
 
-    if(isset($params['visits'])){
-      // array("serv_id", "site_code", "ext_code", "pat_age", "ext_code_2", "info", "refer_to_vcct", "refer_to_oiart", "refer_to_std", "date_create", "visit_date")
-      foreach($params["visits"] as $visit_params){
-        $filter_visit_params  =  FieldTransformer::apply_to_visit($visit_params);
-        $visit_params["pat_id"] = $patient->pat_id;
-        $visit = new Visit($visit_params);
-        if(!$visit->save()){
-          PatientModule::$errors = $patient->get_errors();
-          //$active_record->db->trans_rollback();
-          return false;
-        }
+    if(!isset($params['visits']))
+      return $patient;
+
+    // array("serv_id", "site_code", "ext_code", "pat_age", "ext_code_2", "info", "refer_to_vcct", "refer_to_oiart", "refer_to_std", "date_create", "visit_date")
+    foreach($params["visits"] as $visit_params){
+      $filter_visit_params  =  FieldTransformer::apply_to_visit($visit_params);
+      $filter_visit_params["pat_id"] = $patient->pat_id;
+      $visit = new Visit($filter_visit_params);
+      if(!$visit->save()){
+        PatientModule::$errors = $visit->get_errors();
+        return false;
+        //$active_record->db->trans_rollback();
       }
     }
+
     //$active_record->db->trans_commit();
     return $patient;
   }

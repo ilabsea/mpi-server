@@ -27,4 +27,5 @@ class Tscopes extends MpiController {
     $result = $scope->has_searchable_access($params);
     ILog::d("result: ", $result);
   }
+  
 }

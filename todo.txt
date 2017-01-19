@@ -1,0 +1,8 @@
+- check list visits after sync
+- sync visit to server tooltip shown error
+- only non-sync visit will be sent to server
+
+
+
+------- before sync-----------------
+-how to construct

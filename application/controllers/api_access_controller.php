@@ -25,10 +25,10 @@ class ApiAccessController extends ApiController {
     //$this->oauth->scope = Scope::find(2);
 
     $action = strtolower($this->router->fetch_method());
-    if($action == "index" || $action == "show")
-      $this->authorize_searchable_access();
-    else if ($action == "udpate" || $action == "create")
+    if (AppHelper::is_post_request()) // POST
       $this->authorize_updatable_access();
+    else// GET
+      $this->authorize_searchable_access();
 
   }
 

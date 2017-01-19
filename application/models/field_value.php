@@ -44,13 +44,17 @@ class FieldValue extends Imodel {
       $cast_value = floatval($value);
 
     else if($this->field_type == "Date") {
-      $format = '%Y-%m-%d';
-      $cast_value = strptime($value, $format) ? $value : '';
+      // $format = '%Y-%m-%d';
+      // $cast_value = strptime($value, $format) ? $value : '';
+      $format = 'Y-m-d';
+      $cast_value = date_parse_from_format($format, $value) ? $value : "";
     }
 
     else if($this->field_type == 'DateTime') {
-      $format = '%Y-%m-%d %H:%M:%S';
-      $cast_value = strptime($value, $format) ? $value : '' ;
+      // $format = '%Y-%m-%d %H:%M:%S';
+      // $cast_value = strptime($value, $format) ? $value : '' ;
+      $format = 'Y-m-d H:M:S';
+      $cast_value = date_parse_from_format($format, $value) ? $value : "";
     }
 
     if($this->is_encrypted)

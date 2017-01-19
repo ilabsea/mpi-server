@@ -79,12 +79,10 @@ class BaseController extends CI_Controller {
 
   //override this in your controller
   function before_action(){
-    ob_start();
     $this->log_request();
   }
   function after_action(){
     $this->log_response();
-    ob_end_flush();
   }
 
   function callback() {

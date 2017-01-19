@@ -96,16 +96,16 @@ class Api_patients extends ApiAccessController{
   }
 
   function catch_exception($exception) {
-    parent::catch_exception();
+    parent::catch_exception($exception);
 
     $type = get_class($exception);
     if($type == "RecordNotFoundException"){
       $errors = array("error" => "not found", "error_description" > " Pat_id is not found");
-      return render_record_not_found($errors);
+      return $this->render_record_not_found($errors);
     }
     else if ($type == "FingerPrintRequireException"){
       $errors = array("error" => "bad request", "error_description" => "Fingerprint params values required");
-      return render_bad_request($errors);
+      return $this->render_bad_request($errors);
     }
 
   }

@@ -45,7 +45,7 @@ class Tpatients extends MpiController {
     $params = array(
       "p_fingerprint_l5"=>"",
       "p_fingerprint_r1"=>"",
-      "p_pat_id"=>"D3288821-2533-4DD1-A597-120B9287F06F",
+      "p_pat_id"=>"KH002100003312",
       "p_pat_age"=>"",
       "p_fingerprint_r2"=>"p/8BHYYA8gABdwCwAMYAATsBxwCwAAGHAKUA/QABfADDAO4AAXwAnAAFAQF8AL8A1gABggCEAC0BASsBpAAVAQEwAdEA8AABNgHCAHMAAkcBjgAKAQIrAbcABAEBMAGEAEsAAakAiwDIAAGHAFgAMQEBdwBcAA8BAXEAhwBwAAGpAFQA4gABYAB8AJkAAa8AfAAxAAFjAXUAaAACAABVAKYAAS0AQAALAQJrAFAAhgABHQDpADUBAjsBbQDeAAFrAGAA2QABZgB7AMgAAYIAowAFAwkEGhsSGwsFDhwIBQwDERUGAQgDBAYICwsADAQSGggMCwMaHAUMDRQQFwUACQYbHAECABoWGAwJFQ0DAAMEDxAHCxoOEQ0OAQYCBwgLDBYTExEADgAcBAEPBw8XBQQAGwMJCAAbDhASFxIHBRIcHBMDBgwGGBUTGA4TExUQCwgEBxAQABwWGxYAEhAaDAAJARwBBg4QGwsaFRQDAQUJBwMICQoRBwAXGwUGGBEDDhIWCwQAARIOGhYCCgQCBQ4XGhEUDhYQBQkCBwwOAg8LAxwBExsTGQwWFQgQGQkXAAoNFhEHFxkIEBwKFQITFwsPABMNGA0PEhwYHAITCg8IGQQPBQMCGxgBCgwCDhEZAw4YABMGExkFEhgKFBwVGBQGChkLGQcWDRcWExQZBhAWAxMCDRYUCQoXGBkCGQ8ZEAIUGRMZCg==",
       "p_updated_at"=>"2017-01-09 16:00:43",
@@ -59,13 +59,47 @@ class Tpatients extends MpiController {
       "p_fingerprint_r5"=>"",
       "p_pat_dob"=>"",
       "p_fingerprint_l3"=>"",
-      "p_pat_gender"=>"1" );
-    $filter_patients = FieldTransformer::apply_to_patient($params);
+      "p_pat_gender"=>"1",
+      "visits" => array(
+        array(
+          "v_pat_age"=> "80", "v_serv_id"=> "2", "v_visit_date"=> "2016-12-06",
+          "v_site_code"=> "0202", "v_ext_code"=> "ex1", "v_ext_code_2"=> "ex2",
+          "v_refer_to_vcct"=> "2", "v_refer_to_oiart"=> "1", "v_refer_to_std"=> "",
+          "v_info"=> "positive", "v_vcctnumber"=> "1000", "v_vcctsite" => "V01-02",
 
-    $patient = PatientModule::synchronize($filter_patients);
+          "v_dynamic_field1" => "False",
+          "v_dynamic_field2" => "hello",
+          "v_dynamic_field3" => "12dfdsa"
+        ),
+        array(
+          "v_pat_age"=> "81", "v_serv_id"=> "2", "v_visit_date"=> "2016-12-06",
+          "v_site_code"=> "0202", "v_ext_code"=> "ex1", "v_ext_code_2"=> "ex2",
+          "v_refer_to_vcct"=> "2", "v_refer_to_oiart"=> "1", "v_refer_to_std"=> "",
+          "v_info"=> "positive", "v_vcctnumber"=> "1000", "v_vcctsite" => "V01-02",
 
-    if($patient->has_error())
-      $this->render_record_errors($patient);
+          "v_dynamic_field1" => "False",
+          "v_dynamic_field2" => "hello",
+          "v_dynamic_field3" => "12dfdsa"
+        ),
+        array(
+          "v_pat_age"=> "83", "v_serv_id"=> "2", "v_visit_date"=> "2016-12-06",
+          "v_site_code"=> "0202", "v_ext_code"=> "ex1", "v_ext_code_2"=> "ex2",
+          "v_refer_to_vcct"=> "2", "v_refer_to_oiart"=> "1", "v_refer_to_std"=> "",
+          "v_info"=> "positive", "v_vcctnumber"=> "1000", "v_vcctsite" => "V01-02",
+
+          "v_dynamic_field1" => "False",
+          "v_dynamic_field2" => "hello",
+          "v_dynamic_field3" => "12dfdsa"
+        )
+      ));
+
+    $patient = PatientModule::synchronize($params);
+
+    if(!$patient){
+      $errors = array("error" => "Validation errors",
+                      "error_description" => PatientModule::$errors);
+      $this->render_bad_request($errors);
+    }
     else{
       $patient_json = PatientModule::embed_dynamic_value($patient);
       $patient_json["patient"] = $this->display_value->patient($patient_json["patient"]);
