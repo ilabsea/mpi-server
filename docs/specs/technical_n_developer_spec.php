@@ -14,3 +14,7 @@ you query will behave unexpectedly
     //cause unexpected result since $visit instance interrupt the $patient_active_record
     //core framework might store the last active record query builder
     $patient_active_record->db->query()
+
+
+** Fingerprint component client **
+how to add a fingerprint component to form http://www.griaulebiometrics.com/en-us/taxonomy/term/72
