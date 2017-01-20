@@ -17,6 +17,7 @@
       <th>Scope</th>
       <th>Whitelist</th>
       <th>Status</th>
+      <th>Internal</th>
       <th>Created at</th>
       <th>Updated at</th>
       <th width='120' valign='middle'>Action</th>
@@ -28,14 +29,18 @@
         <td><?= Paginator::offset() + $index + 1 ?></td>
         <td><?= $application->name ?></td>
         <td>
-            <span style="margin-right: 5px" class="label item">
-              <?= $scopes[$application->scope_id] ?>
-            </span>
+          <?= $scopes[$application->scope_id] ?>
         </td>
         <td><?= $application->whitelist ?></td>
         <td>
           <span style="margin-right: 5px" class="label item">
             <?= Application::statuses()[$application->status] ?>
+          </span>
+        </td>
+        <td>
+
+          <span style="margin-right: 5px" class="label item">
+            <?= ($application->internal_app) ? "Yes" : "No" ?>
           </span>
         </td>
         <td><?= $application->created_at?></td>

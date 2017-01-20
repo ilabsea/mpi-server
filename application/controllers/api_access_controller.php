@@ -18,6 +18,15 @@ class ApiAccessController extends ApiController {
     $this->restrict_field_access();
   }
 
+  function require_internal_app(){
+    if($this->oauth->application->is_internal_app())
+      return ;
+
+    $errors = array("error"=>401,
+                    "error_description" => "Unauthorized: you are not allow to acces this endpoint");
+    return $this->render_unauthorized($errors);
+  }
+
   function restrict_field_access(){
     if($this->skip_restrict_field_access())
       return;

@@ -4,6 +4,14 @@ class Api_visits extends ApiAccessController{
   function before_action(){
     parent::before_action();
     $this->display_value = new DisplayValue($this->oauth->scope);
+
+    if($this->action_name() == "update_field")
+      $this->require_internal_app();
+
+  }
+
+  function update_field(){
+    return $this->render_json(array("success"=>1));
   }
 
   //GET api/visits/index?pat_id=xxx
@@ -85,7 +93,7 @@ class Api_visits extends ApiAccessController{
     // if(isset($filter_visits["pat_id"]))
     //   unset($filter_visits["pat_id"])
     $visit->update_attributes($filter_visits);
-    
+
     $visit_json = $visit->dynamic_value();
     $visit_json = $this->display_value->visit($visit_json);
     $this->render_json($visit_json);

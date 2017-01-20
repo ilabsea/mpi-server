@@ -23,6 +23,10 @@ class BaseController extends CI_Controller {
     ILog::d("Application raise exception with: ", $exception);
   }
 
+  function action_name(){
+    return $this->router->fetch_method();
+  }
+
   function log_request(){
     if(!$this->allow_log_request())
       return;

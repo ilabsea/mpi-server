@@ -37,6 +37,27 @@
   </div>
 </div>
 
+
+<div class="row-fluid input-row">
+  <div class="span2">Internal App</div>
+  <div class="span10">
+    <?= form_checkbox(array("name"=> "internal_app",
+                            "id"=>"internal_app",
+                            "value" => 0,
+                            "checked" => true,
+                            "class" => "hidden") )?>
+
+    <?= form_checkbox(array("name"=> "internal_app",
+                            "id"=>"internal_app",
+                            "value" => 1,
+                            "checked" => $application->internal_app == "1" ? true : false) )?>
+    <p class='field-hint'>
+      Check only if this application has full access to every API.
+    </p>
+
+  </div>
+</div>
+
 <br />
 
 <div class="row-fluid">

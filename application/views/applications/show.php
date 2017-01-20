@@ -37,6 +37,15 @@
       </tr>
 
       <tr>
+        <td>Internal app</td>
+        <td>
+          <span style="margin-right: 5px" class="label item">
+            <?= $application->internal_app ? "Yes" : "No" ?>
+          </span>
+        </td>
+      </tr>
+
+      <tr>
         <td>Created at </td>
         <td><?= $application->created_at?></td>
       </tr>

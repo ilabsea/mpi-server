@@ -6,6 +6,14 @@ class Api_patients extends ApiAccessController{
   function before_action(){
     parent::before_action();
     $this->display_value = new DisplayValue($this->oauth->scope);
+
+    if($this->action_name() == "update_field"){
+      $this->require_internal_app();
+    }
+  }
+
+  function update_field(){
+    return $this->render_json(array("success"=>1));
   }
 
   function index() {
