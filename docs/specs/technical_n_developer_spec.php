@@ -18,3 +18,10 @@ you query will behave unexpectedly
 
 ** Fingerprint component client **
 how to add a fingerprint component to form http://www.griaulebiometrics.com/en-us/taxonomy/term/72
+
+
+patient come to vcct to test for HIV get a code number
+ - if positive -> oiart -> get a new code number code preart/oi/clinic (ext_code)
+ - serious cond will get a code art(arv medicine) ext_code2
+
+third, site_code, clinic_id(oi), art(art)

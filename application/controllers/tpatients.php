@@ -24,11 +24,12 @@ class Tpatients extends MpiController {
       "p_fingerprint_l3"=>""
       ,"p_fingerprint_r5"=>"");
 
-     $filter_patients = FieldTransformer::apply_to_all($params, true);
+    $filter_patients = FieldTransformer::apply_to_all($params);
+    $filter_patients = AppHelper::merge_array($filter_patients['visits'], $filter_patients['patients']);
 
-     $paginate_patients = PatientModule::search_registersite_priority($filter_patients);
-     $paginate_patients->records = $this->display_value->patients($paginate_patients->records);
-     $this->render_json($paginate_patients);
+    $paginate_patients = PatientModule::search_registersite_priority($filter_patients);
+    $paginate_patients->records = $this->display_value->patients($paginate_patients->records);
+    $this->render_json($paginate_patients);
   }
 
 

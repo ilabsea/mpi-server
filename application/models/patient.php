@@ -53,6 +53,45 @@ class Patient extends Imodel {
     return false;
   }
 
+  static function update_field($pat_id, $field_code, $field_value, $application=null){
+    $patient = Patient::ensure_find_by(array("pat_id" => $pat_id));
+    $values = $patient->dynamic_value();
+
+    $patient_attrs  = array($field_code => $field_value);
+
+    $field_patients = FieldTransformer::apply_to_patient($patient_attrs);
+    $keys = array_keys($field_patients);
+
+
+    $old_field_value = $values[$keys[0]];
+
+    $field_log_attrs = array("modified_attrs"=> array());
+    $field_log_attrs["modified_attrs"][$field_code] = array("from" => $old_field_value,
+                                                            "to" => $field_value);
+    $field_log_attrs["field_code"] = $field_code;
+
+    if($application){
+      $field_log_attrs["application_id"] = $application->id;
+      $field_log_attrs["application_name"] = $application->name;
+    }
+
+    $fields = Field::map_by_code();
+
+    if(isset($fields[$field_code])){
+      $field = $fields[$field_code];
+      $field_log_attrs["field_name"] = $field->name;
+      $field_log_attrs["field_id"] = $field->id;
+    }
+
+    $field_log_attrs["modified_at"] = AppModel::current_time();
+
+
+    $patient->update_attributes($patient_attrs);
+    $field_log = new FieldLog($field_log_attrs);
+    $field_log->save();
+    return $patient;
+  }
+
   function __construct($params = array()) {
     $patient_fields = Patient::field_params($params);
     $this->dynamic_fields = Patient::dynamic_field_params($params);
