@@ -72,6 +72,10 @@ class ApiAccessController extends ApiController {
       $attrs["application_id"] = $this->oauth->application->id();
       $attrs["application_name"] = $this->oauth->application->name;
     }
+    else{
+      $attrs["application_id"] = 0;
+      $attrs["application_name"] = "unknown";
+    }
 
     $api_access_log->set_attributes($attrs);
     $api_access_log->save();

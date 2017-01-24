@@ -6,7 +6,7 @@ class Api_patients extends ApiAccessController{
   function before_action(){
     parent::before_action();
     $scope = $this->oauth->scope;
-    // $scope = Scope::find(2);
+    $scope = Scope::find(2);
     $this->display_value = new DisplayValue($scope);
 
     if($this->action_name() != "update_field"){
@@ -21,7 +21,7 @@ class Api_patients extends ApiAccessController{
   //POST /api/patients/update_field
   function update_field($pat_id){
     // $params = $_GET;
-    $params = $_POST;
+    $params = $_GET;
 
     if(!isset($params['name']) || !isset($params['value'])) {
       $errors = array(
@@ -35,6 +35,7 @@ class Api_patients extends ApiAccessController{
     $value = $params['value'];
 
     $field_params = FieldTransformer::apply_to_patient(array($name => $value));
+
     if(isset($field_params["pat_id"]) || count($field_params) == 0){
       $errors = array(
         "error" =>"invalid parameter name",
@@ -44,7 +45,7 @@ class Api_patients extends ApiAccessController{
     }
 
     $application = $this->oauth->application;
-    // $application = Application::find(1);
+    $application = Application::find(2);
 
     $patient = Patient::update_field($pat_id, $name, $value, $application);
     $patient_json = PatientModule::embed_dynamic_value($patient);

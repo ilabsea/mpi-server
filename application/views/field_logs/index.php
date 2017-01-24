@@ -10,7 +10,7 @@
       <th>No</th>
       <th width='120'>Field Name</th>
       <th>Field Code</th>
-      <th>Modified Date</th>
+      <th>Modified At</th>
       <th>Modified By</th>
       <th>Changes</th>
       <th></th>
@@ -22,7 +22,7 @@
         <td><?= Paginator::offset() + $index + 1 ?></td>
         <td><?= $log->field_name ?></td>
         <td><?= $log->field_code ?></td>
-        <td><?= $log->modified_at ?></td>
+        <td><?= AppHelper::timeago($log->modified_at) ?> </td>
         <td>
           <span class="label item">
             <?= $log->application_name ?>

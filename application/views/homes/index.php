@@ -12,7 +12,7 @@
     array("title" => "API Scope", "image" => "api-scope.png", "url" => "scopes/index", "admin" => true),
     array("title" => "Application", "image" => "api-application.png", "url" => "applications/index", "admin" => true),
     array("title" => "Access Log", "image" => "monitor-ok-icon.png", "url" => "access_logs/index", "admin" => true),
-    array("title" => "Field Log", "image" => "monitor-ok-icon.png", "url" => "field_logs/index", "admin" => true)
+    array("title" => "Field Log", "image" => "field-log.png", "url" => "field_logs/index", "admin" => true)
   );
 ?>
 <h3> Admin Dashboard</h3>

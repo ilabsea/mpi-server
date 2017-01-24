@@ -1,5 +1,10 @@
 <?php
 class AppHelper {
+
+  static function timeago($date_time){
+    echo "<span class='timeago' title='{$date_time}'>{$date_time}</span>";
+  }
+
   static function url($params=array()){
     $form = array();
     parse_str($_SERVER['QUERY_STRING'], $form);
