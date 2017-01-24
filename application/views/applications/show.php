@@ -37,6 +37,15 @@
       </tr>
 
       <tr>
+        <td>Internal app</td>
+        <td>
+          <span style="margin-right: 5px" class="label item">
+            <?= $application->internal_app ? "Yes" : "No" ?>
+          </span>
+        </td>
+      </tr>
+
+      <tr>
         <td>Created at </td>
         <td><?= $application->created_at?></td>
       </tr>
@@ -53,11 +62,7 @@
 
       <tr>
         <td>API secret</td>
-        <td >
-          <span class='content-hidden' data-hidden-content="<?= $application->api_secret ?>">
-            <?= str_repeat("&#x2022;", strlen($application->api_secret))?>
-          </span>
-        </td>
+        <td > <?=content_hidden($application->api_secret) ?></td>
       </tr>
   </tbody>
 </table>

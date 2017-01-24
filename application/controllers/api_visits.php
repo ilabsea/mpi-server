@@ -4,6 +4,49 @@ class Api_visits extends ApiAccessController{
   function before_action(){
     parent::before_action();
     $this->display_value = new DisplayValue($this->oauth->scope);
+
+    if($this->action_name() == "update_field")
+      $this->require_internal_app();
+  }
+
+  //GET /api/visits/search
+  //{v_site_code, v_ext_code, v_ext_code_2}
+  function search(){
+
+    $params = $_GET;
+    $filter_visits = FieldTransformer::apply_to_visit($params);
+    $no_site_code = !isset($filter_visits['site_code']) || trim($filter_visits['site_code']) == '' ;
+    $no_ext_code  = !isset($filter_visits['ext_code']) || trim($filter_visits['ext_code']) == '' ;
+
+    if($no_site_code || $no_ext_code){
+      $errors = array("error" => "Invalid input",
+                      "error_description" => "api require site code and ext_code");
+      $this->render_bad_request($errors);
+    }
+
+    $conditions = array();
+    $param_keys = array("site_code", "ext_code", "ext_code_2");
+
+    foreach ($param_keys as $value) {
+      if(isset($filter_visits[$value]) && $filter_visits[$value])
+        $conditions[$value] = $filter_visits[$value];
+    }
+
+
+
+    $visit = Visit::find_by($conditions);
+    $patient = Patient::find_by(array("pat_id" => $visit->pat_id));
+
+    $scope = Scope::find(2);
+    $display_value = new DisplayValue($scope);
+
+    $patient_json = $display_value->patient($patient->dynamic_value());
+
+    $visit_json = $display_value->visit($visit->dynamic_value());
+
+    $result = array("patient" => $patient_json, "visit" => $visit_json);
+
+    return $this->render_json($result);
   }
 
   //GET api/visits/index?pat_id=xxx
@@ -85,7 +128,7 @@ class Api_visits extends ApiAccessController{
     // if(isset($filter_visits["pat_id"]))
     //   unset($filter_visits["pat_id"])
     $visit->update_attributes($filter_visits);
-    
+
     $visit_json = $visit->dynamic_value();
     $visit_json = $this->display_value->visit($visit_json);
     $this->render_json($visit_json);

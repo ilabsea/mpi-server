@@ -6,6 +6,7 @@ class Application extends Imodel {
   var $api_secret = '';
   var $whitelist = '';
   var $status = '1';
+  var $internal_app = 0;
 
   var $scope_id = null;
   var $created_at = null;
@@ -33,6 +34,10 @@ class Application extends Imodel {
 
   function ok(){
     return $this->status == 1;
+  }
+
+  function is_internal_app() {
+    return $this->internal_app;
   }
 
   static function mapper() {

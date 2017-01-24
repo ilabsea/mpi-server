@@ -15,13 +15,12 @@ class ApiAccessLog extends Imodel {
 
   static function search_paginate($params){
     $conditions = array();
-    if($params['application_id'] == '')
-      $conditions["application_id IS NULL"] = null;
-    else if ($params['application_id'] != 'all')
+    if($params['application_id'] != '')
       $conditions["application_id"] = $params['application_id'];
 
     if($params['from'] != '')
       $conditions["created_at >="] = Imodel::beginning_of_day($params['from']);
+
     if($params['to'] != '')
       $conditions["created_at <="] = Imodel::end_of_day($params['to']);
 
@@ -31,13 +30,13 @@ class ApiAccessLog extends Imodel {
   static function search_graph($params) {
     $lastmonth = mktime(0, 0, 0, date("m")-1, date("d"), date("Y"));
     $active_record = new ApiAccessLog();
-    if($params["application_id"] == '')
-      $active_record->db->where("application_id IS NULL ");
-    else if ($params['application_id'] != 'all')
+
+    if($params["application_id"] != '')
       $active_record->db->where("application_id", $params['application_id']);
 
     if($params['from'] != '')
       $active_record->db->where("created_at >=", Imodel::beginning_of_day($params['from']));
+
     if($params['to'] != '')
       $active_record->db->where("created_at <=", Imodel::end_of_day($params['to']));
 

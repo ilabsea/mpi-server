@@ -2,7 +2,7 @@
 class FieldTransformer {
   //$params($_GET, $_POST, $_REQUEST)
 
-  public static function apply_to($params, $whitelists){
+  public static function apply_to($params, $whitelists, $allow_empty=true){
     $fields = Field::cache_all();
     $klass = get_class( $whitelists);
 
@@ -17,27 +17,36 @@ class FieldTransformer {
 
     foreach($fields as $field) {
       $is_obj_table =  $klass == 'Patient' ? $field->is_patient_field() : $field->is_visit_field();
-      if($field->dynamic_field &&  $is_obj_table)
-        $transforms[$field->code] = isset($params[$field->code]) ? $params[$field->code] : null;
+      if($field->dynamic_field &&  $is_obj_table && isset($params[$field->code]) )
+        $transforms[$field->code] = $params[$field->code];
     }
-    return $transforms;
+
+    if($allow_empty)
+      return $transforms;
+
+    $result = array();
+    foreach($transforms as $key => $value)
+      if(trim($value) != "")
+        $result[$key] = $value;
+
+    return $result;
   }
 
-  public static function apply_to_patient($params){
+  public static function apply_to_patient($params, $allow_empty=true){
     $patient = new Patient();
-    return FieldTransformer::apply_to($params, $patient);
+    return FieldTransformer::apply_to($params, $patient, $allow_empty);
   }
 
-  public static function apply_to_visit($params){
+  public static function apply_to_visit($params, $allow_empty=true){
     $visit = new Visit();
-    return FieldTransformer::apply_to($params, $visit);
+    return FieldTransformer::apply_to($params, $visit, $allow_empty);
   }
 
-  public function apply_to_all($params, $merged=false){
-    $transform_patients = FieldTransformer::apply_to_patient($params);
-    $transform_visits = FieldTransformer::apply_to_visit($params);
+  public function apply_to_all($params, $allow_empty=true){
+    $transform_patients = FieldTransformer::apply_to_patient($params, $allow_empty);
+    $transform_visits = FieldTransformer::apply_to_visit($params, $allow_empty);
 
-    return $merged ? AppHelper::merge_array($transform_visits, $transform_patients) : array("patients" => $transform_patients, "visits" => $transform_visits);
+    return array("patients" => $transform_patients, "visits" => $transform_visits);
   }
 
 }

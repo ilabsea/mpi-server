@@ -65,7 +65,7 @@ class Applications extends MpiController {
   }
 
   public function application_params(){
-    return $this->filter_params(array("name","scope_id", "whitelist", "status"));
+    return $this->filter_params(array("name","scope_id", "whitelist", "status", "internal_app"));
   }
 
   function delete($id) {

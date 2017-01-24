@@ -1,14 +1,15 @@
 <div class="well">
   <h4>Access Logs filter</h4>
-  <?= form_open('access_logs/index', array("method"=> "GET")) ?>
-  <?= form_input(array("name" => "type",
-                       "id" => "type",
-                       "type" => "hidden",
-                       "value" => $params["type"])) ?>
-
+  <?= form_open('field_logs/index', array("method"=> "GET")) ?>
     <span class="label-inline"> </span>
-    <?= form_dropdown('application_id', AppHelper::merge_array(array(""=>"All Application", "0" => "Unknown"),  Application::mapper()), $params["application_id"],
-                      'id="application_id" class="tokenizer tokenizer-short"' ) ?>
+    <?php
+      $applications = array();
+      foreach(Application::mapper() as $app) {
+        $applications[$app] = $app;
+      }
+    ?>
+    <?= form_dropdown('application_name', AppHelper::merge_array(array(""=>"All"),  $applications), $params["application_name"],
+                      'id="application_name" class="tokenizer tokenizer-short"' ) ?>
 
     <span class="label-inline"> </span>
     <?= form_input(array("name" => "from",

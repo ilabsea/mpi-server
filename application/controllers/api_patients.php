@@ -5,12 +5,59 @@ class Api_patients extends ApiAccessController{
 
   function before_action(){
     parent::before_action();
-    $this->display_value = new DisplayValue($this->oauth->scope);
+    $scope = $this->oauth->scope;
+    $scope = Scope::find(2);
+    $this->display_value = new DisplayValue($scope);
+
+    if($this->action_name() != "update_field"){
+      $this->require_internal_app();
+    }
   }
+
+  function skip_authenticate(){
+    return true;
+  }
+
+  //POST /api/patients/update_field
+  function update_field($pat_id){
+    // $params = $_GET;
+    $params = $_GET;
+
+    if(!isset($params['name']) || !isset($params['value'])) {
+      $errors = array(
+        "error" =>"invalid parameter name",
+        "error_description" => "you must provide a valid parameter name"
+      );
+      return $this->render_bad_request($errors);
+    }
+
+    $name  = $params['name'];
+    $value = $params['value'];
+
+    $field_params = FieldTransformer::apply_to_patient(array($name => $value));
+
+    if(isset($field_params["pat_id"]) || count($field_params) == 0){
+      $errors = array(
+        "error" =>"invalid parameter name",
+        "error_description" => "you must provide a valid parameter name"
+      );
+      return $this->render_bad_request($errors);
+    }
+
+    $application = $this->oauth->application;
+    $application = Application::find(2);
+
+    $patient = Patient::update_field($pat_id, $name, $value, $application);
+    $patient_json = PatientModule::embed_dynamic_value($patient);
+    $patient_json["patient"] = $this->display_value->patient($patient_json["patient"]);
+    $this->render_json($patient_json);
+  }
+
 
   function index() {
     $params = $_GET;
-    $filter_patients = FieldTransformer::apply_to_all($params, true);
+    $filter_patients = FieldTransformer::apply_to_all($params);
+    $filter_patients = AppHelper::merge_array($filter_patients['visits'], $filter_patients['patients']);
     //$filter_patients['pat_register_site'] = '0101';
 
     $paginate_patients = PatientModule::search_registersite_priority($filter_patients);

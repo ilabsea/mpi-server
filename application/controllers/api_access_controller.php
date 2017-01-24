@@ -18,6 +18,15 @@ class ApiAccessController extends ApiController {
     $this->restrict_field_access();
   }
 
+  function require_internal_app(){
+    if($this->oauth->application->is_internal_app())
+      return ;
+
+    $errors = array("error"=>401,
+                    "error_description" => "Unauthorized: you are not allow to acces this endpoint");
+    return $this->render_unauthorized($errors);
+  }
+
   function restrict_field_access(){
     if($this->skip_restrict_field_access())
       return;
@@ -62,6 +71,10 @@ class ApiAccessController extends ApiController {
     if($this->oauth->application){
       $attrs["application_id"] = $this->oauth->application->id();
       $attrs["application_name"] = $this->oauth->application->name;
+    }
+    else{
+      $attrs["application_id"] = 0;
+      $attrs["application_name"] = "unknown";
     }
 
     $api_access_log->set_attributes($attrs);
