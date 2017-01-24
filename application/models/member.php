@@ -36,7 +36,7 @@ class Member extends Imodel {
       $this->set_attribute('date_create',  $this->current_time());
 
     if(!$this->member_code){
-      $secure_random = openssl_random_pseudo_bytes (30);
+      $secure_random = bin2hex(openssl_random_pseudo_bytes (30));
       $this->set_attribute('member_code', $secure_random);
     }
   }
