@@ -7,105 +7,90 @@ class Memberws extends MpiController {
 	/**
 	 * Construction of Memer web service
 	 */
-	function __construct() {
-	    parent::__construct(true, false);
+	function skip_authentication(){
+		return true;
 	}
-	
+
 	/**
 	 * Register New Member
 	 */
 	function register() {
-	    ILog::info("Register new member");
-    	ILog::info(print_r($_POST, true));
-    	$result = array("patients" => array(),
-    	                "error" => "");
-    	try {
-    		// detect the fingerprint SDK
-	    	$grFingerprint = new GrFingerService();
-	        if (!$grFingerprint->initialize()) :
-	            echo "Could not initialize finger print SDK";
-	            return;
-	        endif;
-	        
-	        // get the valid fingerprint from the request
-	        $fingerprints = $this->valid_user_fp($grFingerprint, $result);
-	        if($result["error"] != "") :
-	             echo $result["error"];
-	             return;
-	        endif;
-	        
-	        if (count($fingerprints) <= 0) :
-	             echo "Could not find fingerprint";
-	             return;
-	        endif;
-	        
-            if (!isset($_POST["sitecode"]) || $_POST["sitecode"] == "") :
-                 //$result["error"] = "Could not find site code";
-	             echo "Site code is required";
-	             return;
-            endif;
-            
-            $this->load->model("site");
-            $site = $this->site->getSiteByCode($_POST["sitecode"]);
-            if ($site == null) :
-                 //$result["error"] = "Site code is not correct";
-	             echo "Site code ".$_POST["sitecode"]." is not found";
-	             return;
-            endif;
-            
-            
-            
-            $data = array();
-	        foreach ($fingerprints as $fingerprint) :
-	        	$data[$fingerprint] = $_POST[$fingerprint];
-	        endforeach;
-	        
-	        $data["member_login"] = $_POST["member_login"];
-	        $data["member_pwd"] = $_POST["member_pwd"];
-	        $data["site_code"] = $_POST["sitecode"];
-	        foreach ($fingerprints as $fingerprint) :
-	        	$data[$fingerprint] = $_POST[$fingerprint];
-	        endforeach;
-	        
-	        
-	        $this->load->model("member");
-	        $memberFound = $this->member->getMemberBySiteCodeAndLogin($data["site_code"], $data["member_login"]);
-	        if ($memberFound != null) :
-	        	 echo "Login ".$data["member_login"]." is found on server";
-	             return;
-	        endif;
-	        $this->member->createNew($data);
-	        echo "success";
-    		
-    	} catch (Exception $e) {
-    		$result["error"] = $e->getMessage();
-    		ILog::error("error during patient searching: ".$e->getMessage());
-    		echo $result["error"];
-    	}
+		$params = array("sitecode"=>"0202","member_login"=>"sokmesa","member_pwd"=>"sokmesa",
+									"member_fp_r2"=>"p/8BHoQAwQABawCVANIAAWsAnQDJAAFxALYAnwABNgGLAN0AAR8BlQCgAAF8AJsA6QABJQF4AP8AAR8BwwDJAAFxAMIAsAABdwCzAN4AASUBzwDNAAErAdAAjwABggCdAEgAAZ4AWACwAAFPANgAVgACOwGNAGwAAaQAXQAUAQElAcYAIQEBOwFjAHIAASIAqgAjAQE7AWYAUQABEQCNADoAAV0BogAlAAGeAHEArQABZgBkAK4AAVoAfgCYAAJ3ANcAGQEBNgFVADUBASsB8gA9AQGHAK4ADhkBAgsIGRgEARIbBgQNFgkDAQAFGgYBDhgICRgaAgAGCgoIBAIUEgAYBAAKAhYXAwwGAgoBCwkFAxMVCgscEREHGRoNFwkMABkABQIIGAUHBBANCgQAGgcGAgUTEAgDFRYOGgIJHRsUGwYAGhAaEwEIAA4QFQkFCgkCAwsCAQUQFhkFBggBGB0SCwMCGAUQBwEEGAoAFQ0BCQMaDA8BCwYLCAwECBQGGRMAAwQZDw0FDAEZGBMLDBQHBwAOEw4FHAcHAgMQBRMEDhsKEgoBDhQKExYSBhgQEQQTDQ8XFRcQFxoVEQYMEBsLGwYCDB0UFAQQDxQRGRAPFgMPGwgUARILEgcHDhoNDhAJEAwNEQEcFAYOEggRAAUVCQ8ZFRgVAhAaFg4VGwQTFxECEQ4FDwUWHAYcBB0KHBIMFx0LHAELDxoXHQYcAB0IHA4dBxsMFA4dER0cHQwdEB0P",
+									"member_fp_l2"=>"p/8BHo8A+wAC1gCKAEkAAVUApgC+AAEDAXcA9QAB4QC9AGcAAVoAlQCrAAFPAKAAoAABCQGgAP0AAdwAkwBVAAFVAEEAigACSgB5AFYAAk8AnABiAAFVALEAAQEB1gCFAJQAAU8AWgDSAAHnAKcARwABYACOAIAAAgMBqwCcAAJVAJsAIQABdwDPAL4AAVUAYQDBAAI+AHAAyAAB8gBsALMAAfgA2wDrAAH4AHgAOgABTwB3ADAAATkAXQDjAAEzAJAAJgEBxQCxABIBAcsASwC6AAHyAJ8AGBkGEQgBCwgFBgcAHAwVFAwHGg4UFg4UCgEVFg0QFB0BGAgPDhUAAwIFCggFERwHDh0KGAUNCw8BDwYNARkLAQIGAxoQCxoVBAsaFAIRHRYMAA4WCwoGEAgYChkZEhENGxwEDxYNERAPEhUdAhMcAAcDFgUbAAESGBIQCBsHBRADDhodBAgDFQgZFQUMFxAKFxMKDw8YHQkbDBMRGhYCDQ8ZCBIQBAsYFgYbAw0LEAEAGhUCEwYDFBUNFAURBBwXFA0WCQwDAhYEAQAVEQsTBQcXEA8LGQYLFQYHAgoSDQoGBBQJAAILEhwDAhAADgwCDQkdDQQKFwIOBQMCBxoHFRAYDBMDHQkKDgkJEAAXBBIVCQcTAAUQGRsaHAITDRMEHBMTEAUJAgQXERcFGxcJGAkBBgkJCxsVCRkbAhcE");
+  	$result = array("patients" => array(),
+  	                "error" => "");
+    // get the valid fingerprint from the request
+		// $params = $_POST;
+    $fingerprints = $this->valid_user_fp($params);
+		ILog::d("Fingerprint ", $fingerprints);
+    if($result["error"] != "") :
+         echo $result["error"];
+         return;
+    endif;
+
+    if (count($fingerprints) <= 0) :
+         echo "Could not find fingerprint";
+         return;
+    endif;
+
+    if (!isset($params["sitecode"]) || $params["sitecode"] == "") :
+         //$result["error"] = "Could not find site code";
+			$params["sitecode"] = "0202";
+      //  echo "Site code is required";
+      //  return;
+    endif;
+
+    $this->load->model("site");
+    $site = $this->site->getSiteByCode($params["sitecode"]);
+    if ($site == null) :
+         //$result["error"] = "Site code is not correct";
+       echo "Site code ".$params["sitecode"]." is not found";
+       return;
+    endif;
+
+    $data = array();
+    foreach ($fingerprints as $fingerprint) :
+    	$data[$fingerprint] = $params[$fingerprint];
+    endforeach;
+
+    $data["member_login"] = $params["member_login"];
+    $data["member_pwd"] = $params["member_pwd"];
+    $data["site_code"] = $params["sitecode"];
+    foreach ($fingerprints as $fingerprint) :
+    	$data[$fingerprint] = $params[$fingerprint];
+    endforeach;
+
+    $this->load->model("member");
+    $memberFound = $this->member->getMemberBySiteCodeAndLogin($data["site_code"], $data["member_login"]);
+    if ($memberFound != null) :
+    	 echo "Login ".$data["member_login"]." is found on server";
+         return;
+    endif;
+    $this->member->createNew($data);
+    echo "success";
 	}
-	
+
 	/**
 	 * Getting the available fingerprint
 	 * @param Object $grFingerprint
 	 * @param Array $result
 	 * @param Array $reference
 	 */
-    private function valid_user_fp($grFingerprint, &$result, $reference=null) {
-    	$arr = array();
-    	if ($reference == null) :
-    	   $reference = $_POST;
-    	endif;
-    	foreach (Iconstant::$MPI_USER_FP as $fingerprint) :
-    	    if (isset($reference[$fingerprint]) && $reference[$fingerprint] != "") :
-        		$ret = $grFingerprint->GrFingerX->IdentifyPrepareBase64($reference[$fingerprint], $grFingerprint->GR_DEFAULT_CONTEXT);
-        		if ($ret != $grFingerprint->GR_OK) :
-        		    $result["error"] = "Fingerprint (".$fingerprint.") template is not correct";
-	            	return FALSE;
-	            else :
-	                array_push($arr, $fingerprint);
-        		endif;
-        	endif;
-    	endforeach;
-        return $arr;
+    private function valid_user_fp($params) {
+			$sdk = GrFingerService::get_instance();
+			$arr = array();
+    	foreach (Iconstant::$MPI_USER_FP as $fingerprint){
+    	  if (isset($params[$fingerprint]) && $params[$fingerprint] != ""){
+        	$ok = $sdk->prepare($params[$fingerprint]);
+      		if (!$ok){
+						$result["error"] = "Fingerprint (".$fingerprint.") template is not correct";
+						return FALSE;
+					}
+      		else
+            $arr[] = $fingerprint;
+	      }
+    	}
+      return $arr;
     }
 }

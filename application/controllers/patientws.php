@@ -25,130 +25,50 @@ class Patientws extends  MpiController {
 
   /**
    * patient identify
+	 *	$params = array("fingerprint_r1"=>"","fingerprint_r2"=>"p/8BHrMAjAABNgGKALYAAXcAmACVAAGCAGcApQABZgByAKEAAXEApgDAAAF3AJIAzAABKwHMAHwAAYIAuADKAAErAcIAngABggCBAMUAASsBWgCkAAFgAMUAtgABfADLAEAAAkEB0QC3AAEwAWQA2gABdwCDAPAAAisBjwA4AAGpAIQAXgABrwBaAEoAARcAuAAKAQFBAX4ALAABAABtAAABASsBXABpAAEtANMACAECQQHkAPsAATsBIwA9AQEGAMIAPQEBXQGTABUAAakAHwA2AQHWALEAGh0ODAMEAwsKAQYKERUYGQgFCQAGBQYBCAwMCQsEFhAUGAIADgkABwUBFRwXEwgOAQQFDBEcCQcPCgECCgUGCBAPFg8QBgEDCgQSEQQCFxIKAxAKCQIFDgUJBQIICRQZDAASExMVDwYIARIVAQsKCwMCDwEbFA4ADwMKAgUABgQGAg8LCAoMAhsYBgwTEQYDDAcCBxABDgcCEhAFAQAPBAsXFBAHDQQXBQQBCQMXDREWCggACAIWBgsCFAgQCAYOABIOAhkIBAAYCAYLBBIXFQ0cFxEZDhQGGxkCFxIcFAUZDBQWEg0FBwcSExwWAQ0VAA0QAxgOCAcLEhgMGBAYBRYFGQUBEgkSBBMLEwARFgMHEQMTFggJDR0WGQYaFhQPGxAZCQINFxwbFgIVABUPFxsIHQ8aDwccDg0dEBoQABwbBhsFGQcdChoKHQYaFB0LGgYdFBobHQMdBBkNHRcdEh0T",
+	 *	 "fingerprint_r3"=>"","fingerprint_r4"=>"","fingerprint_r5"=>"","fingerprint_l1"=>"",
+	 *	 "fingerprint_l2"=>"p/8BHmAAvgABTwBmAM0AAU8ATwCxAAH4AFkAtQABSgCEANYAAVUASAC/AAFEAJoAqwABYAB1ALUAAVUAcACOAAF3AHcAWQABngCfAMYAAmAAnwD1AAFaALMArwABawBYAGwAAbQAiwBVAAGTAKkAUQABjQCDAIsAAXcAbgAGAQFKAG0AagABUgFgAAkBAf4AVwDlAAH+ADUABAEB8gBIAPsAAUQAYgAlAQH4AFQAEgEBRABLAKMAAT4AVgCgAAFEAGYAewABmAA0ADYBAecAiwAnAQFKAKAAAwIAAxkaExECGRgTAQAFAgIaGxIIEAkOBQMSCQgbAxobDQACFRYNEgAHAxkXGAUADAYYFgEDCgYWFBQBBwMFGQEHFxMTFhgRDg8KDAQBBAoAGhoIFxEQGwEFBRoAGRgVBAcBAg0JCBIHGhMUEg4bCQcGBwIGEAcIFAARFBASERYaGx0XFAULBAgNGQgEABMVBxAdEQMICgcYFAcZBQcVFBQECwoCCAQGGRsBGhwYHBcXFhwVGhAJDxAJBggaDR0TEQsbDhANEQQICR0LFgEQDhcVDQ4UBxEVAQoZDREBHRgaEgcbDBAWBRMBBAwABhwWAQYHDBMEHBMIDgoABAUSDwoQFxQTCxAPCwEVBQsMCwYLFBwRDAgLBxMFGgkbDx0WEQodBAEMCA8dFBgFDQ8GDhUCHBQWGRwdBg8MDwwOFRk=",
+	 *	 "fingerprint_l3"=>"","fingerprint_l4"=>"","fingerprint_l5"=>"","gender"=>"1",
+	 *	 "sitecode"=>"","member_fp_name"=>"","member_fp_value"=>"");
    */
   function search() {
-      $this->initLogPath();
-      ILog::info("Patient searching");
-      ILog::info(print_r($_POST, true));
-      $result = array("patients" => array(),
-                      "error" => "");
-
-      try {
-        // detect the fingerprint SDK
-        $grFingerprint = new GrFingerService();
-          if (!$grFingerprint->initialize()) :
-              $result["error"] = "SDK is busy with other service";
-              ILog::error($result["error"]);
-              echo json_encode($result);
-              return;
-          endif;
-
-          if (!$this->accept_webservice($grFingerprint)) :
-            $result["error"] = "The request was rejected. Contact application administrator for more detail";
-            ILog::error($result["error"]);
-            echo json_encode($result);
-              return;
-          endif;
-
-          // get the valid fingerprint from the request
-          $fingerprints = $this->valid_fingerprint($grFingerprint, $result);
-          if($result["error"] != "") :
-             ILog::error($result["error"]);
-               echo json_encode($result);
-               return;
-          endif;
-
-          if (count($fingerprints) <= 0) :
-               $result["error"] = "Could not find fingerprint";
-               ILog::error($result["error"]);
-               echo json_encode($result);
-               return;
-          endif;
-
-          // Prepare for searching according to the most prioritied
-            $ret = $grFingerprint->GrFingerX->IdentifyPrepareBase64($_POST[$fingerprints[0]], $grFingerprint->GR_DEFAULT_CONTEXT);
-            if ($ret != $grFingerprint->GR_OK) :
-              $result["error"] = "Fingerprint (".$fingerprint.") template is not correct";
-              ILog::error($result["error"]);
-              echo json_encode($result);
-              return;
-          endif;
-
-            $gender = "";
-            if (isset($_POST["gender"]) && ($_POST["gender"] == 1 || $_POST["gender"] == 2)) :
-                $gender = $_POST["gender"];
-            endif;
-
-            $this->load->model("patient");
-
-            // get the list of patient with the specific gender
-            $patients = $this->patient->search();
-            $arr_patient = array();
-
-            // start doing the matching
-            //$cpt = 0;
-            //ILog::info("patients: ".$patients->num_rows());
-            foreach ($patients->result_array() as $row) :
-                $score = 0;
-                //$cpt++;
-                //ILog::info("records = ".$cpt );
-                if ($row[$fingerprints[0]] == null || $row[$fingerprints[0]] == "") :
-                    continue;
-                endif;
-
-                $ret = $grFingerprint->GrFingerX->IdentifyBase64($row[$fingerprints[0]],$score,$grFingerprint->GR_DEFAULT_CONTEXT);
-                if( $ret == $grFingerprint->GR_MATCH) :
-                    $patient = array();
-                    $patient["patientid"] = $row["pat_id"];
-                    $patient["gender"] = $row["pat_gender"];
-                    $patient["birthdate"] = $row["pat_dob"];
-                    $patient["sitecode"] = $row["pat_register_site"];
-                    $patient["createdate"] = $row["date_create"];
-                    $patient["age"] = $row["pat_age"];
-                    $patient["visits"] = array();
-                    $visits = $this->patient->getVisitsByPID($patient["patientid"]);
-                    $last_test_date = "";
-                    $last_test_result = "";
-                    foreach($visits->result_array() as $row) :
-                    $visit = array();
-                    $visit["patientid"] = $patient["patientid"];
-                    $visit["visitid"] = $row["visit_id"];
-                    $visit["sitecode"] = $row["site_code"];
-                    $visit["sitename"] = $row["site_name"];
-                    $visit["externalcode"] = $row["ext_code"];
-                    $visit["externalcode2"] = $row["ext_code_2"];
-                    $visit["serviceid"] = $row["serv_id"];
-                    $visit["info"] = $row["info"];
-                    $visit["age"] = $row["pat_age"];
-                    $visit["visitdate"] = $row["visit_date"];
-                    $visit["refer_to_vcct"] = $row["refer_to_vcct"];
-                    $visit["refer_to_oiart"] = $row["refer_to_oiart"];
-                    $visit["refer_to_std"] = $row["refer_to_std"];
-                    if ($visit["serviceid"] == 1) :
-                        if ($last_test_date == "" || strcmp($last_test_date, $visit["visitdate"]) < 0) :
-                            $last_test_date = $visit["visitdate"];
-                            $last_test_result = $visit["info"];
-                        endif;
-                    endif;
-                    array_push($patient["visits"], $visit);
-                endforeach;
-                $patient["lastvcctdate"] = $last_test_date;
-                $patient["lastvcctresult"] = $last_test_result;
-                    array_push($arr_patient, $patient);
-                endif;
-            endforeach;
-            $result["patients"] = $arr_patient;
-
-          // Write the JSON object and send back to client
-          ILog::info("Success");
-          echo json_encode($result);
-          $grFingerprint->finalize();
-    } catch (Exception $e) {
-        $result["error"] = $e->getMessage();
-        ILog::error("error during patient searching: ".$e->getMessage());
-        echo json_encode($result);
-      }
-    }
+    $this->initLogPath();
+    $result = array("patients" => array(), "error" => "");
+		$params = $_POST;
+    $gender = "";
+    if (isset($params["gender"]) && ($params["gender"] == 1 || $params["gender"] == 2))
+        $gender = $params["gender"];
+    $this->load->model("patient");
+    // get the list of patient with the specific gender
+    $patients = $this->patient->search();
+    $arr_patient = array();
+		$sdk = GrFingerService::get_instance();
+		$fingerprints = Patient::fingerprint_params($params);
+		$match = false;
+		foreach ($fingerprints as $key => $value){
+			if(!$value)
+				continue;
+			$ok = $sdk->prepare($value);
+			if (!$ok){
+				$result["error"] = "Fingerprint (".$key.") template is not correct";
+				ILog::error($result["error"]);
+				// echo json_encode($result);
+				return $this->render_json($result);
+			}
+			foreach ($patients->result_array() as $row) {
+				if (!$row[$key])
+						continue;
+				$patient_tmp = $this->search_patient_fingerprint($row, $key);
+				if($patient_tmp)
+					$arr_patient[$row["pat_id"]] = $patient_tmp;
+			}
+		}
+		foreach($arr_patient as $value){
+			$result["patients"][] = $value;
+		}
+    ILog::info("Success");
+		return $this->render_json($result);
+  }
 
     /**
      * Enroll patient
@@ -656,20 +576,22 @@ class Patientws extends  MpiController {
 
     return $result;
   }
-  private function valid_fingerprint($grFingerprint, &$result, $reference=null) {
+  private function valid_fingerprint($grFingerprint=null, &$result, $reference=null) {
       $arr = array();
       if ($reference == null) :
          $reference = $_POST;
       endif;
+			$sdk = GrFingerService::get_instance();
       foreach (Iconstant::$MPI_FINGERPRINT as $fingerprint) :
           if (isset($reference[$fingerprint]) && $reference[$fingerprint] != "") :
-            $ret = $grFingerprint->GrFingerX->IdentifyPrepareBase64($reference[$fingerprint], $grFingerprint->GR_DEFAULT_CONTEXT);
-            if ($ret != $grFingerprint->GR_OK) :
-                $result["error"] = "Fingerprint (".$fingerprint.") template is not correct";
-                return FALSE;
-              else :
-                  array_push($arr, $fingerprint);
-            endif;
+            $ok = $sdk->identify($reference[$fingerprint]);
+            if ($ok)
+							array_push($arr, $fingerprint);
+            else{
+							$result["error"] = "Fingerprint (".$fingerprint.") template is not correct";
+              return FALSE;
+						}
+
           endif;
       endforeach;
         return $arr;
@@ -801,7 +723,7 @@ class Patientws extends  MpiController {
      * @param Object $grFingerprint
      * @param array $reference
      */
-  private function accept_webservice($grFingerprint, $reference=null) {
+  private function accept_webservice($grFingerprint=null, $reference=null) {
       if ($reference == null) :
          $reference = $_POST;
       endif;
@@ -814,28 +736,27 @@ class Patientws extends  MpiController {
       $site_code = !isset($_POST["sitecode"]) || $_POST["sitecode"] == "" ? null : $_POST["sitecode"];
       $fp_name = !isset($_POST["member_fp_name"]) || $_POST["member_fp_name"] == "" ? null : $_POST["member_fp_name"];
       $fp_val = !isset($_POST["member_fp_value"]) || $_POST["member_fp_value"] == "" ? null : $_POST["member_fp_value"];
-
+			log_message("info", "Fingerprint value ". $fp_val);
       if ($site_code == null || $fp_name == null || $fp_val == null) :
-          ILog::info("Detect webservice: missing parameters");
+          log_message("info","Detect webservice: missing parameters");
           return false;
       endif;
       $this->load->model("member");
+			$sdk = GrFingerService::get_instance();
       $members = $this->member->getMemberBySiteCode($site_code);
-      $ret = $grFingerprint->GrFingerX->IdentifyPrepareBase64($fp_val, $grFingerprint->GR_DEFAULT_CONTEXT);
-      if ($ret != $grFingerprint->GR_OK) :
-          ILog::info("Detect webservice: Cannot prepare base 64");
-          return FALSE;
-      endif;
-      foreach($members->result_array() as $row) :
-        $score = 0;
-            if ($row[$fp_name] == null || $row[$fp_name] == "") :
-                continue;
-            endif;
-          $ret = $grFingerprint->GrFingerX->IdentifyBase64($row[$fp_name],$score,$grFingerprint->GR_DEFAULT_CONTEXT);
-          if( $ret == $grFingerprint->GR_MATCH) :
-              return true;
-          endif;
-      endforeach;
+      $ok = $sdk->prepare($fp_val);
+      if ($ok){
+				ILog::info("Detect webservice: Cannot prepare base 64");
+				return FALSE;
+			}
+      foreach($members->result_array() as $row){
+				log_message("info", "Row ".print_r($row, true));
+				if ($row[$fp_name] == null || $row[$fp_name] == "")
+					continue;
+				$matched = $sdk->identify($row[$fp_name]);
+				if( $matched)
+						return true;
+			}
       ILog::info("Detect webservice: Not match fingerprint");
       return false;
     }
@@ -911,4 +832,46 @@ class Patientws extends  MpiController {
         echo json_encode($result);
       }
     }
+
+		function search_patient_fingerprint($patient, $key){
+			$sdk = GrFingerService::get_instance();
+			$ok = $sdk->identify($patient[$key]);
+			$patient_result = array();
+			if(!$ok)
+				return null;
+			$patient_result["patientid"] = $patient["pat_id"];
+			$patient_result["gender"] = $patient["pat_gender"];
+			$patient_result["birthdate"] = $patient["pat_dob"];
+			$patient_result["sitecode"] = $patient["pat_register_site"];
+			$patient_result["createdate"] = $patient["date_create"];
+			$patient_result["age"] = $patient["pat_age"];
+			$patient_result["visits"] = array();
+			$visits = $this->patient->getVisitsByPID($patient_result["patientid"]);
+			$last_test_date = "";
+			$last_test_result = "";
+			foreach($visits->result_array() as $patient){
+				$visit = array();
+				$visit["patientid"] = $patient_result["patientid"];
+				$visit["visitid"] = $patient["visit_id"];
+				$visit["sitecode"] = $patient["site_code"];
+				$visit["sitename"] = $patient["site_name"];
+				$visit["externalcode"] = $patient["ext_code"];
+				$visit["externalcode2"] = $patient["ext_code_2"];
+				$visit["serviceid"] = $patient["serv_id"];
+				$visit["info"] = $patient["info"];
+				$visit["age"] = $patient["pat_age"];
+				$visit["visitdate"] = $patient["visit_date"];
+				$visit["refer_to_vcct"] = $patient["refer_to_vcct"];
+				$visit["refer_to_oiart"] = $patient["refer_to_oiart"];
+				$visit["refer_to_std"] = $patient["refer_to_std"];
+				if ($visit["serviceid"] == 1 && ($last_test_date == "" || strcmp($last_test_date, $visit["visitdate"]) < 0)){
+					$last_test_date = $visit["visitdate"];
+					$last_test_result = $visit["info"];
+				}
+				$patient_result["visits"][] = $visit;
+			}
+			$patient_result["lastvcctdate"] = $last_test_date;
+			$patient_result["lastvcctresult"] = $last_test_result;
+			return $patient_result;
+		}
 }
