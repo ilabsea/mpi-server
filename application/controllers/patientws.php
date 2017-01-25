@@ -9,7 +9,7 @@ class Patientws extends  MpiController {
 		return true;
 	}
 
-	function allow_log_response(){
+	function allow_log_ui_response(){
 		return false;
 	}
   /**
@@ -27,6 +27,23 @@ class Patientws extends  MpiController {
     // $grFingerprint->initialize(true);
   }
 
+	function before_action(){
+		log_message("info", "Hello");
+		parent::before_action();
+
+		$this->load->model("site");
+		$this->load->model("member");
+		$this->load->model("patient");
+		$this->require_member_fingerprint();
+	}
+
+	private function require_member_fingerprint(){
+		if (!$this->accept_webservice()){
+			$result["error"] = "The request was rejected. Contact application administrator for more detail";
+			return $this->render_json($result);
+		}
+	}
+
   /**
    * patient identify
 	 *	$params = array("fingerprint_r1"=>"","fingerprint_r2"=>"p/8BHrMAjAABNgGKALYAAXcAmACVAAGCAGcApQABZgByAKEAAXEApgDAAAF3AJIAzAABKwHMAHwAAYIAuADKAAErAcIAngABggCBAMUAASsBWgCkAAFgAMUAtgABfADLAEAAAkEB0QC3AAEwAWQA2gABdwCDAPAAAisBjwA4AAGpAIQAXgABrwBaAEoAARcAuAAKAQFBAX4ALAABAABtAAABASsBXABpAAEtANMACAECQQHkAPsAATsBIwA9AQEGAMIAPQEBXQGTABUAAakAHwA2AQHWALEAGh0ODAMEAwsKAQYKERUYGQgFCQAGBQYBCAwMCQsEFhAUGAIADgkABwUBFRwXEwgOAQQFDBEcCQcPCgECCgUGCBAPFg8QBgEDCgQSEQQCFxIKAxAKCQIFDgUJBQIICRQZDAASExMVDwYIARIVAQsKCwMCDwEbFA4ADwMKAgUABgQGAg8LCAoMAhsYBgwTEQYDDAcCBxABDgcCEhAFAQAPBAsXFBAHDQQXBQQBCQMXDREWCggACAIWBgsCFAgQCAYOABIOAhkIBAAYCAYLBBIXFQ0cFxEZDhQGGxkCFxIcFAUZDBQWEg0FBwcSExwWAQ0VAA0QAxgOCAcLEhgMGBAYBRYFGQUBEgkSBBMLEwARFgMHEQMTFggJDR0WGQYaFhQPGxAZCQINFxwbFgIVABUPFxsIHQ8aDwccDg0dEBoQABwbBhsFGQcdChoKHQYaFB0LGgYdFBobHQMdBBkNHRcdEh0T",
@@ -36,7 +53,6 @@ class Patientws extends  MpiController {
 	 *	 "sitecode"=>"","member_fp_name"=>"","member_fp_value"=>"");
    */
   function search() {
-    $this->initLogPath();
     $result = array("patients" => array(), "error" => "");
 		$params = $_POST;
     $gender = "";
@@ -74,95 +90,57 @@ class Patientws extends  MpiController {
 		return $this->render_json($result);
   }
 
-    /**
-     * Enroll patient
-     */
+	//  $_POST = array(
+	// 		 "fingerprint_r1"=>"",
+	// 		 "fingerprint_r2"=>"p/8BHWIAxgABYABJALcAAVUA3ACOAAF8AKkAsgABcQBuAOMAAR8BUQDfAAFgAHwALAEBRwFyAOsAAXEAcwAIAQE7AY0AdAABtABxAHwAATMAqAAxAAFMAaEAJgEBNgFfAIMAAUQAZAB7AAHyAKMAXQABTAF1AHMAAeEAbgBkAAEtAMsAIwEBggCqADMBAYIAxgAoAQE2AVkANgEBggC4AAwBATYBgwCWAAFPAF8AGgEBhwCSAJkAAXcAkQA4AQE7AdoAMgABhwCBACUAAQAAowAUEg0OBwQKEAoOGRcTDBARDhANCgkQChEaDBoGDhEaEw0QGAgIBwQFCgkAARUYExQFABIWBAAUFhcKCQ8GGA0RAxkMFgkRFwkHBRUGExIGDAYIGQkIBBQMFxAHABMWFw0LHAUBFw4OCQwSDwsZChMGAxcZEA0JGwsYBxAPFQgRDwgFFxEaFAwIGQ4ZDQENGhUYBBoIBAEAFxoYCg8aFhgFAwIZDxoSGREXDwYHBwEAGQEOERwPHAANARcMGAMJBhYIABYIDxsTCAEKCQsAAwYUBgQVDBkCDAcCDxELBAMWBw0PAwoQHBUHARkTGAcDBhIJHBUTBBkQCwIJAw8VBBUFChwGBRQIFwIbHBYDAREOHBIIAhsKCwUDDRwOCwkbGAEIAxQHEgcCEAILFQAWBRccEgMRGxAbFhkZGxUBFgIHAhICARwUAg==",
+	// 		 "fingerprint_r3"=>"",
+	// 		 "fingerprint_r4"=>"",
+	// 		 "fingerprint_r5"=>"",
+	// 		 "fingerprint_l1"=>"",
+	// 		 "fingerprint_l2"=>"p/8BHswAAAEBSgDTANkAAVUAuQAFAQFEAOUA1gACWgC5APsAAfgAqgDjAAHyAMMA7AABSgDgAN4AAlUA1QArAQJEANcAFAEBAwHZAOgAAgMBsQDOAAJKALoA1wACSgC7ALwAAWAAnAC+AAE5AJEAtwAB7QCAAPkAAe0AbgAXAQHnAHgALAEB5wBgABABATkAagABAQHtAIQACAEBOQDPADwBAfgAjQATAQE5APQAhgABggC0ALMAATkAGgA3AQF3AEoAPwEBpACXAIcAAdYAsQB7AAG6ALQABwMCBA0ZCgcODwwLFxUHARETFRAKARMUAQMWCAQGAAQFDAIACw0GCgoDAAYRFAULEhEICQYMCQAUEAYBAQwLDg4ZCxkACgYFDA0RFQIGFRQEBRwdFxARFw4NBgcSFwkCBgsPGREQCgwEDAELDBkSEwIFExUEChIVAQ0TEAkEFxQHDAwOCw8ABwUOAAEGAxYJDQ8FAQQBAgoFDQwDCAAJCgAFEhQXEwkGFwICDAgCEAUPHBsaARkEBwMNBg0FGQADFwQbEgcNBwsFDxsTDA8SEBUCFQUZHAMLGxEJBxUEDhwZHQgEFwUEEBYCCQEDGRYABg4JAw0cAgMQCxAODR0XAAgGCAoYHRAPDx0VBhYEGxQOHRQFCxwSAggXEQIVDhkYFhcNGBEEGxUaExsXAxgWBhUPCx0UDhQPFgoIAwwcEBkWEhsQARgaEQcYDB0cGBoSGhQLGBYRFBkaFRoQGhcUHBsWExwaDxoc",
+	// 		 "fingerprint_l3"=>"",
+	// 		 "fingerprint_l4"=>"",
+	// 		 "fingerprint_l5"=>"",
+	// 		 "gender"=>"1",
+	// 		 "sitecode"=>"0206",
+	// 		 "member_fp_name"=>"member_fp_l1",
+	// 		 "member_fp_value"=>"p/8BHooABQEBMwDJACkBAU8AdAAaAQI5AHgACAEBMwB/AP4AAecAvgAgAQFPAFkAEAEB7QBjAPsAAecAnAAJAQI5AG4ACgEB5wBnABEBATkAcwDuAAItAOgAFQEBFAHpACABAVoA7gAPAQFmAFYAHQEB7QBNAMQAATMAkwDrAAEtAFsAsgAB4QA4AB8BAfgAzgCzAAFjAe0A8AABdwDrAMEAAY0AwQDbAAGeAJcAiAABywBVADMBAfIAswAKAQFEANQA+AABawA1ABgBAUQAywCtAAGvAKgAFB0MDhMcCQMKCQ0MAwQABA8GAQUKBgIKAgkNDggAAgMDAAoDCQcECwkEDwoHCxkPBgkKBxoIEBIGBwUaAwcDCxsVCQsAEQQHCQAEEQIGDwICBAIAEw8OFQoEDwkIEQgECxEWFAYDAQ0ACw8cDBsbFw4bAgcZBhkTCAMPBxMGAQwcBgwVCgAKCxobGQoWHQEaAxEZAhoABQgZHBcUBgsFDAUNAggaEQEODRsJCAUbFx0VFg0VCREZCREXFRcXFhMKGhcBGxwKBQ4aBAwaHAcZAwEIAhETBwsQEwkNGhwJCBsFAA4aCBcHEBMCGxYCHBoVHRgCGgsSGxEBFQUVFRQFERsUBRcOFxQYDBcSGAcSBQIVHRsdCRAEEAYQDhYNFxESERADEBEUBBIRHQwWAQIcEAkSGhQDEhoWFxgQGBodERYRGBYYGQULGBIdAgwBDxkB"
+	//  );
   function enroll() {
-      $this->initLogPath();
-      ILog::info("Patient registration");
-      ILog::info(print_r($_POST, true));
-      $result = array("patientid" => "",
-                      "error" => "");
-      try {
-        // detect the fingerprint SDK
-        $grFingerprint = new GrFingerService();
-          if (!$grFingerprint->initialize()) :
-              $result["error"] = "SDK is busy with other service";
-              echo json_encode($result);
-              return;
-          endif;
-
-          if (!$this->accept_webservice($grFingerprint)) :
-            $result["error"] = "The request was rejected. Contact application administrator for more detail";
-            echo json_encode($result);
-              return;
-          endif;
-
-          // get the valid fingerprint from the request
-          $fingerprints = $this->valid_fingerprint($grFingerprint, $result);
-        if($result["error"] != "") :
-               echo json_encode($result);
-               return;
-        endif;
-
-        if (count($fingerprints) <= 0) :
-               $result["error"] = "Could not find fingerprint";
-               echo json_encode($result);
-               return;
-          endif;
-
-          if (count($fingerprints) <= 1) :
-               $result["error"] = "At least 2 fingerprints are required for registration";
-               echo json_encode($result);
-               return;
-          endif;
-
-          $data = array();
-          foreach ($fingerprints as $fingerprint) :
-            $data[$fingerprint] = $_POST[$fingerprint];
-          endforeach;
-
-          if (isset($_POST["gender"])) :
-              $data["gender"] = $_POST["gender"];
-          endif;
-
-          if (isset($_POST["age"]) && is_nint($_POST["age"])) :
-              $data["age"] = $_POST["age"];
-          endif;
-
-          if (isset($_POST["birthdate"])) :
-              $data["birthdate"] = $_POST["birthdate"];
-          endif;
-
-          if (isset($_POST["sitecode"]) && $_POST["sitecode"] != "") :
-              $data["sitecode"] = $_POST["sitecode"];
-              $this->load->model("site");
-              if ($this->site->getSiteByCode($data["sitecode"]) == null) :
-                   $result["error"] = "Side code ".$data["sitecode"]." is not available";
-                 echo json_encode($result);
-                 return;
-              endif;
-          else :
-            $result["error"] = "Side code is required";
-            echo json_encode($result);
-            return;
-          endif;
-
-          $this->load->model("patient");
-
-
-          // creating new patient and return the new patient id
-          $pat_id = $this->patient->newPatientFingerprint($data);
-          ILog::info("Patient registered with id: ".$pat_id);
-          $result["patientid"] = $pat_id;
-          echo json_encode($result);
-          $grFingerprint->finalize();
-      } catch (Exception $e) {
-        $result["error"] = $e->getMessage();
-        ILog::error("error during enrollment: ".$e->getMessage());
-        echo json_encode($result);
-      }
+    $result = array("patientid" => "", "error" => "");
+		$params = $_POST;
+		log_message("info", "Params".print_r($params, true));
+		$filter_params = AppHelper::slice_array($params, array("gender","age", "sitecode", "birthdate"));
+		$fingerprints = $this->patient_fingerprint_names($params);
+    if (count($fingerprints) <= 0){
+      $result["error"] = "Could not find fingerprint";
+      return $this->render_json($result);
     }
+
+    if (count($fingerprints) <= 1){
+      $result["error"] = "At least 2 fingerprints are required for registration";
+      return $this->render_json($result);
+    }
+
+    $data = array();
+    foreach ($fingerprints as $fingerprint)
+      $filter_params[$fingerprint] = $params[$fingerprint];
+
+    if ($filter_params["sitecode"] && $this->site->getSiteByCode($filter_params["sitecode"]) == null){
+      $result["error"] = "Side code ".$data["sitecode"]." is not available";
+      return $this->render_json($result);
+		}
+    else if($filter_params["sitecode"] == ""){
+			$result["error"] = "Side code is required";
+      return $this->render_json($result);
+		}
+
+    $this->load->model("patient");
+    // creating new patient and return the new patient id
+    $pat_id = $this->patient->newPatientFingerprint($filter_params);
+    $result["patientid"] = $pat_id;
+    return $this->render_json($result);
+  }
 
   /**
      * Enroll patient
@@ -327,24 +305,7 @@ class Patientws extends  MpiController {
           $visitid = $this->patient->newVisit($data);
           $return["visitid"] = $visitid;
 
-          /*
-          if ($data["serv_id"] == 1) :  // VCCT Service
-            if (($patient["fingerprint_r1"] == null || $patient["fingerprint_r1"] == "")
-              && ($patient["fingerprint_r2"] == null || $patient["fingerprint_r2"] == "")
-              && ($patient["fingerprint_r3"] == null || $patient["fingerprint_r3"] == "")
-              && ($patient["fingerprint_r4"] == null || $patient["fingerprint_r4"] == "")
-              && ($patient["fingerprint_r5"] == null || $patient["fingerprint_r5"] == "")
-              && ($patient["fingerprint_l1"] == null || $patient["fingerprint_l1"] == "")
-              && ($patient["fingerprint_l2"] == null || $patient["fingerprint_l2"] == "")
-              && ($patient["fingerprint_l3"] == null || $patient["fingerprint_l3"] == "")
-              && ($patient["fingerprint_l4"] == null || $patient["fingerprint_l4"] == "")
-              && ($patient["fingerprint_l5"] == null || $patient["fingerprint_l5"] == "")
-              ) :
 
-              $this->patient->manageVcctNoFpFromVcct($data);
-            endif;
-          endif;
-          */
           if ($data["serv_id"] == 2) : // OI/ART Service
             if (isset($_POST["vcctsite"]) && $_POST["vcctsite"] != "" && isset($_POST["vcctnumber"]) && $_POST["vcctnumber"] != "") :
               $vcct_info = array();
@@ -382,12 +343,12 @@ class Patientws extends  MpiController {
 
   function synchronize() {
 		$params = $_POST;
-     $params = array(
-			 "patient"=>"{\"patientid\":\"08f0fa26-1223-472b-8de5-d40d80fead49\",\"fingerprint_r1\":\"\",\"fingerprint_r2\":\"\",\"fingerprint_r3\":\"\",\"fingerprint_r4\":\"p/8BHpMADQEBJQHIAK8AATYBygDtAAErAdUAvwABggCDAMAAAWsA4wCeAAGHAKwAWAABngB4AMIAAWYA1wDWAAF8AGsAwAABWgCbAEsAAV0BwwAvAQI2AbQA/QACKwGZANQAAXcAfAAfAQElAaIA7QABKwGnALIAAXwArgDrAAF3AJsAfQABpACQAOQAASUBtgDhAAF3ALMANAABpADlANkAATABpwAYAAFYAcMAOAECRwHfAC4BATYBmQDpAAJxAOgAXgABRwGSAKkAAYIAbgD6AAFxAK0AGAsPGhoTBwQPEREUBwkWCBMNDBEPExoNBgoDAREaCAMPFBAcAhQECQwPAggMAg8NBBwLGQwUAhEOAA0EGBkVFxoUFgMRExENAQUUDRABChUMGgIWFAgADwAaAwUHHAAMDRAGFQ0HEwQTFAQQAg8dEw4dEgYAEwgBEwcAHQARDBMNHAkcHBIRCB0aFAMCAxoEFBYDEAwNFBACGhIKBxANCRoHFgEMCBMJChcLDBQBEBIBHB0PAg0TEA8EABQREAgFHQ0ADR0HERYdCREDCwAWBRMcDQEbBg4aFAQYDAwWGgkJEA4THQQQBQ4PGAAGFwUbGQwLAg4MARIZAhsVCxEEEg4RCw4LDxgCGA4SFQcSGwoFEhgRAAcUBQkSGA8ZABIbGREcBhkWGRQBGxkIAxIFBh0cEAYcChsXAxsZDhIXFBIQCgEKBRUWEhwVFhsBFQkKHBcFFxAXCRUJFw==\",\"fingerprint_r5\":\"\",\"fingerprint_l1\":\"\",\"fingerprint_l2\":\"\",\"fingerprint_l3\":\"\",\"fingerprint_l4\":\"p\/8BI1EAXAABMwDXAGkAARQBXAB9AAE5AHMAPAABHQCOANwAATkAsKAFgAlQAC7QBPAJcAAe0ArwAfAAGeAMIAlQABTwC6AFwAAXEApgDDAALyAHoAnQACOQCEAKoAATkAtACgAAFKAHgAiwACOQBmAKcAAeEAnQAvAAFjAZMAOAABtACbAKIAAj4A5ACmAAJaAKEAngAB+ACpAIoAAU8AYQDoAAEtAI0ADAEBOQDqAHwAAWAAigBIAAK6AD0AnAABPgBUANAAAS0AfQADMAsgAB8gBDAMwAAeEANQDBAAHtAC0A3wAB4QCeAFAAAkwBxAATFQcGEhEgHgsFDQwcHxoSHyAOCQwPDhUbByIaFRYQDB0YEAYRCA0THhsGAg4WEw4iEhoDFxwJFhkBBQ4QBxsGExYHAiEfDRAKIg0VGhEPAiEgHx4BCgMSDQ8QDxMMIhEcIAUVFQkGDwQLCxMCAAwGBRMLFQsOFAkSCCAbFQwQkXHxMPFBkQGwsNIRwMBwcPEAIbAgwCAxEhHhweFQ8cEAkZFwQeBgADIgMfGxQOGAQNBiAHDRYJAQ8WFgoNDgQFBQ0FFgwWHxAEDQoaIggeEBATBRQXIQoSCwkfBwoRGgggECAGHBsGABYBGBccBwsWGQoJChcgBBwWIgcABBMdFw0CABoPABwNFAEKCAEiDhkEFRQWFxAOARYZBBAeAhQVGwAdQPGiEbAgMPIgIaFw0WGh8NABIVARgLFwsKAyEHAiIhEA8KFRkBERMiHAsYHAEIARIFGQ8SHRwAERgFHgAWEQYaIQQYDRgfHQsdHx0hGCEWCBgTGQgdBRsaCQgYFA==\",\"fingerprint_l5\":\"\",\"gender\":1,\"age\":\"\",\"sitecode\":\"\",\"datebirth\":\"\",\"cate\":\"2017-01-18 14:50:14\",\"updatedate\":\"2017-01-18 14:50:14\",\"visits\":[{\"visitid\":\"ba336822-026e-4d5d-a380-7d0bda89cda7\",\"patientid\":\"KH002100003441\",\"age\":80,\"serviceid\":2,\"sitecode\":\"0202\",\"visitdate\":\"2017-01-25 00:00:00\",\"externalcode\":\"009999\",\"externalcode2\":\"\",\"info\":\"Followup Visit\",\"syn\":false,\"servicename\":\"OI_ART\",\"createdate\":\"2017-01-25 15:38:12\",\"updatedate\":\"2017-01-25 15:38:12\",\"vcctsite\":\"\",\"vcctnumber\":\"\",\"refer_to_vcct\":0,\"refer_to_oiart\":0,\"refer_to_std\":0}]}",
-			 "sitecode"=>"V02-04",
-			 "member_fp_name"=>"",
-			 "member_fp_value"=>""
-		 );
+    //  $params = array(
+		// 	 "patient"=>"{\"patientid\":\"08f0fa26-1223-472b-8de5-d40d80fead49\",\"fingerprint_r1\":\"\",\"fingerprint_r2\":\"\",\"fingerprint_r3\":\"\",\"fingerprint_r4\":\"p/8BHpMADQEBJQHIAK8AATYBygDtAAErAdUAvwABggCDAMAAAWsA4wCeAAGHAKwAWAABngB4AMIAAWYA1wDWAAF8AGsAwAABWgCbAEsAAV0BwwAvAQI2AbQA/QACKwGZANQAAXcAfAAfAQElAaIA7QABKwGnALIAAXwArgDrAAF3AJsAfQABpACQAOQAASUBtgDhAAF3ALMANAABpADlANkAATABpwAYAAFYAcMAOAECRwHfAC4BATYBmQDpAAJxAOgAXgABRwGSAKkAAYIAbgD6AAFxAK0AGAsPGhoTBwQPEREUBwkWCBMNDBEPExoNBgoDAREaCAMPFBAcAhQECQwPAggMAg8NBBwLGQwUAhEOAA0EGBkVFxoUFgMRExENAQUUDRABChUMGgIWFAgADwAaAwUHHAAMDRAGFQ0HEwQTFAQQAg8dEw4dEgYAEwgBEwcAHQARDBMNHAkcHBIRCB0aFAMCAxoEFBYDEAwNFBACGhIKBxANCRoHFgEMCBMJChcLDBQBEBIBHB0PAg0TEA8EABQREAgFHQ0ADR0HERYdCREDCwAWBRMcDQEbBg4aFAQYDAwWGgkJEA4THQQQBQ4PGAAGFwUbGQwLAg4MARIZAhsVCxEEEg4RCw4LDxgCGA4SFQcSGwoFEhgRAAcUBQkSGA8ZABIbGREcBhkWGRQBGxkIAxIFBh0cEAYcChsXAxsZDhIXFBIQCgEKBRUWEhwVFhsBFQkKHBcFFxAXCRUJFw==\",\"fingerprint_r5\":\"\",\"fingerprint_l1\":\"\",\"fingerprint_l2\":\"\",\"fingerprint_l3\":\"\",\"fingerprint_l4\":\"p/8BI1EAXAABMwDXAGkAARQBXAB9AAE5AHMAPAABHQCOANwAATkAsKAFgAlQAC7QBPAJcAAe0ArwAfAAGeAMIAlQABTwC6AFwAAXEApgDDAALyAHoAnQACOQCEAKoAATkAtACgAAFKAHgAiwACOQBmAKcAAeEAnQAvAAFjAZMAOAABtACbAKIAAj4A5ACmAAJaAKEAngAB+ACpAIoAAU8AYQDoAAEtAI0ADAEBOQDqAHwAAWAAigBIAAK6AD0AnAABPgBUANAAAS0AfQADMAsgAB8gBDAMwAAeEANQDBAAHtAC0A3wAB4QCeAFAAAkwBxAATFQcGEhEgHgsFDQwcHxoSHyAOCQwPDhUbByIaFRYQDB0YEAYRCA0THhsGAg4WEw4iEhoDFxwJFhkBBQ4QBxsGExYHAiEfDRAKIg0VGhEPAiEgHx4BCgMSDQ8QDxMMIhEcIAUVFQkGDwQLCxMCAAwGBRMLFQsOFAkSCCAbFQwQkXHxMPFBkQGwsNIRwMBwcPEAIbAgwCAxEhHhweFQ8cEAkZFwQeBgADIgMfGxQOGAQNBiAHDRYJAQ8WFgoNDgQFBQ0FFgwWHxAEDQoaIggeEBATBRQXIQoSCwkfBwoRGgggECAGHBsGABYBGBccBwsWGQoJChcgBBwWIgcABBMdFw0CABoPABwNFAEKCAEiDhkEFRQWFxAOARYZBBAeAhQVGwAdQPGiEbAgMPIgIaFw0WGh8NABIVARgLFwsKAyEHAiIhEA8KFRkBERMiHAsYHAEIARIFGQ8SHRwAERgFHgAWEQYaIQQYDRgfHQsdHx0hGCEWCBgTGQgdBRsaCQgYFA==\",\"fingerprint_l5\":\"\",\"gender\":1,\"age\":\"\",\"sitecode\":\"\",\"datebirth\":\"\",\"cate\":\"2017-01-18 14:50:14\",\"updatedate\":\"2017-01-18 14:50:14\",\"visits\":[{\"visitid\":\"ba336822-026e-4d5d-a380-7d0bda89cda7\",\"patientid\":\"KH002100003441\",\"age\":80,\"serviceid\":2,\"sitecode\":\"0202\",\"visitdate\":\"2017-01-25 00:00:00\",\"externalcode\":\"009999\",\"externalcode2\":\"\",\"info\":\"Followup Visit\",\"syn\":false,\"servicename\":\"OI_ART\",\"createdate\":\"2017-01-25 15:38:12\",\"updatedate\":\"2017-01-25 15:38:12\",\"vcctsite\":\"\",\"vcctnumber\":\"\",\"refer_to_vcct\":0,\"refer_to_oiart\":0,\"refer_to_std\":0}]}",
+		// 	 "sitecode"=>"V02-04",
+		// 	 "member_fp_name"=>"",
+		// 	 "member_fp_value"=>""
+		//  );
 
     $patient_array = array("patients" => array(), "error" => "");
     $sdk = GrFingerService::get_instance();
@@ -602,48 +563,45 @@ class Patientws extends  MpiController {
       echo $this->unit->report();
     }
 
-  /**
-     * Detect if the finger is ok with the site
-     * @param Object $grFingerprint
-     * @param array $reference
-     */
+	// $_POST = array(
+	// 		"fingerprint_r1"=>"",
+	// 		"fingerprint_r2"=>"p/8BHWIAxgABYABJALcAAVUA3ACOAAF8AKkAsgABcQBuAOMAAR8BUQDfAAFgAHwALAEBRwFyAOsAAXEAcwAIAQE7AY0AdAABtABxAHwAATMAqAAxAAFMAaEAJgEBNgFfAIMAAUQAZAB7AAHyAKMAXQABTAF1AHMAAeEAbgBkAAEtAMsAIwEBggCqADMBAYIAxgAoAQE2AVkANgEBggC4AAwBATYBgwCWAAFPAF8AGgEBhwCSAJkAAXcAkQA4AQE7AdoAMgABhwCBACUAAQAAowAUEg0OBwQKEAoOGRcTDBARDhANCgkQChEaDBoGDhEaEw0QGAgIBwQFCgkAARUYExQFABIWBAAUFhcKCQ8GGA0RAxkMFgkRFwkHBRUGExIGDAYIGQkIBBQMFxAHABMWFw0LHAUBFw4OCQwSDwsZChMGAxcZEA0JGwsYBxAPFQgRDwgFFxEaFAwIGQ4ZDQENGhUYBBoIBAEAFxoYCg8aFhgFAwIZDxoSGREXDwYHBwEAGQEOERwPHAANARcMGAMJBhYIABYIDxsTCAEKCQsAAwYUBgQVDBkCDAcCDxELBAMWBw0PAwoQHBUHARkTGAcDBhIJHBUTBBkQCwIJAw8VBBUFChwGBRQIFwIbHBYDAREOHBIIAhsKCwUDDRwOCwkbGAEIAxQHEgcCEAILFQAWBRccEgMRGxAbFhkZGxUBFgIHAhICARwUAg==",
+	// 		"fingerprint_r3"=>"",
+	// 		"fingerprint_r4"=>"",
+	// 		"fingerprint_r5"=>"",
+	// 		"fingerprint_l1"=>"",
+	// 		"fingerprint_l2"=>"p/8BHswAAAEBSgDTANkAAVUAuQAFAQFEAOUA1gACWgC5APsAAfgAqgDjAAHyAMMA7AABSgDgAN4AAlUA1QArAQJEANcAFAEBAwHZAOgAAgMBsQDOAAJKALoA1wACSgC7ALwAAWAAnAC+AAE5AJEAtwAB7QCAAPkAAe0AbgAXAQHnAHgALAEB5wBgABABATkAagABAQHtAIQACAEBOQDPADwBAfgAjQATAQE5APQAhgABggC0ALMAATkAGgA3AQF3AEoAPwEBpACXAIcAAdYAsQB7AAG6ALQABwMCBA0ZCgcODwwLFxUHARETFRAKARMUAQMWCAQGAAQFDAIACw0GCgoDAAYRFAULEhEICQYMCQAUEAYBAQwLDg4ZCxkACgYFDA0RFQIGFRQEBRwdFxARFw4NBgcSFwkCBgsPGREQCgwEDAELDBkSEwIFExUEChIVAQ0TEAkEFxQHDAwOCw8ABwUOAAEGAxYJDQ8FAQQBAgoFDQwDCAAJCgAFEhQXEwkGFwICDAgCEAUPHBsaARkEBwMNBg0FGQADFwQbEgcNBwsFDxsTDA8SEBUCFQUZHAMLGxEJBxUEDhwZHQgEFwUEEBYCCQEDGRYABg4JAw0cAgMQCxAODR0XAAgGCAoYHRAPDx0VBhYEGxQOHRQFCxwSAggXEQIVDhkYFhcNGBEEGxUaExsXAxgWBhUPCx0UDhQPFgoIAwwcEBkWEhsQARgaEQcYDB0cGBoSGhQLGBYRFBkaFRoQGhcUHBsWExwaDxoc",
+	// 		"fingerprint_l3"=>"",
+	// 		"fingerprint_l4"=>"",
+	// 		"fingerprint_l5"=>"",
+	// 		"gender"=>"1",
+	// 		"sitecode"=>"0206",
+	// 		"member_fp_name"=>"member_fp_r2",
+	// 		"member_fp_value"=>"p/8BG48AkAABcQCvAI8AASsBXgCjAAFaAMkAfQABdwC4AKIAAWsAewC2AAFmAGIAOwABEQCEAFYAAaQAUACeAAFVAJMAwAABZgBfAF4AASIApADVAAEaAYoAzwABZgDUAEAAAjYBfwDUAAEaAY0A4wABGgG1AL8AAWsAwQDDAAEfAZYAHwEBMAFpAPYAARoBagCeAAFgAHwAiAABdwCYADAAAZ4AcACGAAJmAHAAfQABtACIACIAAV0BwgAVAQErAZkAFxgVFw4MERACFAIIFRgMCQ8MFhkEAQ8OABUUFwkFCBQLDAsJDwsOCQsQFBUFFBAEDAUOBQEDAAEAFwsREQQCFwkQFBgYCgUCCgYAGA8JCw4KBxQAAhUIFxMOEw8EAwIYBQAHBhcKBxYYBxIaBhkEAAgYEQkMEAUVCQQPBRABCQAIFQUXBQgBFRUHFQoTDAsFBxkXBwIACRQPEBEBBhYLBAwRCQEOEA4UDgIABxAAEg8PEQADEhMDDQwCDRYMAAEXBQQUCggAEwUIChgGEwsOERMJAgoQAxEDGgsBBw4IChYKGRoPEgsXBhIOFQMPAgMHEgwVBg0ZGhEHDRMCGBYBDRoQCAcaDBMIAxYVFgQHGg4YGRoTEgkLAwAGEhAIBgQNFRkXGQANFQ0aBBENGgMaBxoN"
+	// );
+
   private function accept_webservice($grFingerprint=null, $reference=null) {
-      if ($reference == null) :
-         $reference = $_POST;
-      endif;
-
-      /*if (true) :
-         return true;
-      endif;
-      */
-
-      $site_code = !isset($_POST["sitecode"]) || $_POST["sitecode"] == "" ? null : $_POST["sitecode"];
-      $fp_name = !isset($_POST["member_fp_name"]) || $_POST["member_fp_name"] == "" ? null : $_POST["member_fp_name"];
-      $fp_val = !isset($_POST["member_fp_value"]) || $_POST["member_fp_value"] == "" ? null : $_POST["member_fp_value"];
-			log_message("info", "Fingerprint value ". $fp_val);
-      if ($site_code == null || $fp_name == null || $fp_val == null) :
-          log_message("info","Detect webservice: missing parameters");
-          return false;
-      endif;
-      $this->load->model("member");
-			$sdk = GrFingerService::get_instance();
-      $members = $this->member->getMemberBySiteCode($site_code);
-      $ok = $sdk->prepare($fp_val);
-      if ($ok){
-				ILog::info("Detect webservice: Cannot prepare base 64");
-				return FALSE;
-			}
-      foreach($members->result_array() as $row){
-				log_message("info", "Row ".print_r($row, true));
-				if ($row[$fp_name] == null || $row[$fp_name] == "")
-					continue;
-				$matched = $sdk->identify($row[$fp_name]);
-				if( $matched)
-						return true;
-			}
-      ILog::info("Detect webservice: Not match fingerprint");
-      return false;
+		$params = AppHelper::slice_array($_POST, array("sitecode","member_fp_name","member_fp_value"));
+    if (!$params["sitecode"] || !$params["member_fp_name"] || !$params["member_fp_value"]){
+        log_message("info","Detect webservice: missing parameters");
+        return false;
     }
+		$sdk = GrFingerService::get_instance();
+    $members = $this->member->getMemberBySiteCode($params["sitecode"]);
+    $ok = $sdk->prepare($params["member_fp_value"]);
+    if (!$ok)
+			return FALSE;
+    foreach($members->result_array() as $row){
+			log_message("info", "Row ".print_r($row, true));
+			$member_fingerprint_value = $row[$params["member_fp_name"]];
+			if (!$member_fingerprint_value)
+				continue;
+			$matched = $sdk->identify($member_fingerprint_value);
+			if( $matched)
+				return true;
+		}
+    return false;
+  }
 
     /**
      * Init log path
@@ -717,7 +675,7 @@ class Patientws extends  MpiController {
       }
     }
 
-		function search_patient_fingerprint($patient, $key){
+		private function search_patient_fingerprint($patient, $key){
 			$sdk = GrFingerService::get_instance();
 			$ok = $sdk->identify($patient[$key]);
 			$patient_result = array();
@@ -759,7 +717,7 @@ class Patientws extends  MpiController {
 			return $patient_result;
 		}
 
-		function sync_insert_visits($visits, $patient_id){
+		private function sync_insert_visits($visits, $patient_id){
 			foreach($visits as $visit){
 				$data_visit = array();
 				$data_visit["pat_id"] =$patient_id;
@@ -788,7 +746,7 @@ class Patientws extends  MpiController {
 			}
 		}
 
-		function sync_return_visits($patient_id){
+		private function sync_return_visits($patient_id){
 			$visits = $this->patient->getVisitsByPID($patient_id);
 			$result = array();
 			foreach($visits->result_array() as $row){
@@ -812,7 +770,7 @@ class Patientws extends  MpiController {
 			return $result;
 		}
 
-		function sync_search_patient_by_fingerprint($fingerprints, $patient_params){
+		private function sync_search_patient_by_fingerprint($fingerprints, $patient_params){
 			$sdk = GrFingerService::get_instance();
 			$patient_list_query = $this->patient->search($patient_params["gender"]);
 			$patient_list = $patient_list_query->result_array();

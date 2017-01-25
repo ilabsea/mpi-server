@@ -87,9 +87,13 @@ class MpiController extends BaseController {
     //echo $this->response_content;
   }
 
+  function allow_log_ui_response(){
+    return true;
+  }
+
   function after_action($status){
     parent::after_action($status);
-    if($this->allow_log_response())
+    if($this->allow_log_ui_response())
       log_message("info", $this->response_content);
   }
 }
