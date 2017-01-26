@@ -212,117 +212,64 @@ class Patientws extends  MpiController {
      * Create service or visit when the patient visit a site
      */
     function createservice() {
-      $this->initLogPath();
-      ILog::info("Create Visit");
-      ILog::info(print_r($_POST, true));
-      $return = array("patientid" => "", "error" => "");
-      try {
-
-        // detect the fingerprint SDK
-        $grFingerprint = new GrFingerService();
-          if (!$grFingerprint->initialize()) :
-              $return["error"] = "SDK is busy with other service";
-              echo json_encode($return);
-              return;
-          endif;
-
-          if (!$this->accept_webservice($grFingerprint)) :
-            $return["error"] = "The request was rejected. Contact application administrator for more detail";
-            echo json_encode($return);
-              return;
-          endif;
-
-        if (!isset($_POST["patientid"])) :
-             $return["error"] = "patientid is required";
-             echo json_encode($return);
-             return;
-        endif;
-
-        $return["patientid"] = $_POST["patientid"];
-        if (!isset($_POST["serviceid"])) :
-             $return["error"] = "serviceid is required";
-        elseif (!in_array($_POST["serviceid"], Iconstant::$MPI_SERVICE)) :
-             $return["error"] = "serviceid is not valid: ".$_POST["serviceid"];
-        endif;
-        if ($return["error"] != "") :
-             echo json_encode($return);
-             return;
-        endif;
-
-        /*
-        if (!isset($_POST["sitecode"])) :
-             $return["error"] = "sitecode is required";
-             echo json_encode($return);
-             return;
-        endif;
-        */
-
-        if (isset($_POST["sitecode"]) && $_POST["sitecode"] != "") :
-              $data["sitecode"] = $_POST["sitecode"];
-              $this->load->model("site");
-              if ($this->site->getSiteByCode($data["sitecode"]) == null) :
-                   $result["error"] = "Side code ".$data["sitecode"]." is not available";
-                 echo json_encode($result);
-                 return;
-              endif;
-        else :
-             $return["error"] = "sitecode is required";
-             echo json_encode($return);
-             return;
-        endif;
-
-
-        if (!isset($_POST["visitdate"])) :
-             $return["error"] = "visitdate is required";
-             echo json_encode($return);
-             return;
-        endif;
-
-        $this->load->model("patient");
-        $patient = $this->patient->getPatientById($_POST["patientid"]);
-        if ($patient == null) :
-            $return["error"] = "Could not find patient with id: ".$_POST["patientid"];
-            echo json_encode($return);
-            return;
-        endif;
-
-          $data = array();
-          $data["pat_id"] = $_POST["patientid"];
-          /*$data["gender"] = $_POST["gender"];
-          $data["birthdate"] = $_POST["birthdate"];*/
-          $data["age"] = isset($_POST["age"]) ? $_POST["age"] : "";
-          $data["serv_id"] = $_POST["serviceid"];
-          $data["visit_date"] = $_POST["visitdate"];
-          $data["site_code"] = $_POST["sitecode"];
-          $data["ext_code"] = $_POST["externalcode"];
-          $data["ext_code_2"] = isset($_POST["externalcode2"]) ? $_POST["externalcode2"] : "";
-          $data["age"] = isset($_POST["age"]) && is_nint($_POST["age"]) ? $_POST["age"] : "";
-          $data["refer_to_vcct"] = isset($_POST["refer_to_vcct"]) && is_nint($_POST["refer_to_vcct"]) ? $_POST["refer_to_vcct"] : 0;
-          $data["refer_to_oiart"] = isset($_POST["refer_to_oiart"]) && is_nint($_POST["refer_to_oiart"]) ? $_POST["refer_to_oiart"] : 0;
-          $data["refer_to_std"] = isset($_POST["refer_to_std"]) && is_nint($_POST["refer_to_std"]) ? $_POST["refer_to_std"] : 0;
-          $data["info"] = $_POST["info"];
-
-          $visitid = $this->patient->newVisit($data);
-          $return["visitid"] = $visitid;
-
-
-          if ($data["serv_id"] == 2) : // OI/ART Service
-            if (isset($_POST["vcctsite"]) && $_POST["vcctsite"] != "" && isset($_POST["vcctnumber"]) && $_POST["vcctnumber"] != "") :
-              $vcct_info = array();
-              $vcct_info["ext_code"] = $_POST["vcctnumber"];
-              $vcct_info["site_code"] = $_POST["vcctsite"];
-              $vcct_info["pat_id"] = $data["pat_id"];
-              $this->patient->manageVcctNoFpFromOiart($vcct_info);
-            endif;
-          endif;
-
-          echo json_encode($return);
-        return;
-      } catch (Exception $e) {
-        $return["error"] = $e->getMessage();
-        ILog::error("error during enrollment: ".$e->getMessage());
-        echo json_encode($return);
+      $result = array("patientid" => "", "error" => "");
+			$params = $_POST;
+			// $params = array("patientid"=>"KH015100000010",
+			// 								"age"=>"0",
+			// 								"serviceid"=>"2",
+			// 								"visitdate"=>"2017/01/20",
+			// 								"externalcode"=>"565656",
+			// 								"externalcode2"=>"",
+			// 								"info"=>"Followup Visit",
+			// 								"vcctsite"=>"",
+			// 								"vcctnumber"=>"",
+			// 								"refer_to_vcct"=>"0",
+			// 								"refer_to_oiart"=>"0",
+			// 								"refer_to_std"=>"0",
+			// 								"sitecode"=>"0206",
+			// 								"member_fp_name"=>"member_fp_r2",
+			// 								"member_fp_value"=>"p/8BHogA+gABcQCPAO4AAXcAdwDoAAFrAK8A0AABdwCkAAEBASUBYgDSAAFmAH8AAgEBJQGEAMIAAXwAvQCwAAGCAKMAvwABNgG9AO4AASsBVgDSAAFgAMEAcwACOwFRAJUAASIAjgAOAQElAUkA0QABWgCHAGYAAaQAdgCMAAGpALkA+gABdwA+APoAAWYAiwBDAAGkAFIAdAABFwBuACMBASUBTAACAQFrAHgAWgABXQGJACsAAVgBcQC7AAGCAFQANAEBJQE9ADIBAWYA6wArAQErAakACwUGAAsPEgoAARcTDgYQGAcaDgADCQQSGxwUGQUPAQIAAgYBDgQGAgUaBAEEABgUAgUJCAcJBAobFg4BCgMNFRAUCxoDCAYEFgYFBxYODRECCwIHERATDxIDERUBAxIBDgIBBwMHAhoVGAEKDxoOEhYXEwsaEQsHABIXCxcPFgAEAwkaGg0RGBgZFwIcFxwWGxcCDwQCBhcBCRcFAQUAChMFCgkVEBwTBgUHEQAHDgoAAxAZDBAGEhYCEwIHCAIJFwAPBw8NCAwLDRYBGxMKCBYTEgkFDRYEGwYOFwkRBw0bDh0SDRgMFA0QBRESCBUUHQoRFAsRAQgMGBoVGggbABEMCBEXGh0EHAYJDBsCFwcaEAMRHA4VGQwZCBAHFRwAHAIDDB0OGhgRGRwLDRQBERMNHQMdAB0BHQYIFA0ZCgwTER0WHQgTFQgZGx0dFx0MHRE="
+			// 						);
+      if (!isset($params["patientid"])){
+         $result["error"] = "patientid is required";
+         return $this->render_json($result);
       }
+			$filter_params = AppHelper::slice_array($params, array("patientid", "sitecode", "visitdate", "serviceid"));
+
+      $result["patientid"] = $params["patientid"];
+      if (!$filter_params["serviceid"])
+         $result["error"] = "serviceid is required";
+      elseif (!in_array($filter_params["serviceid"], Iconstant::$MPI_SERVICE))
+         $result["error"] = "serviceid is not valid: ".$filter_params["serviceid"];
+
+			if ($result["error"] != "")
+         return $this->render_json($result);
+
+			if($filter_params["sitecode"] == ""){
+				$result["error"] = "sitecode is required";
+				return $this->render_json($result);
+			}
+      else if($filter_params["sitecode"] && !$this->site->getSiteByCode($filter_params["sitecode"])){
+        $result["error"] = "Side code ".$filter_params["sitecode"]." is not available";
+        return $this->render_json($result);
+			}
+
+
+
+      if (!$params["visitdate"]) {
+				$result["error"] = "visitdate is required";
+				return $this->render_json($result);
+			}
+
+      $patient = $this->patient->getPatientById($params["patientid"]);
+      if ($patient == null){
+        $result["error"] = "Could not find patient with id: ".$params["patientid"];
+        return $this->render_json($result);
+      }
+
+			$patient_id = $params["patientid"];
+			$result["visitid"] = $this->sync_insert_visit($params, $patient_id);
+			return $this->render_json($result);
     }
 
     /**
@@ -411,8 +358,6 @@ class Patientws extends  MpiController {
     }
   }
 
-
-
   private function patient_fingerprint_names($params) {
     $result = array();
     foreach (Iconstant::$MPI_FINGERPRINT as $fingerprint)
@@ -421,62 +366,56 @@ class Patientws extends  MpiController {
 
     return $result;
   }
+
   private function valid_fingerprint($grFingerprint=null, &$result, $reference=null) {
-      $arr = array();
-      if ($reference == null) :
-         $reference = $_POST;
-      endif;
-			$sdk = GrFingerService::get_instance();
-      foreach (Iconstant::$MPI_FINGERPRINT as $fingerprint) :
-          if (isset($reference[$fingerprint]) && $reference[$fingerprint] != "") :
-            $ok = $sdk->identify($reference[$fingerprint]);
-            if ($ok)
-							array_push($arr, $fingerprint);
-            else{
-							$result["error"] = "Fingerprint (".$fingerprint.") template is not correct";
-              return FALSE;
-						}
-
-          endif;
-      endforeach;
-        return $arr;
+    $arr = array();
+    if ($reference == null)
+      $reference = $_POST;
+		$sdk = GrFingerService::get_instance();
+    foreach (Iconstant::$MPI_FINGERPRINT as $fingerprint){
+      if (!isset($reference[$fingerprint]) || $reference[$fingerprint] == "")
+				continue ;
+      $ok = $sdk->identify($reference[$fingerprint]);
+      if ($ok)
+				$arr[] = $fingerprint;
+      else{
+				$result["error"] = "Fingerprint (".$fingerprint.") template is not correct";
+        return FALSE;
+      }
     }
+    return $arr;
+  }
 
-    /**
-     * synchronize update
-     */
+	// $params = array(
+	// 									"patient"=>"{\"patientid\":\"2178e8ab-dc63-444d-bbc7-ce518a93ae25\",\"fingerprint_r1\":\"\",\"fingerprint_r2\":\"p/8BHWIAxgABYABJALcAAVUA3ACOAAF8AKkAsgABcQBuAOMAAR8BUQDfAAFgAHwALAEBRwFyAOsAAXEAcwAIAQE7AY0AdAABtABxAHwAATMAqAAxAAFMAaEAJgEBNgFfAIMAAUQAZAB7AAHyAKMAXQABTAF1AHMAAeEAbgBkAAEtAMsAIwEBggCqADMBAYIAxgAoAQE2AVkANgEBggC4AAwBATYBgwCWAAFPAF8AGgEBhwCSAJkAAXcAkQA4AQE7AdoAMgABhwCBACUAAQAAowAUEg0OBwQKEAoOGRcTDBARDhANCgkQChEaDBoGDhEaEw0QGAgIBwQFCgkAARUYExQFABIWBAAUFhcKCQ8GGA0RAxkMFgkRFwkHBRUGExIGDAYIGQkIBBQMFxAHABMWFw0LHAUBFw4OCQwSDwsZChMGAxcZEA0JGwsYBxAPFQgRDwgFFxEaFAwIGQ4ZDQENGhUYBBoIBAEAFxoYCg8aFhgFAwIZDxoSGREXDwYHBwEAGQEOERwPHAANARcMGAMJBhYIABYIDxsTCAEKCQsAAwYUBgQVDBkCDAcCDxELBAMWBw0PAwoQHBUHARkTGAcDBhIJHBUTBBkQCwIJAw8VBBUFChwGBRQIFwIbHBYDAREOHBIIAhsKCwUDDRwOCwkbGAEIAxQHEgcCEAILFQAWBRccEgMRGxAbFhkZGxUBFgIHAhICARwUAg==\",\"fingerprint_r3\":\"\",\"fingerprint_r4\":\"\",\"fingerprint_r5\":\"\",\"fingerprint_l1\":\"\",\"fingerprint_l2\":\"p/8BHswAAAEBSgDTANkAAVUAuQAFAQFEAOUA1gACWgC5APsAAfgAqgDjAAHyAMMA7AABSgDgAN4AAlUA1QArAQJEANcAFAEBAwHZAOgAAgMBsQDOAAJKALoA1wACSgC7ALwAAWAAnAC+AAE5AJEAtwAB7QCAAPkAAe0AbgAXAQHnAHgALAEB5wBgABABATkAagABAQHtAIQACAEBOQDPADwBAfgAjQATAQE5APQAhgABggC0ALMAATkAGgA3AQF3AEoAPwEBpACXAIcAAdYAsQB7AAG6ALQABwMCBA0ZCgcODwwLFxUHARETFRAKARMUAQMWCAQGAAQFDAIACw0GCgoDAAYRFAULEhEICQYMCQAUEAYBAQwLDg4ZCxkACgYFDA0RFQIGFRQEBRwdFxARFw4NBgcSFwkCBgsPGREQCgwEDAELDBkSEwIFExUEChIVAQ0TEAkEFxQHDAwOCw8ABwUOAAEGAxYJDQ8FAQQBAgoFDQwDCAAJCgAFEhQXEwkGFwICDAgCEAUPHBsaARkEBwMNBg0FGQADFwQbEgcNBwsFDxsTDA8SEBUCFQUZHAMLGxEJBxUEDhwZHQgEFwUEEBYCCQEDGRYABg4JAw0cAgMQCxAODR0XAAgGCAoYHRAPDx0VBhYEGxQOHRQFCxwSAggXEQIVDhkYFhcNGBEEGxUaExsXAxgWBhUPCx0UDhQPFgoIAwwcEBkWEhsQARgaEQcYDB0cGBoSGhQLGBYRFBkaFRoQGhcUHBsWExwaDxoc\",\"fingerprint_l3\":\"\",\"fingerprint_l4\":\"\",\"fingerprint_l5\":\"\",\"gender\":1,\"age\":null,\"sitecode\":\"\",\"datebirth\":\"\",\"createdate\":\"2017-01-25 15:21:43\",\"updatedate\":\"2017-01-25 15:21:43\",\"visits\":[]}",
+	// 									"patientid"=>"KH015100000001",
+	// 									"sitecode"=>"0206",
+	// 									"member_fp_name"=>"member_fp_r2",
+	// 									"member_fp_value"=>"p/8BHqIAtgABOwGvAMUAAYIAhAC+AAGCALsApQABhwC0AN4AAXwAkgDlAAF8AIAAYgABpADBAOAAATABcQCIAAGkAKYA8AABMAG3AGQAAUEBgAA/AAGpAEgAcwABFwBzACUAAWMBcABVAAFjAVUAzwABZgBgAMsAAXEApQAvAQE7AUwANwEBQQFuAO0AASsBzwAtAQElAeEAJQEBdwByABUBASsBZACbAAGpANQAIwECKwFLAJMAASgAWgAmAQErAdwAIAEBcQDcADYBARoBQQDVAAFgAKkAFRsYGxQYDxAHBBUYHBQUGxwVFBUBABwYBg4dDxwbEhoJBBcICQUEARcZDgsLDRoWAAMJBwIABwEZDB0QAQMGCwUEExATBRACEw8WExkIBQIIBhEUBQEEAAkBAQIIDAUHAhcODRAXFwwRGAUADA4PAhMdCA4SFhMCBwAPFwoGHBEJEwUQERYRGwQDAggEAhYFCQAMBgcDGhMJAhAZAgMRFQ8ZBg0RCRcGFgkDCgUPCgsACB0ZHRcAFxAIGAkbBxgHAhkdAhcOGQYTBBkOGwkKDhQJCAsVBwwLFhAFAxMBEQUWDxEaDwgYBBsEFAcJAwgKAwgVCRYdEhMTFxQEBR0RBxUEAAoaHRYEGgURExoPAQgcCRYCEhEDBgwNHAcQDBoQDwwKDRoJFwscBBMZAQodDBkLCA0SHRIPFQESBRIQGQ0XDQcKGwMSFBwaFQMRHRIcFQo="
+	// 								);
   function synchronizeupdate() {
     $patient_array = array("patient" => array(), "error" => "");
 		$params = $_POST;
-		$params = array(
-											"patient"=>"{\"patientid\":\"2178e8ab-dc63-444d-bbc7-ce518a93ae25\",\"fingerprint_r1\":\"\",\"fingerprint_r2\":\"p/8BHWIAxgABYABJALcAAVUA3ACOAAF8AKkAsgABcQBuAOMAAR8BUQDfAAFgAHwALAEBRwFyAOsAAXEAcwAIAQE7AY0AdAABtABxAHwAATMAqAAxAAFMAaEAJgEBNgFfAIMAAUQAZAB7AAHyAKMAXQABTAF1AHMAAeEAbgBkAAEtAMsAIwEBggCqADMBAYIAxgAoAQE2AVkANgEBggC4AAwBATYBgwCWAAFPAF8AGgEBhwCSAJkAAXcAkQA4AQE7AdoAMgABhwCBACUAAQAAowAUEg0OBwQKEAoOGRcTDBARDhANCgkQChEaDBoGDhEaEw0QGAgIBwQFCgkAARUYExQFABIWBAAUFhcKCQ8GGA0RAxkMFgkRFwkHBRUGExIGDAYIGQkIBBQMFxAHABMWFw0LHAUBFw4OCQwSDwsZChMGAxcZEA0JGwsYBxAPFQgRDwgFFxEaFAwIGQ4ZDQENGhUYBBoIBAEAFxoYCg8aFhgFAwIZDxoSGREXDwYHBwEAGQEOERwPHAANARcMGAMJBhYIABYIDxsTCAEKCQsAAwYUBgQVDBkCDAcCDxELBAMWBw0PAwoQHBUHARkTGAcDBhIJHBUTBBkQCwIJAw8VBBUFChwGBRQIFwIbHBYDAREOHBIIAhsKCwUDDRwOCwkbGAEIAxQHEgcCEAILFQAWBRccEgMRGxAbFhkZGxUBFgIHAhICARwUAg==\",\"fingerprint_r3\":\"\",\"fingerprint_r4\":\"\",\"fingerprint_r5\":\"\",\"fingerprint_l1\":\"\",\"fingerprint_l2\":\"p/8BHswAAAEBSgDTANkAAVUAuQAFAQFEAOUA1gACWgC5APsAAfgAqgDjAAHyAMMA7AABSgDgAN4AAlUA1QArAQJEANcAFAEBAwHZAOgAAgMBsQDOAAJKALoA1wACSgC7ALwAAWAAnAC+AAE5AJEAtwAB7QCAAPkAAe0AbgAXAQHnAHgALAEB5wBgABABATkAagABAQHtAIQACAEBOQDPADwBAfgAjQATAQE5APQAhgABggC0ALMAATkAGgA3AQF3AEoAPwEBpACXAIcAAdYAsQB7AAG6ALQABwMCBA0ZCgcODwwLFxUHARETFRAKARMUAQMWCAQGAAQFDAIACw0GCgoDAAYRFAULEhEICQYMCQAUEAYBAQwLDg4ZCxkACgYFDA0RFQIGFRQEBRwdFxARFw4NBgcSFwkCBgsPGREQCgwEDAELDBkSEwIFExUEChIVAQ0TEAkEFxQHDAwOCw8ABwUOAAEGAxYJDQ8FAQQBAgoFDQwDCAAJCgAFEhQXEwkGFwICDAgCEAUPHBsaARkEBwMNBg0FGQADFwQbEgcNBwsFDxsTDA8SEBUCFQUZHAMLGxEJBxUEDhwZHQgEFwUEEBYCCQEDGRYABg4JAw0cAgMQCxAODR0XAAgGCAoYHRAPDx0VBhYEGxQOHRQFCxwSAggXEQIVDhkYFhcNGBEEGxUaExsXAxgWBhUPCx0UDhQPFgoIAwwcEBkWEhsQARgaEQcYDB0cGBoSGhQLGBYRFBkaFRoQGhcUHBsWExwaDxoc\",\"fingerprint_l3\":\"\",\"fingerprint_l4\":\"\",\"fingerprint_l5\":\"\",\"gender\":1,\"age\":null,\"sitecode\":\"\",\"datebirth\":\"\",\"createdate\":\"2017-01-25 15:21:43\",\"updatedate\":\"2017-01-25 15:21:43\",\"visits\":[]}",
-											"patientid"=>"KH015100000001",
-											"sitecode"=>"0206",
-											"member_fp_name"=>"member_fp_r2",
-											"member_fp_value"=>"p/8BHqIAtgABOwGvAMUAAYIAhAC+AAGCALsApQABhwC0AN4AAXwAkgDlAAF8AIAAYgABpADBAOAAATABcQCIAAGkAKYA8AABMAG3AGQAAUEBgAA/AAGpAEgAcwABFwBzACUAAWMBcABVAAFjAVUAzwABZgBgAMsAAXEApQAvAQE7AUwANwEBQQFuAO0AASsBzwAtAQElAeEAJQEBdwByABUBASsBZACbAAGpANQAIwECKwFLAJMAASgAWgAmAQErAdwAIAEBcQDcADYBARoBQQDVAAFgAKkAFRsYGxQYDxAHBBUYHBQUGxwVFBUBABwYBg4dDxwbEhoJBBcICQUEARcZDgsLDRoWAAMJBwIABwEZDB0QAQMGCwUEExATBRACEw8WExkIBQIIBhEUBQEEAAkBAQIIDAUHAhcODRAXFwwRGAUADA4PAhMdCA4SFhMCBwAPFwoGHBEJEwUQERYRGwQDAggEAhYFCQAMBgcDGhMJAhAZAgMRFQ8ZBg0RCRcGFgkDCgUPCgsACB0ZHRcAFxAIGAkbBxgHAhkdAhcOGQYTBBkOGwkKDhQJCAsVBwwLFhAFAxMBEQUWDxEaDwgYBBsEFAcJAwgKAwgVCRYdEhMTFxQEBR0RBxUEAAoaHRYEGgURExoPAQgcCRYCEhEDBgwNHAcQDBoQDwwKDRoJFwscBBMZAQodDBkLCA0SHRIPFQESBRIQGQ0XDQcKGwMSFBwaFQMRHRIcFQo="
-									  );
+
 
     $patient_str = $params["patient"];
     $patient = json_decode($patient_str, true);
-		ILog::d("Patient decode", $patient);
     if (!isset($params["patientid"]) || $params["patientid"] == ""){
       $patient_array["error"] = "Could not find master id";
       return $this->render_json($patient_array);
     }
 
     $patient_id = $params["patientid"];
-		ILog::d("Patient ID",  $params["patientid"],1,1);
     $this->load->model("patient");
     $patient_found = $this->patient->getPatientById($patient_id);
-		ILog::d("Patient", $patient_found);
     if ($patient_found == null){
       $patient_array["error"] = "Could not find patient with master id ".$patient;
-
       return $this->render_json($patient_array);
-			die("Done");
     }
 		$this->sync_insert_visits($patient["visits"], $patient_id);
+		$patient["patientid"] = $patient_id;
     $patient["visits"] = $this->sync_return_visits($patient_id);
+
     foreach (Iconstant::$MPI_FINGERPRINT as $fingerprint){
       if (isset($patient[$fingerprint]))
         unset($patient[$fingerprint]);
@@ -657,31 +596,33 @@ class Patientws extends  MpiController {
 
 		private function sync_insert_visits($visits, $patient_id){
 			foreach($visits as $visit){
-				$data_visit = array();
-				$data_visit["pat_id"] =$patient_id;
-				$data_visit["serv_id"] = $visit["serviceid"];
-				$data_visit["site_code"] = $visit["sitecode"];
-				$data_visit["ext_code"] = $visit["externalcode"];
-				$data_visit["age"] = isset($visit["age"]) ? $visit["age"] : "";
-				$data_visit["ext_code_2"] = isset($visit["externalcode2"]) ? $visit["externalcode2"] : null;
-				$data_visit["info"] = $visit["info"];
-				$data_visit["refer_to_vcct"] = isset($visit["refer_to_vcct"]) ? $visit["refer_to_vcct"] : 0;
-				$data_visit["refer_to_oiart"] = isset($visit["refer_to_oiart"]) ? $visit["refer_to_oiart"] : 0;
-				$data_visit["refer_to_std"] = isset($visit["refer_to_std"]) ? $visit["refer_to_std"] : 0;
-
-				$data_visit["date_create"] = $visit["createdate"];
-				$data_visit["visit_date"] = $visit["visitdate"];
-				$this->patient->newVisit($data_visit);
-
-
-				if ($data_visit["serv_id"] == 2 && isset($visit["vcctsite"]) && $visit["vcctsite"] != "" && isset($visit["vcctnumber"]) && $visit["vcctnumber"] != ""){
-					$vcct_info = array();
-					$vcct_info["ext_code"] = $visit["vcctnumber"];
-					$vcct_info["site_code"] = $visit["vcctsite"];
-					$vcct_info["pat_id"] = $data_visit["pat_id"];
-					$this->patient->manageVcctNoFpFromOiart($vcct_info);
-				}
+				$this->sync_insert_visit($visit, $patient_id);
 			}
+		}
+
+		private function sync_insert_visit($visit, $patient_id){
+			$data_visit = array();
+			$data_visit["pat_id"] =$patient_id;
+			$data_visit["serv_id"] = $visit["serviceid"];
+			$data_visit["site_code"] = $visit["sitecode"];
+			$data_visit["ext_code"] = $visit["externalcode"];
+			$data_visit["age"] = isset($visit["age"]) ? $visit["age"] : "";
+			$data_visit["ext_code_2"] = isset($visit["externalcode2"]) ? $visit["externalcode2"] : null;
+			$data_visit["info"] = $visit["info"];
+			$data_visit["refer_to_vcct"] = isset($visit["refer_to_vcct"]) ? $visit["refer_to_vcct"] : 0;
+			$data_visit["refer_to_oiart"] = isset($visit["refer_to_oiart"]) ? $visit["refer_to_oiart"] : 0;
+			$data_visit["refer_to_std"] = isset($visit["refer_to_std"]) ? $visit["refer_to_std"] : 0;
+			$data_visit["date_create"] = isset($visit["createdate"]) ? $visit["createdate"]: "";
+			$data_visit["visit_date"] = $visit["visitdate"];
+			$visit_id = $this->patient->newVisit($data_visit);
+			if ($data_visit["serv_id"] == 2 && isset($visit["vcctsite"]) && $visit["vcctsite"] != "" && isset($visit["vcctnumber"]) && $visit["vcctnumber"] != ""){
+				$vcct_info = array();
+				$vcct_info["ext_code"] = $visit["vcctnumber"];
+				$vcct_info["site_code"] = $visit["vcctsite"];
+				$vcct_info["pat_id"] = $data_visit["pat_id"];
+				$this->patient->manageVcctNoFpFromOiart($vcct_info);
+			}
+			return $visit_id;
 		}
 
 		private function sync_return_visits($patient_id){
