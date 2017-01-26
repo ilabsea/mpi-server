@@ -34,7 +34,7 @@ class Patientws extends  MpiController {
 		$this->load->model("site");
 		$this->load->model("member");
 		$this->load->model("patient");
-		$this->require_member_fingerprint();
+		// $this->require_member_fingerprint();
 	}
 
 	private function require_member_fingerprint(){
@@ -446,106 +446,44 @@ class Patientws extends  MpiController {
      * synchronize update
      */
   function synchronizeupdate() {
-      $this->initLogPath();
-      ILog::info("Synchronization Update");
-      ILog::info(print_r($_POST, true));
-        $patient_array = array("patient" => array(), "error" => "");
-        try {
-        $grFingerprint = new GrFingerService();
-          if (!$grFingerprint->initialize()) :
-              $patient_array["error"] = "SDK is busy with other service";
-              echo json_encode($patient_array);
-              return;
-          endif;
+    $patient_array = array("patient" => array(), "error" => "");
+		$params = $_POST;
+		$params = array(
+											"patient"=>"{\"patientid\":\"2178e8ab-dc63-444d-bbc7-ce518a93ae25\",\"fingerprint_r1\":\"\",\"fingerprint_r2\":\"p/8BHWIAxgABYABJALcAAVUA3ACOAAF8AKkAsgABcQBuAOMAAR8BUQDfAAFgAHwALAEBRwFyAOsAAXEAcwAIAQE7AY0AdAABtABxAHwAATMAqAAxAAFMAaEAJgEBNgFfAIMAAUQAZAB7AAHyAKMAXQABTAF1AHMAAeEAbgBkAAEtAMsAIwEBggCqADMBAYIAxgAoAQE2AVkANgEBggC4AAwBATYBgwCWAAFPAF8AGgEBhwCSAJkAAXcAkQA4AQE7AdoAMgABhwCBACUAAQAAowAUEg0OBwQKEAoOGRcTDBARDhANCgkQChEaDBoGDhEaEw0QGAgIBwQFCgkAARUYExQFABIWBAAUFhcKCQ8GGA0RAxkMFgkRFwkHBRUGExIGDAYIGQkIBBQMFxAHABMWFw0LHAUBFw4OCQwSDwsZChMGAxcZEA0JGwsYBxAPFQgRDwgFFxEaFAwIGQ4ZDQENGhUYBBoIBAEAFxoYCg8aFhgFAwIZDxoSGREXDwYHBwEAGQEOERwPHAANARcMGAMJBhYIABYIDxsTCAEKCQsAAwYUBgQVDBkCDAcCDxELBAMWBw0PAwoQHBUHARkTGAcDBhIJHBUTBBkQCwIJAw8VBBUFChwGBRQIFwIbHBYDAREOHBIIAhsKCwUDDRwOCwkbGAEIAxQHEgcCEAILFQAWBRccEgMRGxAbFhkZGxUBFgIHAhICARwUAg==\",\"fingerprint_r3\":\"\",\"fingerprint_r4\":\"\",\"fingerprint_r5\":\"\",\"fingerprint_l1\":\"\",\"fingerprint_l2\":\"p/8BHswAAAEBSgDTANkAAVUAuQAFAQFEAOUA1gACWgC5APsAAfgAqgDjAAHyAMMA7AABSgDgAN4AAlUA1QArAQJEANcAFAEBAwHZAOgAAgMBsQDOAAJKALoA1wACSgC7ALwAAWAAnAC+AAE5AJEAtwAB7QCAAPkAAe0AbgAXAQHnAHgALAEB5wBgABABATkAagABAQHtAIQACAEBOQDPADwBAfgAjQATAQE5APQAhgABggC0ALMAATkAGgA3AQF3AEoAPwEBpACXAIcAAdYAsQB7AAG6ALQABwMCBA0ZCgcODwwLFxUHARETFRAKARMUAQMWCAQGAAQFDAIACw0GCgoDAAYRFAULEhEICQYMCQAUEAYBAQwLDg4ZCxkACgYFDA0RFQIGFRQEBRwdFxARFw4NBgcSFwkCBgsPGREQCgwEDAELDBkSEwIFExUEChIVAQ0TEAkEFxQHDAwOCw8ABwUOAAEGAxYJDQ8FAQQBAgoFDQwDCAAJCgAFEhQXEwkGFwICDAgCEAUPHBsaARkEBwMNBg0FGQADFwQbEgcNBwsFDxsTDA8SEBUCFQUZHAMLGxEJBxUEDhwZHQgEFwUEEBYCCQEDGRYABg4JAw0cAgMQCxAODR0XAAgGCAoYHRAPDx0VBhYEGxQOHRQFCxwSAggXEQIVDhkYFhcNGBEEGxUaExsXAxgWBhUPCx0UDhQPFgoIAwwcEBkWEhsQARgaEQcYDB0cGBoSGhQLGBYRFBkaFRoQGhcUHBsWExwaDxoc\",\"fingerprint_l3\":\"\",\"fingerprint_l4\":\"\",\"fingerprint_l5\":\"\",\"gender\":1,\"age\":null,\"sitecode\":\"\",\"datebirth\":\"\",\"createdate\":\"2017-01-25 15:21:43\",\"updatedate\":\"2017-01-25 15:21:43\",\"visits\":[]}",
+											"patientid"=>"KH015100000001",
+											"sitecode"=>"0206",
+											"member_fp_name"=>"member_fp_r2",
+											"member_fp_value"=>"p/8BHqIAtgABOwGvAMUAAYIAhAC+AAGCALsApQABhwC0AN4AAXwAkgDlAAF8AIAAYgABpADBAOAAATABcQCIAAGkAKYA8AABMAG3AGQAAUEBgAA/AAGpAEgAcwABFwBzACUAAWMBcABVAAFjAVUAzwABZgBgAMsAAXEApQAvAQE7AUwANwEBQQFuAO0AASsBzwAtAQElAeEAJQEBdwByABUBASsBZACbAAGpANQAIwECKwFLAJMAASgAWgAmAQErAdwAIAEBcQDcADYBARoBQQDVAAFgAKkAFRsYGxQYDxAHBBUYHBQUGxwVFBUBABwYBg4dDxwbEhoJBBcICQUEARcZDgsLDRoWAAMJBwIABwEZDB0QAQMGCwUEExATBRACEw8WExkIBQIIBhEUBQEEAAkBAQIIDAUHAhcODRAXFwwRGAUADA4PAhMdCA4SFhMCBwAPFwoGHBEJEwUQERYRGwQDAggEAhYFCQAMBgcDGhMJAhAZAgMRFQ8ZBg0RCRcGFgkDCgUPCgsACB0ZHRcAFxAIGAkbBxgHAhkdAhcOGQYTBBkOGwkKDhQJCAsVBwwLFhAFAxMBEQUWDxEaDwgYBBsEFAcJAwgKAwgVCRYdEhMTFxQEBR0RBxUEAAoaHRYEGgURExoPAQgcCRYCEhEDBgwNHAcQDBoQDwwKDRoJFwscBBMZAQodDBkLCA0SHRIPFQESBRIQGQ0XDQcKGwMSFBwaFQMRHRIcFQo="
+									  );
 
-          if (!$this->accept_webservice($grFingerprint)) :
-            $result["error"] = "The request was rejected. Contact application administrator for more detail";
-            echo json_encode($result);
-              return;
-          endif;
-
-        $patient_str = $_POST["patient"];
-
-        $patient = json_decode($patient_str, true);
-
-        if (!isset($_POST["patientid"]) || $_POST["patientid"] == "") :
-            $patient_array["error"] = "Could not find master id";
-              echo json_encode($patient_array);
-              return;
-        endif;
-
-        $patient_id = $_POST["patientid"];
-        $this->load->model("patient");
-        $patient_found = $this->patient->getPatientById($patient_id);
-        if ($patient_found == null) :
-          $patient_array["error"] = "Could not find patient with master id ".$patient_id;
-              echo json_encode($patient_array);
-              return;
-        endif;
-
-        foreach ($patient["visits"] as $visit) :
-          $data_visit = array();
-              $data_visit["pat_id"] = $patient_id;
-              $data_visit["serv_id"] = $visit["serviceid"];
-              $data_visit["site_code"] = $visit["sitecode"];
-              $data_visit["ext_code"] = $visit["externalcode"];
-              $data_visit["ext_code_2"] = isset($visit["externalcode2"]) ? $visit["externalcode2"] : null;
-              $data_visit["info"] = $visit["info"];
-        $data_visit["age"] = isset($visit["age"]) ? $visit["age"] : "";
-        $data_visit["refer_to_vcct"] = isset($visit["refer_to_vcct"]) ? $visit["refer_to_vcct"] : 0;
-        $data_visit["refer_to_oiart"] = isset($visit["refer_to_oiart"]) ? $visit["refer_to_oiart"] : 0;
-        $data_visit["refer_to_std"] = isset($visit["refer_to_std"]) ? $visit["refer_to_std"] : 0;
-              $data_visit["date_create"] = $visit["createdate"];
-              $data_visit["visit_date"] = $visit["visitdate"];
-              $this->patient->newVisit($data_visit);
-               if ($data_visit["serv_id"] == 2) : // OI/ART Service
-              if (isset($visit["vcctsite"]) && $visit["vcctsite"] != "" && isset($visit["vcctnumber"]) && $visit["vcctnumber"] != "") :
-                $vcct_info = array();
-                $vcct_info["ext_code"] = $visit["vcctnumber"];
-                $vcct_info["site_code"] = $visit["vcctsite"];
-                $vcct_info["pat_id"] = $data_visit["pat_id"];
-                $this->patient->manageVcctNoFpFromOiart($vcct_info);
-              endif;
-            endif;
-        endforeach;
-
-        // prepare to send back to client
-        $visits = $this->patient->getVisitsByPID($patient_id);
-          $patient["visits"] = array();
-          $patient["patientid"] = $patient_id;
-            foreach($visits->result_array() as $row) :
-              $visit = array();
-              $visit["patientid"] = $patient_id;
-              $visit["visitid"] = $row["visit_id"];
-              $visit["sitecode"] = $row["site_code"];
-              $visit["sitename"] = $row["site_name"];
-              $visit["externalcode"] = $row["ext_code"];
-              $visit["serviceid"] = $row["serv_id"];
-              $visit["info"] = $row["info"];
-              $visit["age"] = $row["pat_age"];
-              $visit["refer_to_vcct"] = $row["refer_to_vcct"];
-            $visit["refer_to_oiart"] = $row["refer_to_oiart"];
-            $visit["refer_to_std"] = $row["refer_to_std"];
-              $visit["visitdate"] = $row["visit_date"];
-              $visit["createdate"] = $row["date_create"];
-              array_push($patient["visits"], $visit);
-          endforeach;
-
-          foreach (Iconstant::$MPI_FINGERPRINT as $fingerprint) :
-               if (isset($patient[$fingerprint])) :
-                 unset($patient[$fingerprint]);
-               endif;
-          endforeach;
-          $patient_array["patient"] = $patient;
-        echo json_encode($patient_array);
-        //log_message($message)
-
-        } catch (Exception $e) {
-        $patient_array["error"] = $e->getMessage() ;
-        ILog::error("error during synchronize update: ".$e->getMessage());
-            echo json_encode($patient_array);
-      }
+    $patient_str = $params["patient"];
+    $patient = json_decode($patient_str, true);
+		ILog::d("Patient decode", $patient);
+    if (!isset($params["patientid"]) || $params["patientid"] == ""){
+      $patient_array["error"] = "Could not find master id";
+      return $this->render_json($patient_array);
     }
+
+    $patient_id = $params["patientid"];
+		ILog::d("Patient ID",  $params["patientid"],1,1);
+    $this->load->model("patient");
+    $patient_found = $this->patient->getPatientById($patient_id);
+		ILog::d("Patient", $patient_found);
+    if ($patient_found == null){
+      $patient_array["error"] = "Could not find patient with master id ".$patient;
+
+      return $this->render_json($patient_array);
+			die("Done");
+    }
+		$this->sync_insert_visits($patient["visits"], $patient_id);
+    $patient["visits"] = $this->sync_return_visits($patient_id);
+    foreach (Iconstant::$MPI_FINGERPRINT as $fingerprint){
+      if (isset($patient[$fingerprint]))
+        unset($patient[$fingerprint]);
+    }
+    $patient_array["patient"] = $patient;
+    return $this->render_json($patient_array);
+  }
 
     /**
      * The test for this controller
