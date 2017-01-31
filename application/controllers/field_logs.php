@@ -23,7 +23,20 @@ class Field_logs extends MpiController {
     $this->render_view();
   }
 
-  function page(){
-    echo AppHelper::paginate(10);
+  //POST field_logs/revert/id
+  function revert($id){
+    $field_log = FieldLog::find($id);
+    $modified_attrs = $field_log->modified_attrs;
+    if(count($modified_attrs) == 0)
+      return redirect(site_url("field_logs/index"));
+
+    $keys =  array_keys($modified_attrs);
+    $field_code = $keys[0];
+    $field_value = $modified_attrs[$field_code]["from"];
+    $pat_id = $field_log->pat_id;
+
+    Patient::update_field($pat_id, $field_code, $field_value);
+    return redirect(site_url("field_logs/index"));
   }
+
 }

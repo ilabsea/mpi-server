@@ -18,10 +18,9 @@ class Api_patients extends ApiAccessController{
     return true;
   }
 
-  //POST /api/patients/update_field
+  //POST /api/patients/update_field/pat_id
   function update_field($pat_id){
-    // $params = $_GET;
-    $params = $_GET;
+    $params = $_POST;
 
     if(!isset($params['name']) || !isset($params['value'])) {
       $errors = array(
@@ -45,7 +44,7 @@ class Api_patients extends ApiAccessController{
     }
 
     $application = $this->oauth->application;
-    $application = Application::find(2);
+    // $application = Application::find(2);
 
     $patient = Patient::update_field($pat_id, $name, $value, $application);
     $patient_json = PatientModule::embed_dynamic_value($patient);

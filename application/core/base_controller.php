@@ -20,7 +20,7 @@ class BaseController extends CI_Controller {
   }
 
   public function catch_exception($exception) {
-    ILog::d("Application raise exception with: ", $exception);
+    ILog::d("Application raise ".get_class($exception). " with: ", $exception->getMessage());
   }
 
   function action_name(){
@@ -42,10 +42,7 @@ class BaseController extends CI_Controller {
   function log_response(){
     if(!$this->allow_log_response())
       return false;
-
     log_message("info", "RESPONSE: " . $this->response_content);
-
-
   }
 
   function allow_log_request(){

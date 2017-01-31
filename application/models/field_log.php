@@ -5,6 +5,8 @@ class FieldLog extends Imodel {
   var $field_code = '';
   var $field_name = '';
 
+  var $pat_id=null;
+
   var $application_id = null;
   var $application_name = '';
   var $modified_at = '';
@@ -12,6 +14,8 @@ class FieldLog extends Imodel {
 
   var $created_at = null;
   var $updated_at = null;
+
+  const ADMIN_REVERT = "Web Base";
 
   function before_save(){
     parent::before_save();

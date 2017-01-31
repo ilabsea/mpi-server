@@ -57,15 +57,15 @@ class Patient extends Imodel {
     $patient = Patient::ensure_find_by(array("pat_id" => $pat_id));
     $values = $patient->dynamic_value();
 
-    $patient_attrs  = array($field_code => $field_value);
-
-    $field_patients = FieldTransformer::apply_to_patient($patient_attrs);
+    $field_patients = FieldTransformer::apply_to_patient(array($field_code => $field_value));
     $keys = array_keys($field_patients);
 
+    $patient_field_code = $keys[0];
+    $old_field_value = $values[$patient_field_code];
 
-    $old_field_value = $values[$keys[0]];
+    $field_log_attrs = array("pat_id" => $pat_id,
+                             "modified_attrs"=> array());
 
-    $field_log_attrs = array("modified_attrs"=> array());
     $field_log_attrs["modified_attrs"][$field_code] = array("from" => $old_field_value,
                                                             "to" => $field_value);
     $field_log_attrs["field_code"] = $field_code;
@@ -73,6 +73,10 @@ class Patient extends Imodel {
     if($application){
       $field_log_attrs["application_id"] = $application->id;
       $field_log_attrs["application_name"] = $application->name;
+    }
+
+    else {
+      $field_log_attrs["application_name"] = FieldLog::ADMIN_REVERT;
     }
 
     $fields = Field::map_by_code();
@@ -85,8 +89,10 @@ class Patient extends Imodel {
 
     $field_log_attrs["modified_at"] = AppModel::current_time();
 
+    $patient_attrs = array($patient_field_code => $field_value);
 
     $patient->update_attributes($patient_attrs);
+
     $field_log = new FieldLog($field_log_attrs);
     $field_log->save();
     return $patient;

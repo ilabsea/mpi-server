@@ -30,11 +30,10 @@
         </td>
         <td>
           <?php foreach($log->modified_attrs as $key => $value): ?>
-            <?= $value["from"] ?> -> <?= $value["to"] ?>
+            From <strong> <?= $value["from"] ?> </strong> , To <strong> <?= $value["to"] ?> </strong> 
           <? endforeach; ?>
         </td>
-        <td>
-        </td>
+        <td><a href='<?= site_url("field_logs/revert/{$log->id}")?>' > Revert Change</a></td>
       </tr>
     <? endforeach ?>
   </tbody>

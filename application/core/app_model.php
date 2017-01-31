@@ -373,8 +373,13 @@ class AppModel extends CI_Model {
   function delete(){
     $primary_key = $this->primary_key();
     $this->db->delete(static::table_name(), array("{$primary_key}" => $this->id()));
-    if($this->db->affected_rows() == 0)
+
+    if($this->db->_error_number() != 0)
+      throw new ForeignKeyConstraintException($this->db->_error_message());
+
+    if($this->db->affected_rows() == 0){
       return false;
+    }
     else{
       $this->after_destroy();
       return true;

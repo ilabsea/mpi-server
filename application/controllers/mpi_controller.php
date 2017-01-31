@@ -91,6 +91,11 @@ class MpiController extends BaseController {
     return true;
   }
 
+  function catch_exception($exception){
+    parent::catch_exception($exception);
+    Isession::setFlash("failed", $exception->getMessage() );
+  }
+
   function after_action($status){
     parent::after_action($status);
     if($this->allow_log_ui_response())

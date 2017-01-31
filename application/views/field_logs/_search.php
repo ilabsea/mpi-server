@@ -7,6 +7,8 @@
       foreach(Application::mapper() as $app) {
         $applications[$app] = $app;
       }
+      $applications[FieldLog::ADMIN_REVERT] = FieldLog::ADMIN_REVERT;
+      // sort($applications);
     ?>
     <?= form_dropdown('application_name', AppHelper::merge_array(array(""=>"All"),  $applications), $params["application_name"],
                       'id="application_name" class="tokenizer tokenizer-short"' ) ?>

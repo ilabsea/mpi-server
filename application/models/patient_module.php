@@ -112,8 +112,6 @@ class PatientModule {
     return $paginator;
   }
 
-
-
   static function embeded_dynamic_fields($patients, $visit_conditions=array()) {
     $dynamic_value = new DynamicValue();
     $dynamic_results = $dynamic_value->result($patients, "patient");
