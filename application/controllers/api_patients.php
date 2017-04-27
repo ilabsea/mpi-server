@@ -6,7 +6,7 @@ class Api_patients extends ApiAccessController{
   function before_action(){
     parent::before_action();
     $scope = $this->oauth->scope;
-    $scope = Scope::find(2);
+    // $scope = Scope::find(2);
     $this->display_value = new DisplayValue($scope);
 
     if($this->action_name() != "update_field"){
@@ -15,7 +15,7 @@ class Api_patients extends ApiAccessController{
   }
 
   function skip_authenticate(){
-    return true;
+    return false;
   }
 
   //POST /api/patients/update_field/pat_id
@@ -54,6 +54,20 @@ class Api_patients extends ApiAccessController{
 
 
   function index() {
+    // $params = array(
+    //               "p_fingerprint_r3"=>"",
+    //               "p_fingerprint_l5"=>"",
+    //               "p_fingerprint_l1"=>"",
+    //               "p_fingerprint_l2"=>"p/8BJTIAxwAB/gA3AOwAAfgAfABkAAGCAJsAJAABmAAwALoAAUoAeADZAAFVAFkAvQACAwFfAOgAAUoAfQAuAAGkAE8A0AABSgBrAN4AAQMBOQABAQHtAGsANQABpABbAFcAAZgATABKAAG6AKkAyAABYABhAEcAAVgBtACAAAFxACgA+AABPgCfAHAAAXcAbwD7AAH+AKcAgQABJQEiAA4BAecAmgD5AAFPAKMAmgACZgCaAH4AAXEAdQCOAAFgAEAALQEB4QCKAKoAAVoAQwCZAAJKAI8ALwEB5wBlAKQAAlUAXACZAAJVAGcAaAABfABEAH8AATMAVwCHAAFPACUAHQEBMwDLAAAEFRkVER8gCgUkFhkTBwoNEBUTEgEMCAsSICMNDgkGCwEhAiENEAwjIg4QFhIUByAdGBURGRETHSIWCx8aIBodIwYfGBkHCRQKBwUJABwYGyQYEQoJGiMfIwgDJAshEAINHBogIhQFIyEfHQYgAQkcHwEAEwIODCQSCQQNDAQdEAgKBiEOAQcaGQIQGiEABhYBGQIGBCIhBQkYEwYdBQYHBg8cGxYaAhQXGwsLByINDxgcGRcFGBojDRwgAB0JHxwVICECDAUcAQQfIhIAIwIhDBoiDAMXDx0aGhMFDxoVJAEVAg0IBhwCCBQJAQoXCgsJCxQGIyIOBhoEIB4XAg4SCQUfBwAZIQ4IEyEEHxIHCh8bEgsAAQYUARwRCwoeFBcHCgAKHB0hGg0cEwQiIw4hCBECHxgSBCIQBCMjEBoRCg8UBhsBGAIQAxsUFSECAw8VCwQWBw8RFgATCBsHEwMPGQUYFA8SBhYJEwwkBx4bHQ4PBhccJBQNAxcJFgQhAx4HJAAOAx4FHgoZAxUDEQMeCx4PBA4=",
+    //               "p_fingerprint_r1"=>"",
+    //               "p_fingerprint_l4"=>"",
+    //               "p_fingerprint_r4"=>"",
+    //               "p_pat_gender"=>"1",
+    //               "p_fingerprint_r2"=>"p/8BHsIAeQABggCHAIsAAXwAdgCrAAFrALMAmgABfADAALcAASsBqACKAAEwAbQAtAABcQBJAJIAAVUAkAC0AAFxAKMAxQABJQGMANEAASUBfQDEAAEfAckAPgACOwGIAMAAAXEAsgAIAQI7AWkA4gABHwGXAAYBATYBfwBVAAGkAMoA/AABMAFKAMkAAWYAVQBZAAEiALYAJQEBRwFOAPEAAR8BOwC5AAFgAJIAMAABngBYADgAAQwAgQAiAAFdAVYAlQABWgBiAJQAAWYAcwCBAAF8AK0ACw0EBhscGwcNCAoNAwUKCxMXGBoBHQkGHAccHQsICQgGAwoJCwIJDQ4QDhIIAg0CCggVDgIcBQAWDwQDCQQBBRQZGx0GCAMAAgEPCwkLHAEPCgIbFhMPExcHAh0RGBQRCAEVEAYFCAMKAgcdFxsNBgMBHREPDQkDFRIZGggFBAgRGQoGHRQbAQQFAgcTCxEaCQIQEhMbDQETAhAKBR0XHAERCxwTBwgcDBgNBA8CCwYNAwoEBxQTHBAPAAwJBRkYFhccFBsUAgUPCAYAFwILGwEABAAPFwcBEw0PCRYLChMQCQsXBREOChIJHBEOCRYKFBoSBAEUEAsQDRQYEgoSBhsRFg0QFgARDBoRDAgAHRkWAg4PCQAOBAUMDg0DEQAYHRgSDQcZARgWGxwZGxkVCgMMHRoIERUJFxQSAwEMFQ8OFgEaABodDBUEFQ0VFhcRBAwSABcZEhESDA==",
+    //               "v_site_code"=>"",
+    //               "p_fingerprint_l3"=>"",
+    //               "p_fingerprint_r5"=>""
+    //           );
     $params = $_GET;
     $filter_patients = FieldTransformer::apply_to_all($params);
     $filter_patients = AppHelper::merge_array($filter_patients['visits'], $filter_patients['patients']);
