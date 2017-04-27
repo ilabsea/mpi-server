@@ -11,8 +11,8 @@ class Reports extends MpiController {
    * Enter description here ...
    */
     function reportmenu() {
-      $data = array();
-      $reports = array();
+    $data = array();
+    $reports = array();
 
     $reports["fingerprint"] = array();
     $reports["fingerprint"]["code"] = "fingerprint";
@@ -56,35 +56,29 @@ class Reports extends MpiController {
      */
     private function sumbit_report() {
       $criteria = $_POST;
-      $criteria["cri_pro_code"] = trim($criteria["cri_pro_code"]);
+      $criteria["cri_pro_code"] = isset($criteria["cri_pro_code"])?trim($criteria["cri_pro_code"]):"";
       $criteria["date_from"] = trim($criteria["date_from"]);
       $criteria["date_to"] = trim($criteria["date_to"]);
 
       $error = "";
 
-      if (!isset($criteria["report_type"])) :
-        if ($error=="" && $criteria["cri_pro_code"] == "") :
+      if (!isset($criteria["report_type"]))
+        if ($error=="" && $criteria["cri_pro_code"] == "")
           $error = "Please select a province";
-        endif;
-      endif;
 
-      if ($error=="" && $criteria["date_from"] != null && date_html_to_php($criteria["date_from"]) == null) :
+      if ($error=="" && $criteria["date_from"] != null && date_html_to_php($criteria["date_from"]) == null)
         $error = "Start date format is not correct";
-      endif;
 
-      if ($error=="" && $criteria["date_to"] != null && date_html_to_php($criteria["date_to"]) == null) :
+      if ($error=="" && $criteria["date_to"] != null && date_html_to_php($criteria["date_to"]) == null)
         $error = "End date format is not correct";
-      endif;
 
       Isession::setFlash("error", $error);
 
       $session_data = Isession::getCriteria("reports");
-      if ($session_data != null) :
+      if ($session_data != null)
         $criteria = array_merge($session_data, $criteria);
-      endif;
-      if (!isset($_POST["empty_exclude"])) :
+      if (!isset($_POST["empty_exclude"]))
         unset($criteria["empty_exclude"]);
-      endif;
       Isession::setCriteria("reports", $criteria);
     }
 
@@ -371,7 +365,7 @@ class Reports extends MpiController {
      * Display fingerprint report
      */
     function fingerprint() {
-       $data = array();
+      $data = array();
       $data["error"] = Isession::getFlash("error");
       $data["error_list"] = Isession::getFlash("error_list");
       $data["success"] = Isession::getFlash("success");
@@ -381,53 +375,37 @@ class Reports extends MpiController {
       $old_criteria = Isession::getCriteria("old_reports");
       $session_data = Isession::getCriteria("reports");
       $criteria = array(  "cri_pro_code" => "",
-                "date_from" => "",
-                "date_to" => ""
-              );
+                          "date_from" => "",
+                          "date_to" => ""
+                  );
 
       $first_access = false;
-      if ($session_data != null) :
+      if ($session_data != null)
         $criteria = array_merge($criteria, $session_data);
-      else :
-          $first_access = true;
-      endif;
+      else
+        $first_access = true;
 
-
-      if ($first_access || $data["error"] != null) :
+      if ($first_access || $data["error"] != null){
           $data = array_merge($data, $criteria);
           $data["reports"] = null;
           // $this->load->template("templates/general", "reports/fingerprint", Iconstant::MPI_APP_NAME, $data);
           // return;
           $this->set_view_variables($data);
           return $this->render_view();
-      endif;
+      }
 
       Isession::setCriteria("reports", $criteria);
 
       $this->load->model("report");
 
-      if ($old_criteria != null && ($old_criteria["date_from"] == $criteria["date_from"] && $old_criteria["date_to"] == $criteria["date_to"])) :
+      if ($old_criteria != null && ($old_criteria["date_from"] == $criteria["date_from"] && $old_criteria["date_to"] == $criteria["date_to"]))
         $result = Isession::getCriteria("report_fingeprint");
-      else:
+      else{
         $patients = $this->report->get_fingerprint_report_data($criteria);
-
-        require FCPATH.'application/libraries/GrFingerService.php';
-        $grFingerprint = new GrFingerService();
-          if (!$grFingerprint->initialize()) :
-            $data = array_merge($data, $criteria);
-            $data["error"] = "SDK is busy with other service";
-            $data["reports"] = null;
-            Isession::setCriteria("report_fingeprint", $data["reports"]);
-            // $this->load->template("templates/general", "reports/fingerprint", Iconstant::MPI_APP_NAME, $data);
-            $this->set_view_variables($data);
-            return $this->render_view();
-          endif;
-
-          $result = array();
-          $this->findSameFingerprint($patients, $grFingerprint, $result);
-          $grFingerprint->finalize();
-        endif;
-        $data["reports"] = $result;
+        $result = array();
+        $this->findSameFingerprint($patients, $result);
+      }
+      $data["reports"] = $result;
       Isession::setCriteria("report_fingeprint", $data["reports"]);
 
       $data = array_merge($data, $criteria);
@@ -442,52 +420,47 @@ class Reports extends MpiController {
   function submitfingerprint() {
     $session_data = Isession::getCriteria("reports");
     Isession::setCriteria("old_reports", $session_data);
-      $this->sumbit_report();
-      redirect(site_url("reports/fingerprint"));
-    }
+    $this->sumbit_report();
+    redirect(site_url("reports/fingerprint"));
+  }
 
 
-   private function findSameFingerprint($patients, $grFingerprint, &$result) {
-      if (count($patients) <= 1) :
+   private function findSameFingerprint($patients, &$result) {
+      $sdk = GrFingerService::get_instance();
+      if (count($patients) <= 1)
         return;
-      endif;
-      //$this->load->model("report");
-      while (count($patients) > 1) :
+      while (count($patients) > 1){
         $prepare_patient =  array_shift($patients);
         $fp = $this->get_valid_fingerprint($prepare_patient);
         $fp_name = $fp[0];
 
-        $ret = $grFingerprint->GrFingerX->IdentifyPrepareBase64($prepare_patient[$fp_name], $grFingerprint->GR_DEFAULT_CONTEXT);
-          if ($ret != $grFingerprint->GR_OK) :
-              $result["error"] = "Fingerprint (".$fingerprint.") template is not correct";
-            return;
-          endif;
+        $ok = $sdk->prepare($prepare_patient[$fp_name]);
+        if($ok){
+          $result["error"] = "Fingerprint (".$fingerprint.") template is not correct";
+          return;
+        }
 
-          $sub_result = array();
-          //array_push($sub_result, $prepare_patient["pat_id"]);
-          foreach ($patients as $row) :
-            $score = 0;
-            if ($row[$fp_name] == null || $row[$fp_name] == "") :
-                  continue;
-              endif;
-              $ret = $grFingerprint->GrFingerX->IdentifyBase64($row[$fp_name],$score,$grFingerprint->GR_DEFAULT_CONTEXT);
-              if( $ret == $grFingerprint->GR_MATCH) :
-                array_push($sub_result, $row["pat_id"]);
-              endif;
-          endforeach;
+        $sub_result = array();
+        //array_push($sub_result, $prepare_patient["pat_id"]);
+        foreach ($patients as $row){
+          if ($row[$fp_name] == null || $row[$fp_name] == "")
+            continue;
+          $match = $sdk->identify($row[$fp_name]);
+          if($match)
+            array_push($sub_result, $row["pat_id"]);
+        }
 
-          if (count($sub_result) > 0) :
-            foreach ($sub_result as $row) :
-              unset($patients[$row]);
-            endforeach;
+        if (count($sub_result) > 0){
+          foreach ($sub_result as $row)
+            unset($patients[$row]);
 
-            array_push($sub_result, $prepare_patient["pat_id"]);
+          array_push($sub_result, $prepare_patient["pat_id"]);
 
-            $pat_id_list = implode("','", $sub_result);
-            $record = $this->report->number_visit($pat_id_list);
-            array_push($result, $record);
-          endif;
-        endwhile;
+          $pat_id_list = implode("','", $sub_result);
+          $record = $this->report->number_visit($pat_id_list);
+          array_push($result, $record);
+        }
+      }
 
     }
 

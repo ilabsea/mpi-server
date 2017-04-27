@@ -96,15 +96,35 @@ class Api_patients extends ApiAccessController{
   //POST api/patients/sync one patient per time
   function sync(){
     $params = $_POST;
-    $patient = PatientModule::synchronize($params);
-
-    if($patient->has_error())
-      $this->render_record_errors($patient);
-    else{
-      $patient_json = PatientModule::embed_dynamic_value($patient);
-      $patient_json["patient"] = $this->display_value->patient($patient_json["patient"]);
-      $this->render_json($patient_json);
+    $patient_array = array("patients" => array(), "error" => "");
+    $patients = PatientModule::search_existing_patient($params);
+    if(count($patients) > 1){
+      foreach ($patients as $elt) {
+        $patient_json = array();
+        $patient_json["patientid"] = $elt["pat_id"];
+        $patient_json["gender"] = $elt["pat_gender"];
+        $patient_json["age"] = $elt["pat_age"];
+        $patient_json["birthdate"] = $elt["pat_dob"];
+        $patient_json["sitecode"] = $elt["pat_register_site"];
+        $patient_json["age"] = $elt["pat_age"];
+        $patient_json["createdate"] = $elt["date_create"];
+        $patient_json["visits"] = $this->sync_return_visits($elt["pat_id"]);
+        $patient_array["patients"][] = $patient_json;
+      }
+      return $this->render_json($patient_array);
     }
+    else{
+      $patient = PatientModule::synchronize($params);
+
+      if($patient->has_error())
+        $this->render_record_errors($patient);
+      else{
+        $patient_json = PatientModule::embed_dynamic_value($patient);
+        $patient_json["patient"] = $this->display_value->patient($patient_json["patient"]);
+        $this->render_json($patient_json);
+      }
+    }
+    
   }
 
   function show($pat_id){

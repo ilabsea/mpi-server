@@ -39,4 +39,14 @@ class Field_logs extends MpiController {
     return redirect(site_url("field_logs/index"));
   }
 
+  function export_csv(){
+    $this->load->dbutil();
+    $this->load->helper('file');
+    $this->load->helper('download');
+    $filename = "tmp_log.csv";
+    $params = $this->filter_params(array('application_name', 'from', 'to'));
+    $logs = FieldLog::search($params);
+    $data = $this->dbutil->csv_from_result($logs, ",", "\r\n");
+    force_download($filename, $data);
+  }
 }

@@ -31,4 +31,16 @@ class Access_logs extends MpiController {
   function page(){
     echo AppHelper::paginate(10);
   }
+
+  function export_csv(){
+    $this->load->dbutil();
+    $this->load->helper('file');
+    $this->load->helper('download');
+    $filename = "tmp_log.csv";
+    $params = $this->filter_params(array('application_id', 'from', 'to', 'type'));
+    $view_params = array("params" => $params);
+    $logs = ApiAccessLog::search($params);
+    $data = $this->dbutil->csv_from_result($logs, ",", "\r\n");
+    force_download($filename, $data);
+  }
 }

@@ -27,6 +27,11 @@ class ApiAccessLog extends Imodel {
     return ApiAccessLog::paginate($conditions,"created_at DESC");
   }
 
+  static function search($params){
+    $conditions = ApiAccessLog::generate_condition($params);
+    return ApiAccessLog::all_query($conditions,"created_at DESC");
+  }
+
   static function search_graph($params) {
     $lastmonth = mktime(0, 0, 0, date("m")-1, date("d"), date("Y"));
     $active_record = new ApiAccessLog();
@@ -93,6 +98,20 @@ class ApiAccessLog extends Imodel {
 
   static function class_name(){
     return 'ApiAccessLog';
+  }
+
+  static function generate_condition($params){
+    $conditions = array();
+    if($params['application_id'] != '')
+      $conditions["application_id"] = $params['application_id'];
+
+    if($params['from'] != '')
+      $conditions["created_at >="] = Imodel::beginning_of_day($params['from']);
+
+    if($params['to'] != '')
+      $conditions["created_at <="] = Imodel::end_of_day($params['to']);
+
+    return $conditions;
   }
 
 }

@@ -254,4 +254,24 @@ class PatientModule {
     $patients_json =  PatientModule::embeded_dynamic_fields($patients);
     return $patients_json;
   }
+
+  static function search_existing_patient($params){
+    $sdk = GrFingerService::get_instance();
+    $patient_str = $params["patient"];
+    $patient = json_decode($patient_str, true);
+
+    $fingerprints = $this->patient_fingerprint_names($patient);
+    $data = array();
+    $gender = $patient["gender"];
+    if ($gender == "0")
+      $gender = "";
+
+    $this->load->model("patient");
+    $patient_found = $this->patient->getPatientById($patient["patientid"]);
+    $patient_found = $patient_found ? array($patient_found):array();
+    if (count($patient_found) == 0) {
+      $patient_found = $this->sync_search_patient_by_fingerprint($fingerprints, $patient);
+    }
+    return $patient_found;
+  }
 }

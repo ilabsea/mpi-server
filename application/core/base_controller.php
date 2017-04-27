@@ -60,7 +60,7 @@ class BaseController extends CI_Controller {
     $this->load->helper('form');
     $this->load->library('form_validation');
 
-    require_once BASEPATH.'core/model.php';
+    require_once BASEPATH.'core/Model.php';
 
     $this->load_dir(APPPATH."core");
     $this->load_dir(APPPATH."helpers");

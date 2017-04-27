@@ -459,4 +459,30 @@ class AppModel extends CI_Model {
   static function hex_digest($text){
     return sha1($text);
   }
+
+  static function all_query($conditions=array(), $order_by=null, $offset=null, $limit=null){
+    $class_name = static::class_name();
+    $active_record = new $class_name;
+
+    foreach($conditions as $field => $value){
+      if(is_array($value))
+        $active_record->db->where_in($field, $value);
+      else
+        $active_record->db->where($field, $value);
+    }
+
+    $active_record->db->from(static::table_name());
+
+    if($limit)
+      $active_record->db->limit($limit);
+    if($offset)
+      $active_record->db->offset($offset);
+
+    if($order_by)
+      $active_record->db->order_by($order_by);
+
+    $query = $active_record->db->get();
+    
+    return $query;
+  }
 }

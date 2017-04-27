@@ -6,6 +6,8 @@
 <? require dirname(__FILE__). "/_search.php" ?>
 
 <div class='item-nav-group'>
+	<button class='btn btn-primary' style="margin-left: 20px;"> Export As CSV </button>
+
   <a href='<?=AppHelper::url(array("type" => "list")) ?>'
      class='item-nav <?= $params['type'] != 'graph' ? 'active' : ''  ?>'><i class="icon icon-th"></i></a>
 
